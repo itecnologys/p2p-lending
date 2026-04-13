@@ -1,0 +1,203 @@
+<\!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Portfólios — NEXUS P2P</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#1640D6',navy:'#0B2447',gold:'#D97706',success:'#059669',muted:'#64748B'},fontFamily:{sans:['Poppins','sans-serif'],display:['"Playfair Display"','serif']}}}}</script>
+<style>
+*{box-sizing:border-box}body{background:#FAFCFF;color:#0F172A;font-family:'Poppins',sans-serif;overflow-x:hidden}
+.gradient-text{background:linear-gradient(135deg,#1640D6,#0B9BF5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.07);transition:all .25s}
+.card:hover{box-shadow:0 8px 32px rgba(0,0,0,.12);transform:translateY(-2px)}
+.badge-blue{background:#EFF6FF;color:#1640D6;border:1px solid #BFDBFE;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-green{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-gold{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-red{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;text-transform:uppercase}
+.risk-a{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0}
+.risk-b{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A}
+.risk-c{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA}
+.tab-active{border-bottom:2px solid #1640D6;color:#1640D6;font-weight:600}
+.tab-inactive{border-bottom:2px solid transparent;color:#64748B}
+.prog{height:4px;background:#E2E8F0;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1640D6,#059669);border-radius:2px}
+.filter-pill{border:1.5px solid #E2E8F0;color:#64748B;cursor:pointer;transition:.15s;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:600}
+.filter-pill:hover,.filter-active{border-color:#1640D6;color:#1640D6;background:#EFF6FF}
+tr.prow:hover td{background:#F8FBFF;cursor:pointer}
+.modal-back{backdrop-filter:blur(4px);background:rgba(15,23,42,.6)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#F1F5F9}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .45s ease both}
+</style>
+</head>
+<body>
+<nav class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100" style="box-shadow:0 1px 12px rgba(0,0,0,.05)">
+  <div class="max-w-7xl mx-auto px-5 flex items-center justify-between h-16">
+    <a href="index.html" class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-navy flex items-center justify-center"><span class="text-xs font-bold text-amber-400">NX</span></div><span class="font-bold text-navy text-lg">NEXUS<span class="text-primary font-light">P2P</span></span></a>
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium text-muted"><a href="index.html" class="hover:text-navy transition">Início</a><a href="portfolios.html" class="text-primary font-semibold">Portfólios</a><a href="como-funciona.html" class="hover:text-navy transition">Como Funciona</a><a href="sobre.html" class="hover:text-navy transition">Sobre</a></div>
+    <div class="flex items-center gap-3"><a href="#" class="hidden md:inline text-sm text-muted hover:text-navy font-medium transition">Entrar</a><a href="#" class="text-sm font-semibold bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition">Criar Conta</a></div>
+  </div>
+</nav>
+
+<section class="bg-gradient-to-br from-navy to-primary py-14 px-5 text-white">
+  <div class="max-w-7xl mx-auto fade-up">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <span class="text-xs uppercase tracking-widest opacity-60 font-medium">Mercado de Crédito P2P</span>
+        <h1 class="font-display text-3xl md:text-4xl font-bold mt-2 mb-3">Portfólios Disponíveis</h1>
+        <p class="opacity-70 max-w-xl text-sm">Invista em carteiras de crédito segmentadas por vertical de consumo. Capital distribuído automaticamente pelo agente de IA NEXUS.</p>
+      </div>
+      <div class="grid grid-cols-3 gap-5 md:gap-8 text-center">
+        <div><p class="text-2xl font-bold font-display text-amber-400">12</p><p class="text-xs opacity-60 mt-1">Portfólios</p></div>
+        <div><p class="text-2xl font-bold font-display text-green-400">R$ 892K</p><p class="text-xs opacity-60 mt-1">Disponível</p></div>
+        <div><p class="text-2xl font-bold font-display">12.847</p><p class="text-xs opacity-60 mt-1">Contratos</p></div>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-white/10 border border-white/20 rounded-xl p-4"><p class="text-xs opacity-60 mb-1">Retorno Médio</p><p class="text-xl font-bold text-green-400">+3,8% <span class="text-sm font-normal opacity-60">a.m.</span></p><p class="text-xs opacity-50 mt-1">↑ 45,6% a.a. efetivo</p></div>
+      <div class="bg-white/10 border border-white/20 rounded-xl p-4"><p class="text-xs opacity-60 mb-1">Adimplência Geral</p><p class="text-xl font-bold text-green-400">94,2%</p><div class="prog mt-2"><div class="prog-fill" style="width:94.2%"></div></div></div>
+      <div class="bg-white/10 border border-white/20 rounded-xl p-4"><p class="text-xs opacity-60 mb-1">Prazo Médio</p><p class="text-xl font-bold">8,3 <span class="text-sm font-normal opacity-60">meses</span></p></div>
+      <div class="bg-white/10 border border-white/20 rounded-xl p-4"><p class="text-xs opacity-60 mb-1">Score Mínimo</p><p class="text-xl font-bold text-amber-400">620 <span class="text-sm font-normal opacity-60">pts</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-5 py-8">
+  <div class="flex gap-0 border-b border-gray-200 mb-6">
+    <button onclick="switchTab('reg')" id="tab-reg" class="tab-active px-5 py-3 text-sm transition">Portfólios Regulados</button>
+    <button onclick="switchTab('open')" id="tab-open" class="tab-inactive px-5 py-3 text-sm transition">Acesso Livre</button>
+    <button onclick="switchTab('inst')" id="tab-inst" class="tab-inactive px-5 py-3 text-sm transition">Institucional</button>
+  </div>
+  <div class="flex flex-wrap gap-2 mb-5 items-center">
+    <span class="text-xs text-muted font-medium mr-1">Filtrar:</span>
+    <button onclick="filterBy('all')" id="filter-all" class="filter-pill filter-active">Todos</button>
+    <button onclick="filterBy('saude')" id="filter-saude" class="filter-pill">🏥 Saúde</button>
+    <button onclick="filterBy('educacao')" id="filter-educacao" class="filter-pill">🎓 Educação</button>
+    <button onclick="filterBy('alimentacao')" id="filter-alimentacao" class="filter-pill">🍽️ Alimentação</button>
+    <button onclick="filterBy('transporte')" id="filter-transporte" class="filter-pill">🚗 Transporte</button>
+    <button onclick="filterBy('moradia')" id="filter-moradia" class="filter-pill">🏠 Moradia</button>
+    <button onclick="filterBy('outros')" id="filter-outros" class="filter-pill">+ Outros (7)</button>
+    <div class="ml-auto flex items-center gap-2">
+      <span class="text-xs text-muted">Ordenar:</span>
+      <select onchange="sortP(this.value)" class="bg-white border border-gray-200 text-sm text-navy rounded-lg px-3 py-1.5 focus:outline-none focus:border-primary">
+        <option value="taxa">Maior Taxa</option>
+        <option value="disponivel">Maior Disponível</option>
+        <option value="adimplencia">Adimplência</option>
+        <option value="risco">Menor Risco</option>
+      </select>
+    </div>
+  </div>
+  <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start gap-3 text-xs text-muted">
+    <span class="text-primary text-base mt-0.5">ℹ️</span>
+    <span><strong class="text-navy">Aviso Regulatório:</strong> A NEXUS opera como SCD sob autorização do BACEN conforme <strong class="text-primary">CMN 5050/2022</strong>. Investimentos não são garantidos pelo FGC.</span>
+  </div>
+  <div class="bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-gray-100 text-xs text-muted uppercase tracking-wider bg-gray-50">
+          <th class="text-left px-5 py-4 font-semibold">Categoria</th>
+          <th class="text-right px-4 py-4 font-semibold">Disponível</th>
+          <th class="text-right px-4 py-4 font-semibold">Taxa a.m.</th>
+          <th class="text-right px-4 py-4 font-semibold hidden md:table-cell">Prazo Máx.</th>
+          <th class="text-right px-4 py-4 font-semibold hidden md:table-cell">Contratos</th>
+          <th class="text-right px-4 py-4 font-semibold hidden lg:table-cell">Adimplência</th>
+          <th class="text-center px-4 py-4 font-semibold hidden lg:table-cell">Risco</th>
+          <th class="text-center px-4 py-4 font-semibold">Ação</th>
+        </tr></thead>
+        <tbody id="ptBody"></tbody>
+      </table>
+    </div>
+    <div class="border-t border-gray-100 px-5 py-3 flex items-center justify-between text-xs text-muted">
+      <span id="rowCount">Mostrando 12 portfólios</span>
+      <span class="font-mono">Atualizado: <span id="lastUp"></span></span>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-5 pb-16">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+    <div class="card p-6 text-center border border-gray-100"><div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-4 text-2xl">💡</div><h3 class="font-bold text-navy mb-2 text-sm">1. Escolha o Portfólio</h3><p class="text-xs text-muted">Selecione verticais de consumo conforme seu apetite de risco.</p></div>
+    <div class="card p-6 text-center border border-gray-100"><div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center mx-auto mb-4 text-2xl">🤖</div><h3 class="font-bold text-navy mb-2 text-sm">2. IA Distribui Capital</h3><p class="text-xs text-muted">Agente NEXUS aloca em blocos de R$ 40 via FIFO para contratos elegíveis.</p></div>
+    <div class="card p-6 text-center border border-gray-100"><div class="w-12 h-12 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mx-auto mb-4 text-2xl">📈</div><h3 class="font-bold text-navy mb-2 text-sm">3. Receba Mensalmente</h3><p class="text-xs text-muted">Amortizações e juros creditados D+1. Reinvista ou saque via PIX.</p></div>
+  </div>
+</section>
+
+<\!-- Modal -->
+<div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+  <div class="modal-back absolute inset-0" onclick="closeModal()"></div>
+  <div class="relative bg-white rounded-2xl w-full max-w-md p-6 z-10 shadow-2xl">
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-muted hover:text-navy text-xl">×</button>
+    <h2 class="text-lg font-bold text-navy mb-1" id="mTitle">Investir</h2>
+    <p class="text-xs text-muted mb-5" id="mSub">Portfólio regulado</p>
+    <div class="mb-4"><label class="text-xs text-muted block mb-1.5">Valor do Aporte (R$)</label>
+      <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden bg-gray-50"><span class="px-3 text-muted text-sm">R$</span><input id="mAmt" type="number" min="500" step="500" value="5000" oninput="updateM()" class="flex-1 bg-transparent text-navy text-sm py-3 px-2 focus:outline-none"/></div>
+      <p class="text-xs text-muted mt-1">Mínimo R$ 500</p></div>
+    <div class="mb-5"><label class="text-xs text-muted block mb-1.5">Prazo</label>
+      <div class="grid grid-cols-4 gap-2">
+        <button onclick="setMP(3,this)" class="prazo-btn border border-gray-200 rounded-lg px-2 py-2 text-xs text-muted hover:border-primary transition">3 m</button>
+        <button onclick="setMP(6,this)" class="prazo-btn border border-gray-200 rounded-lg px-2 py-2 text-xs text-muted hover:border-primary transition">6 m</button>
+        <button onclick="setMP(9,this)" class="prazo-btn border border-primary bg-blue-50 rounded-lg px-2 py-2 text-xs text-primary font-semibold">9 m</button>
+        <button onclick="setMP(12,this)" class="prazo-btn border border-gray-200 rounded-lg px-2 py-2 text-xs text-muted hover:border-primary transition">12 m</button>
+      </div></div>
+    <div class="bg-gray-50 rounded-xl p-4 mb-5">
+      <div class="grid grid-cols-3 gap-3 text-center text-xs">
+        <div><p class="text-muted mb-1">Capital</p><p class="font-bold text-navy" id="mCap">R$ 5.000</p></div>
+        <div><p class="text-muted mb-1">Rendimento</p><p class="font-bold text-success" id="mRet">+ R$ 1.895</p></div>
+        <div><p class="text-muted mb-1">Total Final</p><p class="font-bold text-primary text-sm" id="mTot">R$ 6.895</p></div>
+      </div></div>
+    <button class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition text-sm">Confirmar Aporte → Criar Conta</button>
+    <p class="text-center text-xs text-muted mt-2">Ao confirmar, você concorda com os Termos de Uso da NEXUS.</p>
+  </div>
+</div>
+
+<footer class="border-t border-gray-100 bg-gray-900 text-white py-10 px-5 mt-8">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-4 text-xs text-gray-400">
+    <span><strong class="text-white">NEXUS P2P</strong> · SCD autorizada BACEN · CMN 5050/2022 · © 2025 NEXUS Crédito S.A.</span>
+    <span>Investimentos P2P não são cobertos pelo FGC. <a href="index.html" class="text-blue-400 hover:underline">← Voltar ao Início</a></span>
+  </div>
+</footer>
+
+<script>
+const portfolios=[
+  {id:'saude',cat:'saude',icon:'🏥',name:'Saúde',available:148200,taxa:4.2,prazo:12,contracts:1843,adim:95.1,risk:'A',rc:'risk-a'},
+  {id:'educacao',cat:'educacao',icon:'🎓',name:'Educação',available:93400,taxa:3.9,prazo:9,contracts:1204,adim:96.3,risk:'A',rc:'risk-a'},
+  {id:'alimentacao',cat:'alimentacao',icon:'🍽️',name:'Alimentação',available:67800,taxa:4.5,prazo:6,contracts:2341,adim:93.2,risk:'B',rc:'risk-b'},
+  {id:'transporte',cat:'transporte',icon:'🚗',name:'Transporte',available:112600,taxa:4.1,prazo:12,contracts:1672,adim:94.8,risk:'A',rc:'risk-a'},
+  {id:'moradia',cat:'moradia',icon:'🏠',name:'Moradia',available:54300,taxa:3.7,prazo:12,contracts:789,adim:97.2,risk:'A',rc:'risk-a'},
+  {id:'vestuario',cat:'outros',icon:'👗',name:'Vestuário',available:41200,taxa:4.8,prazo:6,contracts:1123,adim:91.4,risk:'B',rc:'risk-b'},
+  {id:'lazer',cat:'outros',icon:'🎭',name:'Lazer & Cultura',available:38700,taxa:4.6,prazo:6,contracts:876,adim:92.1,risk:'B',rc:'risk-b'},
+  {id:'tecnologia',cat:'outros',icon:'💻',name:'Tecnologia',available:78900,taxa:4.0,prazo:9,contracts:1034,adim:95.7,risk:'A',rc:'risk-a'},
+  {id:'beleza',cat:'outros',icon:'💅',name:'Beleza & Estética',available:29400,taxa:5.0,prazo:6,contracts:634,adim:89.3,risk:'C',rc:'risk-c'},
+  {id:'pet',cat:'outros',icon:'🐾',name:'Pet',available:22100,taxa:4.7,prazo:6,contracts:412,adim:90.8,risk:'B',rc:'risk-b'},
+  {id:'viagem',cat:'outros',icon:'✈️',name:'Viagem',available:61300,taxa:4.3,prazo:9,contracts:743,adim:93.6,risk:'B',rc:'risk-b'},
+  {id:'emergencia',cat:'outros',icon:'🆘',name:'Emergência',available:44800,taxa:5.2,prazo:3,contracts:1176,adim:88.1,risk:'C',rc:'risk-c'},
+];
+let af='all',as='taxa',mp=9,mt=4.2;
+function fmtBRL(v){if(v>=1e6)return'R$ '+(v/1e6).toFixed(2)+'M';if(v>=1e3)return'R$ '+(v/1e3).toFixed(1)+'K';return'R$ '+v.toLocaleString('pt-BR')}
+function renderTable(){let d=[...portfolios];if(af\!=='all')d=d.filter(p=>p.cat===af);switch(as){case'taxa':d.sort((a,b)=>b.taxa-a.taxa);break;case'disponivel':d.sort((a,b)=>b.available-a.available);break;case'adimplencia':d.sort((a,b)=>b.adim-a.adim);break;case'risco':d.sort((a,b)=>a.risk.localeCompare(b.risk));break}
+const tb=document.getElementById('ptBody');
+tb.innerHTML=d.map(p=>`<tr class="prow border-b border-gray-50" onclick="openModal('${p.id}')">
+  <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="text-xl">${p.icon}</span><div><p class="font-semibold text-navy text-sm">${p.name}</p><p class="text-xs text-muted font-mono">#NEXUS-${p.id.toUpperCase()}</p></div></div></td>
+  <td class="px-4 py-4 text-right"><p class="font-semibold text-navy text-sm">${fmtBRL(p.available)}</p><div class="prog mt-1.5 w-16 ml-auto"><div class="prog-fill" style="width:${Math.min(100,(p.available/150000)*100)}%"></div></div></td>
+  <td class="px-4 py-4 text-right"><p class="font-bold text-success text-sm">${p.taxa.toFixed(1)}% <span class="text-xs font-normal text-muted">a.m.</span></p><p class="text-xs text-muted">${((Math.pow(1+p.taxa/100,12)-1)*100).toFixed(1)}% a.a.</p></td>
+  <td class="px-4 py-4 text-right hidden md:table-cell"><p class="text-sm text-navy">${p.prazo} <span class="text-muted text-xs">meses</span></p></td>
+  <td class="px-4 py-4 text-right hidden md:table-cell"><p class="font-mono text-sm text-navy">${p.contracts.toLocaleString('pt-BR')}</p></td>
+  <td class="px-4 py-4 text-right hidden lg:table-cell"><div class="flex items-center justify-end gap-2"><div class="w-14 prog"><div class="prog-fill" style="width:${p.adim}%"></div></div><span class="font-mono text-sm ${p.adim>=94?'text-success':p.adim>=91?'text-gold':'text-red-500'}">${p.adim}%</span></div></td>
+  <td class="px-4 py-4 text-center hidden lg:table-cell"><span class="text-xs font-bold px-2 py-1 rounded-lg ${p.rc}">${p.risk}</span></td>
+  <td class="px-4 py-4 text-center"><button onclick="event.stopPropagation();openModal('${p.id}')" class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition">Investir →</button></td>
+</tr>`).join('');
+document.getElementById('rowCount').textContent=`Mostrando ${d.length} portfólios`}
+function filterBy(f){af=f;document.querySelectorAll('[id^="filter-"]').forEach(e=>{e.classList.remove('filter-active')});document.getElementById('filter-'+f).classList.add('filter-active');renderTable()}
+function sortP(v){as=v;renderTable()}
+function switchTab(t){['reg','open','inst'].forEach(x=>{document.getElementById('tab-'+x).className=x===t?'tab-active px-5 py-3 text-sm transition':'tab-inactive px-5 py-3 text-sm transition'});renderTable()}
+function openModal(id){const p=portfolios.find(x=>x.id===id);if(\!p)return;mt=p.taxa;document.getElementById('mTitle').textContent=`Investir em ${p.name}`;document.getElementById('mSub').textContent=`Portfólio regulado · Risco ${p.risk} · ${p.taxa}% a.m.`;updateM();document.getElementById('modal').classList.remove('hidden');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modal').classList.add('hidden');document.body.style.overflow=''}
+function setMP(m,btn){mp=m;document.querySelectorAll('.prazo-btn').forEach(b=>{b.classList.remove('border-primary','bg-blue-50','text-primary','font-semibold');b.classList.add('border-gray-200','text-muted')});btn.classList.add('border-primary','bg-blue-50','text-primary','font-semibold');btn.classList.remove('border-gray-200','text-muted');updateM()}
+function updateM(){const a=parseFloat(document.getElementById('mAmt').value)||0,f=a*Math.pow(1+mt/100,mp),r=f-a;document.getElementById('mCap').textContent='R$ '+a.toLocaleString('pt-BR',{maximumFractionDigits:0});document.getElementById('mRet').textContent='+ R$ '+Math.round(r).toLocaleString('pt-BR');document.getElementById('mTot').textContent='R$ '+Math.round(f).toLocaleString('pt-BR')}
+document.getElementById('lastUp').textContent=new Date().toLocaleTimeString('pt-BR');
+renderTable();
+</script>
+</body>
+</html>

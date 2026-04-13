@@ -1,0 +1,1579 @@
+openapi: 3.1.0
+info:
+  title: NEXUS P2P Credit Platform API
+  version: 1.0.0
+  description: |
+    API REST completa da Plataforma NEXUS — sistema P2P de crédito direto (SCD/CMN 5050/2022).
+    
+    ## Arquitetura
+    - **Auth Service**: JWT + OAuth2, KYC/onboarding
+    - **Credit Service**: Score engine, FIFO queue, block delivery (R$40 via Dock)
+    - **Portfolio Service**: Portfólios de investimento A/B/C, alocação, retornos
+    - **Ledger Service**: MACRO HASH SHA-256 chain L1→L5, append-only audit trail
+    - **Card Service**: Cartão Visa pré-pago, saldo, transações, verticais
+    - **Payment Service**: PIX, amortizações, liquidação D+1
+    
+    ## Autenticação
+    Todas as rotas (exceto `/auth/register` e `/auth/login`) exigem Bearer token JWT.
+    
+    ## Ambiente
+    - **Sandbox**: `https://sandbox.api.nexusp2p.com.br/v1`
+    - **Produção**: `https://api.nexusp2p.com.br/v1`
+  contact:
+    name: NEXUS API Support
+    email: api@nexusp2p.com.br
+    url: https://docs.nexusp2p.com.br
+  license:
+    name: Proprietary
+    url: https://nexusp2p.com.br/terms
+
+servers:
+  - url: https://api.nexusp2p.com.br/v1
+    description: Produção
+  - url: https://sandbox.api.nexusp2p.com.br/v1
+    description: Sandbox / Homologação
+
+tags:
+  - name: Auth
+    description: Autenticação, registro e KYC
+  - name: Users
+    description: Perfil e dados do usuário
+  - name: Credit
+    description: Solicitação e gestão de crédito (Usuários/tomadores)
+  - name: Portfolios
+    description: Portfólios de investimento (Aplicantes)
+  - name: Investments
+    description: Aportes e retornos do Aplicante
+  - name: Ledger
+    description: MACRO HASH — cadeia de auditoria SHA-256
+  - name: Cards
+    description: Cartão Visa pré-pago, saldo e transações
+  - name: Payments
+    description: PIX, amortizações e liquidações
+  - name: Score
+    description: Consulta de score e elegibilidade
+  - name: Webhooks
+    description: Notificações de eventos assíncronos
+
+# ─────────────────────────────────────────────
+# COMPONENTS
+# ─────────────────────────────────────────────
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido em POST /auth/login
+
+  schemas:
+    # --- Common ---
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: UNAUTHORIZED
+        message:
+          type: string
+          example: Token JWT inválido ou expirado
+        details:
+          type: object
+          additionalProperties: true
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 154
+        total_pages:
+          type: integer
+          example: 8
+
+    # --- Auth ---
+    RegisterApplicantRequest:
+      type: object
+      required: [full_name, cpf, email, phone, password, role]
+      properties:
+        full_name:
+          type: string
+          example: João Silva
+        cpf:
+          type: string
+          pattern: '^\d{11}$'
+          example: "12345678901"
+        email:
+          type: string
+          format: email
+          example: joao.silva@email.com
+        phone:
+          type: string
+          example: "+5511999999999"
+        password:
+          type: string
+          format: password
+          minLength: 8
+        role:
+          type: string
+          enum: [applicant, user]
+          description: "'applicant' = Aplicante (investidor) | 'user' = Usuário (tomador)"
+        birth_date:
+          type: string
+          format: date
+          example: "1985-03-15"
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    AuthTokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT de acesso (validade 1h)
+        refresh_token:
+          type: string
+          description: Token de renovação (validade 30d)
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Segundos até expiração
+          example: 3600
+
+    KycStatus:
+      type: object
+      properties:
+        kyc_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, in_review, approved, rejected]
+        submitted_at:
+          type: string
+          format: date-time
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+        rejection_reason:
+          type: string
+          nullable: true
+
+    # --- User Profile ---
+    UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [applicant, user, admin]
+        kyc_status:
+          type: string
+          enum: [pending, in_review, approved, rejected]
+        created_at:
+          type: string
+          format: date-time
+        score:
+          type: integer
+          nullable: true
+          description: Score Serasa (apenas role=user)
+          example: 720
+        credit_limit:
+          type: number
+          format: float
+          nullable: true
+          description: Limite total de crédito aprovado (R$)
+
+    # --- Score ---
+    ScoreCheckResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        score:
+          type: integer
+          example: 720
+        bureau:
+          type: string
+          example: Serasa Experian
+        eligible:
+          type: boolean
+          description: score >= 620
+        minimum_score:
+          type: integer
+          example: 620
+        checked_at:
+          type: string
+          format: date-time
+        next_check_allowed_at:
+          type: string
+          format: date-time
+
+    # --- Credit ---
+    CreditRequestBody:
+      type: object
+      required: [amount_blocks, vertical]
+      properties:
+        amount_blocks:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Número de blocos de R$40 solicitados (1 bloco = R$40)
+          example: 3
+        vertical:
+          type: string
+          enum:
+            - saude
+            - educacao
+            - alimentacao
+            - transporte
+            - moradia
+            - vestuario
+            - lazer
+            - tecnologia
+            - beleza
+            - pet
+            - viagem
+            - emergencia
+          description: Vertical de consumo para destinação do crédito
+        installments:
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Número de parcelas
+          example: 6
+
+    CreditRequest:
+      type: object
+      properties:
+        credit_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, processing, approved, rejected, disbursed]
+        amount_blocks:
+          type: integer
+        amount_total:
+          type: number
+          format: float
+          description: Valor total em R$ (amount_blocks * 40)
+          example: 120.00
+        vertical:
+          type: string
+        installments:
+          type: integer
+        monthly_rate:
+          type: number
+          format: float
+          description: Taxa mensal aplicada (decimal)
+          example: 0.042
+        queue_position:
+          type: integer
+          nullable: true
+          description: Posição na fila FIFO (null se já processado)
+        created_at:
+          type: string
+          format: date-time
+        disbursed_at:
+          type: string
+          format: date-time
+          nullable: true
+        macro_hash_l4:
+          type: string
+          description: Hash SHA-256 do Contract Block (L4) gerado
+          example: "a3f8c1d9e4b27053f1c8a97e621bb4d03e5a1f82c7d94b06e3f2a8c5b91d740e"
+
+    # --- Portfolio ---
+    Portfolio:
+      type: object
+      properties:
+        portfolio_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Portfólio Alfa"
+        risk_level:
+          type: string
+          enum: [A, B, C]
+          description: "A = baixo risco | B = médio risco | C = alto risco"
+        monthly_rate_min:
+          type: number
+          format: float
+          example: 0.030
+          description: Taxa mínima mensal (decimal)
+        monthly_rate_max:
+          type: number
+          format: float
+          example: 0.050
+        min_investment:
+          type: number
+          format: float
+          example: 500.00
+        max_investment:
+          type: number
+          format: float
+          example: 100000.00
+        term_months:
+          type: integer
+          example: 12
+        total_allocated:
+          type: number
+          format: float
+          description: Capital total alocado no portfólio (R$)
+        available_capacity:
+          type: number
+          format: float
+          description: Capacidade disponível para novos aportes (R$)
+        active_contracts:
+          type: integer
+        default_rate:
+          type: number
+          format: float
+          description: Taxa de inadimplência atual (decimal)
+          example: 0.022
+        status:
+          type: string
+          enum: [open, closed, paused]
+        created_at:
+          type: string
+          format: date-time
+
+    # --- Investment ---
+    InvestmentRequest:
+      type: object
+      required: [portfolio_id, amount, term_months]
+      properties:
+        portfolio_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: float
+          minimum: 500
+          example: 5000.00
+        term_months:
+          type: integer
+          enum: [3, 6, 9, 12]
+
+    Investment:
+      type: object
+      properties:
+        investment_id:
+          type: string
+          format: uuid
+        applicant_id:
+          type: string
+          format: uuid
+        portfolio_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: float
+        term_months:
+          type: integer
+        monthly_rate:
+          type: number
+          format: float
+        expected_return:
+          type: number
+          format: float
+          description: Retorno bruto esperado no período (R$)
+        status:
+          type: string
+          enum: [pending_payment, active, matured, withdrawn]
+        invested_at:
+          type: string
+          format: date-time
+        maturity_date:
+          type: string
+          format: date
+        macro_hash_l2:
+          type: string
+          description: Hash SHA-256 do Investor Block (L2)
+
+    InvestmentReturn:
+      type: object
+      properties:
+        investment_id:
+          type: string
+          format: uuid
+        period:
+          type: string
+          format: date
+          description: Mês de competência (YYYY-MM)
+        gross_amount:
+          type: number
+          format: float
+          description: Retorno bruto no mês (R$)
+        ir_amount:
+          type: number
+          format: float
+          description: IR retido na fonte (R$)
+        net_amount:
+          type: number
+          format: float
+          description: Retorno líquido creditado (R$)
+        status:
+          type: string
+          enum: [scheduled, processed, paid]
+        pix_transaction_id:
+          type: string
+          nullable: true
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    # --- MACRO HASH Ledger ---
+    HashBlock:
+      type: object
+      properties:
+        block_id:
+          type: string
+          format: uuid
+        level:
+          type: integer
+          enum: [1, 2, 3, 4, 5]
+          description: "L1=Platform | L2=Investor | L3=Portfolio | L4=Contract | L5=BlockState"
+        hash:
+          type: string
+          description: SHA-256 hash deste bloco
+          example: "a3f8c1d9e4b27053f1c8a97e621bb4d03e5a1f82c7d94b06e3f2a8c5b91d740e"
+        parent_hash:
+          type: string
+          description: Hash do bloco pai (null para L1)
+          nullable: true
+        payload_summary:
+          type: object
+          description: Resumo não-sensível do payload (IDs, timestamps, tipo)
+        created_at:
+          type: string
+          format: date-time
+        entity_id:
+          type: string
+          format: uuid
+          description: ID da entidade referenciada (contrato, aporte, etc.)
+        entity_type:
+          type: string
+          enum: [platform, investor_block, portfolio_block, contract_block, credit_block]
+
+    LedgerVerifyResponse:
+      type: object
+      properties:
+        hash:
+          type: string
+        is_valid:
+          type: boolean
+        chain_intact:
+          type: boolean
+          description: Toda a cadeia até L1 é válida
+        verified_at:
+          type: string
+          format: date-time
+        chain_depth:
+          type: integer
+          description: Número de blocos na cadeia verificada
+
+    # --- Card ---
+    Card:
+      type: object
+      properties:
+        card_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        masked_pan:
+          type: string
+          example: "****  ****  ****  4521"
+        brand:
+          type: string
+          enum: [visa, mastercard]
+        type:
+          type: string
+          enum: [prepaid]
+        status:
+          type: string
+          enum: [active, blocked, cancelled]
+        available_balance:
+          type: number
+          format: float
+          description: Saldo disponível em R$
+        total_limit:
+          type: number
+          format: float
+        issued_at:
+          type: string
+          format: date-time
+        expiry_month:
+          type: integer
+        expiry_year:
+          type: integer
+        bin_sponsor:
+          type: string
+          example: Dock/BS2
+
+    CardTransaction:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        card_id:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: float
+        merchant_name:
+          type: string
+        vertical:
+          type: string
+        type:
+          type: string
+          enum: [purchase, refund, credit_block, fee]
+        status:
+          type: string
+          enum: [authorized, settled, reversed, failed]
+        occurred_at:
+          type: string
+          format: date-time
+        macro_hash_l5:
+          type: string
+          nullable: true
+          description: Hash L5 do bloco de crédito que gerou este saldo
+
+    # --- Payment ---
+    AmortizationSchedule:
+      type: object
+      properties:
+        credit_id:
+          type: string
+          format: uuid
+        installments:
+          type: array
+          items:
+            type: object
+            properties:
+              installment_number:
+                type: integer
+              due_date:
+                type: string
+                format: date
+              principal:
+                type: number
+                format: float
+              interest:
+                type: number
+                format: float
+              total:
+                type: number
+                format: float
+              status:
+                type: string
+                enum: [upcoming, paid, overdue]
+              paid_at:
+                type: string
+                format: date-time
+                nullable: true
+
+    PixPaymentRequest:
+      type: object
+      required: [amount, pix_key, description]
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        pix_key:
+          type: string
+          description: Chave PIX do destinatário (CPF, email, telefone ou aleatória)
+        description:
+          type: string
+          maxLength: 140
+
+# ─────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────
+security:
+  - BearerAuth: []
+
+paths:
+
+  # ═══════════════════════════════════════════
+  # AUTH
+  # ═══════════════════════════════════════════
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Cadastrar novo usuário
+      description: Registra Aplicante (investidor) ou Usuário (tomador). Inicia fluxo KYC.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterApplicantRequest'
+      responses:
+        '201':
+          description: Usuário registrado. KYC iniciado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    format: uuid
+                  kyc_id:
+                    type: string
+                    format: uuid
+                  message:
+                    type: string
+                    example: "Cadastro realizado. Complete o KYC para ativar sua conta."
+        '409':
+          description: CPF ou e-mail já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Dados inválidos
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Autenticar usuário
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Renovar access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: Token renovado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          description: Refresh token inválido ou expirado
+
+  /auth/kyc:
+    get:
+      tags: [Auth]
+      summary: Status do KYC
+      responses:
+        '200':
+          description: Status atual do KYC do usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KycStatus'
+
+  /auth/kyc/documents:
+    post:
+      tags: [Auth]
+      summary: Enviar documentos KYC
+      description: Upload de documentos (RG/CNH frente e verso + selfie)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [doc_type, front_image]
+              properties:
+                doc_type:
+                  type: string
+                  enum: [rg, cnh, passport]
+                front_image:
+                  type: string
+                  format: binary
+                back_image:
+                  type: string
+                  format: binary
+                selfie_image:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: Documentos recebidos, revisão em andamento
+        '422':
+          description: Formato de arquivo inválido
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidar tokens
+      responses:
+        '204':
+          description: Sessão encerrada
+
+  # ═══════════════════════════════════════════
+  # USERS
+  # ═══════════════════════════════════════════
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Perfil do usuário autenticado
+      responses:
+        '200':
+          description: Dados do perfil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+    patch:
+      tags: [Users]
+      summary: Atualizar dados do perfil
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                address:
+                  type: object
+                  properties:
+                    street: { type: string }
+                    city: { type: string }
+                    state: { type: string }
+                    zip_code: { type: string }
+                pix_key:
+                  type: string
+                  description: Chave PIX para recebimento de retornos
+      responses:
+        '200':
+          description: Perfil atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+  # ═══════════════════════════════════════════
+  # SCORE
+  # ═══════════════════════════════════════════
+  /score/check:
+    post:
+      tags: [Score]
+      summary: Consultar score de crédito
+      description: Consulta Serasa Experian em tempo real. Máx 1 consulta por semana por usuário.
+      responses:
+        '200':
+          description: Score obtido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreCheckResponse'
+        '429':
+          description: Limite de consultas atingido. Tente novamente após next_check_allowed_at.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorResponse'
+                  - type: object
+                    properties:
+                      next_check_allowed_at:
+                        type: string
+                        format: date-time
+
+  /score/history:
+    get:
+      tags: [Score]
+      summary: Histórico de consultas de score
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: Histórico paginado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScoreCheckResponse'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  # ═══════════════════════════════════════════
+  # CREDIT
+  # ═══════════════════════════════════════════
+  /credit/request:
+    post:
+      tags: [Credit]
+      summary: Solicitar crédito (Usuário tomador)
+      description: |
+        Insere a solicitação na fila FIFO. O worker Celery processa assincronamente.
+        Cada bloco = R$40. Máximo 10 blocos por solicitação (R$400).
+        Score mínimo exigido: 620 pts (Serasa Experian).
+      responses:
+        '202':
+          description: Solicitação enfileirada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+        '403':
+          description: Score insuficiente ou KYC pendente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Solicitação pendente já existe para este usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditRequestBody'
+
+  /credit/requests:
+    get:
+      tags: [Credit]
+      summary: Listar solicitações de crédito do usuário
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [queued, processing, approved, rejected, disbursed]
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Lista paginada de solicitações
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditRequest'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /credit/requests/{credit_id}:
+    get:
+      tags: [Credit]
+      summary: Detalhes de uma solicitação de crédito
+      parameters:
+        - name: credit_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditRequest'
+          description: Detalhes da solicitação
+        '404':
+          description: Solicitação não encontrada
+
+  /credit/requests/{credit_id}/amortization:
+    get:
+      tags: [Credit]
+      summary: Cronograma de amortização
+      parameters:
+        - name: credit_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmortizationSchedule'
+          description: Cronograma de parcelas
+
+  # ═══════════════════════════════════════════
+  # PORTFOLIOS
+  # ═══════════════════════════════════════════
+  /portfolios:
+    get:
+      tags: [Portfolios]
+      summary: Listar portfólios disponíveis
+      security: []
+      parameters:
+        - name: risk_level
+          in: query
+          schema:
+            type: string
+            enum: [A, B, C]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, paused]
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [monthly_rate_max, min_investment, default_rate]
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Portfólios disponíveis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Portfolio'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /portfolios/{portfolio_id}:
+    get:
+      tags: [Portfolios]
+      summary: Detalhes de um portfólio
+      security: []
+      parameters:
+        - name: portfolio_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Portfolio'
+          description: Detalhes do portfólio
+        '404':
+          description: Portfólio não encontrado
+
+  /portfolios/{portfolio_id}/simulate:
+    post:
+      tags: [Portfolios]
+      summary: Simular retorno de investimento
+      security: []
+      parameters:
+        - name: portfolio_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, term_months]
+              properties:
+                amount:
+                  type: number
+                  format: float
+                term_months:
+                  type: integer
+                  enum: [3, 6, 9, 12]
+      responses:
+        '200':
+          description: Projeção de retorno
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount_invested:
+                    type: number
+                    format: float
+                  term_months:
+                    type: integer
+                  monthly_rate:
+                    type: number
+                    format: float
+                  gross_return:
+                    type: number
+                    format: float
+                  ir_amount:
+                    type: number
+                    format: float
+                  net_return:
+                    type: number
+                    format: float
+                  cdi_equivalent_return:
+                    type: number
+                    format: float
+                    description: Retorno equivalente a 100% CDI no período
+                  nexus_vs_cdi_multiplier:
+                    type: number
+                    format: float
+                    description: Quantas vezes o CDI o NEXUS retorna
+
+  # ═══════════════════════════════════════════
+  # INVESTMENTS
+  # ═══════════════════════════════════════════
+  /investments:
+    post:
+      tags: [Investments]
+      summary: Realizar aporte em portfólio
+      description: Aplica capital em um portfólio. Inicia fluxo de pagamento via PIX.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvestmentRequest'
+      responses:
+        '201':
+          description: Aporte criado. Aguardando confirmação de pagamento PIX.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Investment'
+                  - type: object
+                    properties:
+                      pix_payment_code:
+                        type: string
+                        description: Código PIX copia-e-cola para pagamento
+                      pix_qr_code_base64:
+                        type: string
+                        description: QR code em base64 para pagamento
+                      payment_expires_at:
+                        type: string
+                        format: date-time
+        '403':
+          description: KYC não aprovado ou limite de portfólio atingido
+
+    get:
+      tags: [Investments]
+      summary: Listar aportes do Aplicante
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending_payment, active, matured, withdrawn]
+        - name: portfolio_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Investment'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  summary:
+                    type: object
+                    properties:
+                      total_invested:
+                        type: number
+                        format: float
+                      total_gross_return_ytd:
+                        type: number
+                        format: float
+                      total_net_return_ytd:
+                        type: number
+                        format: float
+                      active_investments:
+                        type: integer
+          description: Lista de aportes com sumário financeiro
+
+  /investments/{investment_id}:
+    get:
+      tags: [Investments]
+      summary: Detalhes de um aporte
+      parameters:
+        - name: investment_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Investment'
+          description: Detalhes do aporte
+
+  /investments/{investment_id}/returns:
+    get:
+      tags: [Investments]
+      summary: Histórico de retornos do aporte
+      parameters:
+        - name: investment_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InvestmentReturn'
+          description: Retornos mensais do aporte
+
+  # ═══════════════════════════════════════════
+  # LEDGER — MACRO HASH
+  # ═══════════════════════════════════════════
+  /ledger/blocks:
+    get:
+      tags: [Ledger]
+      summary: Listar blocos da cadeia MACRO HASH
+      parameters:
+        - name: level
+          in: query
+          schema:
+            type: integer
+            enum: [1, 2, 3, 4, 5]
+        - name: entity_id
+          in: query
+          schema: { type: string, format: uuid }
+          description: Filtrar por ID de entidade relacionada
+        - name: from_date
+          in: query
+          schema: { type: string, format: date }
+        - name: to_date
+          in: query
+          schema: { type: string, format: date }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HashBlock'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+          description: Blocos da cadeia hash
+
+  /ledger/blocks/{hash}:
+    get:
+      tags: [Ledger]
+      summary: Obter bloco por hash SHA-256
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-f0-9]{64}$'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashBlock'
+          description: Bloco encontrado
+        '404':
+          description: Hash não encontrado no ledger
+
+  /ledger/verify/{hash}:
+    get:
+      tags: [Ledger]
+      summary: Verificar integridade de um bloco e sua cadeia
+      description: Valida se o hash informado é consistente e se toda a cadeia até L1 está íntegra.
+      security: []
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-f0-9]{64}$'
+      responses:
+        '200':
+          description: Resultado da verificação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerVerifyResponse'
+        '404':
+          description: Hash não encontrado
+
+  /ledger/root:
+    get:
+      tags: [Ledger]
+      summary: Hash raiz público do período atual
+      description: Retorna o hash raiz L1 do período vigente para verificação pública.
+      security: []
+      responses:
+        '200':
+          description: Hash raiz atual
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  root_hash:
+                    type: string
+                    example: "b7e2c4a1d8f3059e6b1a2c7d4f8e3a9b5c2d7f4e1a6b3c8d5e2f7a4b9c1d6e3f"
+                  period:
+                    type: string
+                    example: "2025-04"
+                  published_at:
+                    type: string
+                    format: date-time
+                  total_blocks:
+                    type: integer
+
+  # ═══════════════════════════════════════════
+  # CARDS
+  # ═══════════════════════════════════════════
+  /cards/me:
+    get:
+      tags: [Cards]
+      summary: Obter cartão do usuário autenticado
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+          description: Dados do cartão ativo
+        '404':
+          description: Nenhum cartão emitido para este usuário
+
+  /cards/me/transactions:
+    get:
+      tags: [Cards]
+      summary: Extrato de transações do cartão
+      parameters:
+        - name: vertical
+          in: query
+          schema:
+            type: string
+            enum: [saude, educacao, alimentacao, transporte, moradia, vestuario, lazer, tecnologia, beleza, pet, viagem, emergencia]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [purchase, refund, credit_block, fee]
+        - name: from_date
+          in: query
+          schema: { type: string, format: date }
+        - name: to_date
+          in: query
+          schema: { type: string, format: date }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Extrato paginado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CardTransaction'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  balance_summary:
+                    type: object
+                    properties:
+                      available_balance: { type: number, format: float }
+                      total_spent_period: { type: number, format: float }
+                      total_credited_period: { type: number, format: float }
+
+  /cards/me/block:
+    post:
+      tags: [Cards]
+      summary: Bloquear cartão temporariamente
+      responses:
+        '200':
+          description: Cartão bloqueado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+
+  /cards/me/unblock:
+    post:
+      tags: [Cards]
+      summary: Desbloquear cartão
+      responses:
+        '200':
+          description: Cartão desbloqueado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+
+  # ═══════════════════════════════════════════
+  # PAYMENTS
+  # ═══════════════════════════════════════════
+  /payments/pix/withdraw:
+    post:
+      tags: [Payments]
+      summary: Sacar retorno via PIX (Aplicante)
+      description: Transfere retorno disponível para a chave PIX cadastrada. Liquidação D+1.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PixPaymentRequest'
+      responses:
+        '202':
+          description: PIX enfileirado para processamento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pix_transaction_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [queued, processing, completed, failed]
+                  estimated_settlement:
+                    type: string
+                    format: date
+                    description: Data estimada de liquidação (D+1)
+        '422':
+          description: Saldo insuficiente ou chave PIX inválida
+
+  /payments/history:
+    get:
+      tags: [Payments]
+      summary: Histórico de transações PIX
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [investment_payment, return_credit, amortization, withdrawal]
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Histórico de pagamentos PIX
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        pix_transaction_id: { type: string, format: uuid }
+                        amount: { type: number, format: float }
+                        type: { type: string }
+                        status: { type: string }
+                        pix_key: { type: string }
+                        occurred_at: { type: string, format: date-time }
+                        settled_at: { type: string, format: date-time, nullable: true }
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  # ═══════════════════════════════════════════
+  # WEBHOOKS
+  # ═══════════════════════════════════════════
+  /webhooks:
+    post:
+      tags: [Webhooks]
+      summary: Registrar endpoint de webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, events]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  example: https://seuservidor.com/nexus-webhook
+                events:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - credit.queued
+                      - credit.approved
+                      - credit.rejected
+                      - credit.disbursed
+                      - investment.active
+                      - investment.return_paid
+                      - investment.matured
+                      - card.transaction
+                      - pix.settled
+                      - kyc.approved
+                      - kyc.rejected
+                  example: [credit.approved, pix.settled]
+                secret:
+                  type: string
+                  description: Segredo HMAC-SHA256 para verificar assinaturas das notificações
+      responses:
+        '201':
+          description: Webhook registrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  webhook_id:
+                    type: string
+                    format: uuid
+                  url:
+                    type: string
+                  events:
+                    type: array
+                    items: { type: string }
+                  created_at:
+                    type: string
+                    format: date-time
+
+    get:
+      tags: [Webhooks]
+      summary: Listar webhooks registrados
+      responses:
+        '200':
+          description: Lista de webhooks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        webhook_id: { type: string, format: uuid }
+                        url: { type: string }
+                        events: { type: array, items: { type: string } }
+                        is_active: { type: boolean }
+                        created_at: { type: string, format: date-time }
+
+  /webhooks/{webhook_id}:
+    delete:
+      tags: [Webhooks]
+      summary: Remover webhook
+      parameters:
+        - name: webhook_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Webhook removido
+

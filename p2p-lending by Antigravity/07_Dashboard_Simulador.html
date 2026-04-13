@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Simulador Financeiro 360º</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0D1B2A; color: #E0E1DD; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(19, 33, 53, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .accent-text { color: #00B4D8; }
+        .gold-text { color: #F5A623; }
+        .profit-text { color: #27AE60; }
+        .danger-text { color: #E63946; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center glass-panel p-6 rounded-xl shadow-lg">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">NEXUS <span class="accent-text">360 BOARD</span></h1>
+                <p class="text-gray-400 mt-1">Simulador Dinâmico de Prospecção (24 Meses)</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-400">Lucro Médio Projetado p/ Cota (Mês 1)</p>
+                <p class="text-3xl font-bold profit-text" id="yield-monthly">0.00%</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar: Parameters -->
+            <div class="glass-panel p-6 rounded-xl lg:col-span-1 space-y-5">
+                <h2 class="text-xl font-semibold accent-text mb-4 border-b border-gray-700 pb-2">Parâmetros</h2>
+                
+                <div>
+                    <label class="block text-sm text-gray-300">Aplicantes no Início (Qtd)</label>
+                    <input type="range" id="param-aplicantes" min="1000" max="20000" step="500" value="5000" class="w-full mt-2 accent-[#00B4D8]">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 mt-1"><span id="val-aplicantes">5,000</span></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-300">Crescimento ao Mês (%)</label>
+                    <input type="range" id="param-growth" min="0" max="30" step="0.5" value="5.5" class="w-full mt-2 accent-[#00B4D8]">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 mt-1"><span id="val-growth">5.5%</span></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-300">Ticket Médio (Fundo) R$</label>
+                    <input type="range" id="param-ticket" min="5000" max="50000" step="1000" value="10000" class="w-full mt-2 accent-[#F5A623]">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 mt-1"><span id="val-ticket">10,000</span></div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-300">Inadimplência da Fatura (NPL %)</label>
+                    <input type="range" id="param-npl" min="1" max="15" step="0.5" value="4.5" class="w-full mt-2 accent-[#E63946]">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 mt-1"><span id="val-npl">4.5%</span></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-300">Luva (Juros da Fatura %)</label>
+                    <input type="range" id="param-fee" min="3" max="12" step="0.5" value="6.0" class="w-full mt-2 accent-[#27AE60]">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 mt-1"><span id="val-fee">6.0%</span></div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-700">
+                    <p class="text-xs text-gray-400">* MDR (1.5% Fixo Plataforma)</p>
+                    <p class="text-xs text-gray-400">* Escala Assis. (1 para 500 Usr)</p>
+                </div>
+            </div>
+
+            <!-- Main Content: Charts and Metrics -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <!-- Quick Metric Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">Mês 24: Usuários</p>
+                        <p class="text-2xl font-bold mt-1" id="m24-users">0</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">Mês 24: Capital Operado</p>
+                        <p class="text-2xl font-bold gold-text mt-1" id="m24-capital">R$ 0</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">Mês 24: Assistentes Requiridos</p>
+                        <p class="text-2xl font-bold mt-1" id="m24-assistants">0</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center border-l-4 border-blue-500">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">MDR Acumulado (24 Meses)</p>
+                        <p class="text-2xl font-bold profit-text mt-1" id="m24-mdr">R$ 0</p>
+                    </div>
+                </div>
+
+                <!-- Simulation Info Alert -->
+                <div class="bg-blue-900 border border-blue-700 text-blue-100 px-4 py-3 rounded-xl flex items-center shadow-md">
+                    <svg class="h-6 w-6 mr-3 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="text-sm" id="stress-analysis">
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="glass-panel p-4 rounded-xl shadow-lg">
+                    <canvas id="growthChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const elAplicantes = document.getElementById('param-aplicantes');
+        const elGrowth = document.getElementById('param-growth');
+        const elTicket = document.getElementById('param-ticket');
+        const elNpl = document.getElementById('param-npl');
+        const elFee = document.getElementById('param-fee');
+
+        let myChart = null;
+
+        const formatBRL = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+        const formatNumber = (val) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(val);
+
+        function simular() {
+            // Update Labels
+            document.getElementById('val-aplicantes').innerText = formatNumber(elAplicantes.value);
+            document.getElementById('val-growth').innerText = elGrowth.value + "%";
+            document.getElementById('val-ticket').innerText = formatBRL(elTicket.value);
+            document.getElementById('val-npl').innerText = elNpl.value + "%";
+            document.getElementById('val-fee').innerText = elFee.value + "%";
+
+            // Parse Parameters
+            const startAplicantes = parseFloat(elAplicantes.value);
+            const growthRate = parseFloat(elGrowth.value) / 100;
+            const avgTicket = parseFloat(elTicket.value);
+            const nplRate = parseFloat(elNpl.value) / 100;
+            const feeRate = parseFloat(elFee.value) / 100;
+
+            const userLimit = 2500; // Limit per user
+            
+            // Arrays for Graphic
+            const labels = [];
+            const capitaChart = [];
+            const userChart = [];
+            
+            let currentAplicantes = startAplicantes;
+            let totalMdrAccumulated = 0;
+
+            let finalUsers = 0;
+            let finalCapital = 0;
+            let finalAssistants = 0;
+
+            for(let m = 1; m <= 24; m++) {
+                labels.push("Mês " + m);
+                
+                const monthCapital = currentAplicantes * avgTicket;
+                const monthUsers = monthCapital / userLimit;
+                const monthAssistants = Math.max(1, Math.floor(monthUsers / 500));
+                
+                // MDR is 1.5% of total capital transacted in that month
+                const monthMdr = monthCapital * 0.015; 
+                totalMdrAccumulated += monthMdr;
+
+                capitaChart.push(monthCapital);
+                userChart.push(monthUsers);
+
+                if (m === 24) {
+                    finalUsers = monthUsers;
+                    finalCapital = monthCapital;
+                    finalAssistants = monthAssistants;
+                }
+
+                currentAplicantes = currentAplicantes * (1 + growthRate);
+            }
+
+            // Calculate Unitary Stress Analysis (per 1 base limit)
+            const feeMarkupValue = avgTicket * (1 + feeRate); 
+            const nplLossValue = avgTicket * nplRate; 
+            const usersPaying = 1.0 - nplRate;
+            const valueRecovered = feeMarkupValue * usersPaying; 
+
+            const netYieldAmount = valueRecovered - avgTicket;
+            const netYieldPercentage = (netYieldAmount / avgTicket) * 100;
+
+            // DOM Updates
+            document.getElementById('yield-monthly').innerText = netYieldPercentage.toFixed(2) + "%";
+            
+            // Adjust colors of yield
+            const yieldEl = document.getElementById('yield-monthly');
+            if (netYieldPercentage > 0) {
+                yieldEl.className = "text-3xl font-bold profit-text";
+            } else {
+                yieldEl.className = "text-3xl font-bold danger-text";
+            }
+
+            document.getElementById('m24-users').innerText = formatNumber(finalUsers);
+            document.getElementById('m24-capital').innerText = formatBRL(finalCapital);
+            document.getElementById('m24-assistants').innerText = formatNumber(finalAssistants);
+            document.getElementById('m24-mdr').innerText = formatBRL(totalMdrAccumulated);
+
+            // Update Analysis Text
+            document.getElementById('stress-analysis').innerHTML = `
+                <strong class="font-bold">Análise do Custo e Quebra:</strong> Se o Aplicante investe ${formatBRL(avgTicket)} e o risco de calote (NPL) for de ${elNpl.value}%, a perda nominal no mês é de ${formatBRL(nplLossValue)} e os pagadores fiéis geram rendimento via "luva" de ${elFee.value}%. O saldo da cota (apenas pelo fator faturamento) fechará o mês em <b class="${netYieldPercentage >= 0 ? "text-green-300" : "text-red-400"}">${formatBRL(valueRecovered)}</b>. A Nexus ganhará ${formatBRL(avgTicket * 0.015)} de taxa de intercâmbio (MDR) por cada título girado.
+            `;
+
+            drawChart(labels, capitaChart, userChart);
+        }
+
+        function drawChart(labels, dataCap, dataUsr) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Capital Operado (R$)',
+                            data: dataCap,
+                            borderColor: '#F5A623',
+                            backgroundColor: 'rgba(245, 166, 35, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Cartões/Usuários',
+                            data: dataUsr,
+                            borderColor: '#00B4D8',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#E0E1DD' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8899AA' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { type: 'linear', display: true, position: 'left', ticks: { color: '#F5A623' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y1: { type: 'linear', display: true, position: 'right', ticks: { color: '#00B4D8' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        // Event Listeners
+        [elAplicantes, elGrowth, elTicket, elNpl, elFee].forEach(el => {
+            el.addEventListener('input', simular);
+        });
+
+        // Initialize
+        simular();
+    </script>
+</body>
+</html>

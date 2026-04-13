@@ -1,0 +1,33 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project Temporary/Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Artifacts & Gemini Assistant logs
+.gemini/
+.gemini_assistant/
+**/scratch/
+**/artifacts/
+**/.system_generated/
+
+# Project Specific
+docs/*.docx
+nexus-platform.code-workspace

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - The Stablecoin P2P Lending Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                        },
+                        blue: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                        },
+                        neon: '#00f2fe',
+                        glass: 'rgba(255, 255, 255, 0.03)'
+                    },
+                    backgroundImage: {
+                        'hero-pattern': 'radial-gradient(circle at top right, #064e3b, #0f172a 40%)',
+                        'tech-grid': 'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
+                        'gradient-text': 'linear-gradient(to right, #34d399, #00f2fe)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 40px -10px rgba(52, 211, 153, 0.4)',
+                        'glow-blue': '0 0 40px -10px rgba(59, 130, 246, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #34d399, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Mockup Devices */
+        .mockup-browser {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1e293b;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .mockup-browser-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .mockup-browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mockup-browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background-color: #ef4444; }
+        .dot-yellow { background-color: #eab308; }
+        .dot-green { background-color: #22c55e; }
+
+        .mockup-phone {
+            width: 320px;
+            height: 650px;
+            border-radius: 40px;
+            border: 12px solid #1e293b;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.1);
+            overflow: hidden;
+            position: relative;
+            background: #0f172a;
+            margin: 0 auto;
+        }
+        
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background: #1e293b;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 20;
+        }
+
+        /* Animated Nodes */
+        .node-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(52, 211, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+        }
+
+        /* Connecting Lines SVG */
+        .path-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear forwards infinite;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- HERO SECTION -->
+    <header class="relative min-h-screen flex items-center justify-center bg-hero-pattern overflow-hidden">
+        <div class="absolute inset-0 bg-tech-grid opacity-20" style="background-size: 50px 50px;"></div>
+        
+        <!-- Glowing Orbs -->
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-30 floating" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-30 floating" style="animation-delay: 0s;"></div>
+
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-6 py-32 text-center lg:text-left grid lg:grid-cols-2 gap-16 items-center">
+            
+            <div class="space-y-8">
+                <div class="inline-flex items-center space-x-2 glass-panel px-4 py-2 rounded-full border border-emerald-500/30 text-emerald-400 text-sm font-bold tracking-widest uppercase mb-4">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Official Executive Whitepaper V1.0</span>
+                </div>
+                
+                <h1 class="font-display text-5xl lg:text-7xl font-black leading-tight">
+                    Desintegrando o <br/>
+                    <span class="text-gradient">Spread Bancário</span>
+                </h1>
+                
+                <p class="text-lg lg:text-xl text-slate-300 font-light leading-relaxed max-w-2xl">
+                    Conectando Investidores diretamente a Consumidores através da mais pura rede P2P em tecnologia Blockchain. Guiada pela Inteligência Artificial Agenticular, a <strong>NEXUS</strong> estabiliza juros, neutraliza calotes e pulveriza barreiras tributárias.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <a href="#engine" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-lg transition-all transform hover:scale-105 shadow-glow text-lg">
+                        Ver a Solução Matemática
+                    </a>
+                    <a href="#prototype" class="px-8 py-4 glass-panel hover:bg-white/10 text-white font-bold rounded-lg transition-all border border-slate-600 text-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Explorar as Interfaces
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero Diagram -->
+            <div class="relative hidden lg:block h-[500px]">
+                <svg class="absolute inset-0 w-full h-full" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Central Node -->
+                    <circle cx="250" cy="250" r="60" fill="rgba(16, 185, 129, 0.1)" stroke="#34d399" stroke-width="2"/>
+                    <text x="250" y="255" fill="white" font-family="Outfit" font-size="20" font-weight="800" text-anchor="middle">NEXUS AI</text>
+                    
+                    <!-- Lenders Nodes -->
+                    <circle cx="100" cy="150" r="30" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="80" cy="250" r="30" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                    <circle cx="100" cy="350" r="30" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="90" y="405" fill="#94a3b8" font-family="Inter" font-size="14" font-weight="500" text-anchor="middle">Investidores (Pool)</text>
+
+                    <!-- Borrowers Nodes -->
+                    <circle cx="400" cy="150" r="30" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                    <circle cx="420" cy="250" r="30" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                    <circle cx="400" cy="350" r="30" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="410" y="405" fill="#94a3b8" font-family="Inter" font-size="14" font-weight="500" text-anchor="middle">Usuários (Card)</text>
+
+                    <!-- Connections Lenders -> Center -->
+                    <path class="path-line" d="M125 168 L200 215" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+                    <path class="path-line" d="M110 250 L190 250" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+                    <path class="path-line" d="M125 332 L200 285" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+
+                    <!-- Connections Center -> Borrowers -->
+                    <path class="path-line" d="M300 215 L375 168" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                    <path class="path-line" d="M310 250 L390 250" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                    <path class="path-line" d="M300 285 L375 332" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                
+                <!-- Overlay Elements -->
+                <div class="absolute top-[80px] left-[60px] bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded border border-blue-500/50">+ 10.000 USDC</div>
+                <div class="absolute bottom-[100px] right-[40px] bg-emerald-500/20 text-emerald-400 text-xs px-2 py-1 rounded border border-emerald-500/50">Score A+ Liberado</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- THE PROBLEM & THE SOLUTION (INFOGRAPHIC) -->
+    <section id="engine" class="py-24 bg-slate-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="font-display text-4xl lg:text-5xl font-black mb-4">A Doença do <span class="text-emerald-400">Risco e da Tributação</span></h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">Eliminando a inadimplência descontrolada e evadindo +80% da base governamental legalmente.</p>
+            </div>
+
+            <!-- Mind Map CSS Grid -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Block 1 -->
+                <div class="glass-panel p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300 border-t-2 border-t-red-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-slate-800 opacity-20 text-9xl font-black"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="w-14 h-14 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-glow">
+                        <i class="fa-solid fa-skull"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">A Lâmina Contábil Federal</h3>
+                    <p class="text-slate-400 leading-relaxed mb-6">Instituições pagam juros sobre todo o volume bruto originado. Ao tributar o P2P da forma tradicional, a empresa roda no prejuízo por 60 meses seguidos.</p>
+                    <div class="pt-4 border-t border-slate-700/50">
+                        <span class="text-emerald-400 font-bold block mb-2"><i class="fa-solid fa-shield-halved mr-2"></i>A Solução NEXUS (V8)</span>
+                        <p class="text-sm text-slate-300">Desmembramento via **FIDC/Escrow**. O Dinheiro Investidor é imune à Holding. A NEXUS paga *Lucro Presumido (16%)* PURAMENTE sobre a taxa *Tech/MDR*. Elisão fiscal imediata de -80%.</p>
+                    </div>
+                </div>
+
+                <!-- Block 2 -->
+                <div class="glass-panel p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300 border-t-2 border-t-blue-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-slate-800 opacity-20 text-9xl font-black"><i class="fa-solid fa-users-slash"></i></div>
+                    <div class="w-14 h-14 bg-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-glow-blue">
+                        <i class="fa-solid fa-user-nurse"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Calotes Destruidores de Patrimônio (NPL)</h3>
+                    <p class="text-slate-400 leading-relaxed mb-6">Em P2P, quem absorve o calote é o Pool. Comissões milionárias são pagas à equipe comercial ignorando o "Churn" da operação, falindo a Matriz.</p>
+                    <div class="pt-4 border-t border-slate-700/50">
+                        <span class="text-blue-400 font-bold block mb-2"><i class="fa-solid fa-rotate-left mr-2"></i>Motor Chargeback Ativo (V6)</span>
+                        <p class="text-sm text-slate-300">Penalidade automática na folha HR do executivo! Mas com **Prêmio Físico de Recuperação**: A equipe salva 25% da dívida do mercado e lucra 30% em cima. Alinhamento letal de interesses.</p>
+                    </div>
+                </div>
+
+                <!-- Block 3 -->
+                <div class="glass-panel p-8 rounded-2xl hover:-translate-y-2 transition-transform duration-300 border-t-2 border-t-emerald-500 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-slate-800 opacity-20 text-9xl font-black"><i class="fa-solid fa-credit-card"></i></div>
+                    <div class="w-14 h-14 bg-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center text-2xl mb-6 shadow-glow">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">O Abismo Físico (Cohort Cliff)</h3>
+                    <p class="text-slate-400 leading-relaxed mb-6">A emissão do cartão custa R$ 15 no dia ZERO, mas a receita entra em 12 parcelas de R$ 1,25. No mês 13, a renovação estilhaça o EBITDA (Free Cash Flow) secando os dividendos.</p>
+                    <div class="pt-4 border-t border-slate-700/50">
+                        <span class="text-emerald-400 font-bold block mb-2"><i class="fa-solid fa-box-archive mr-2"></i>Cofre Restrito Isolado (V5)</span>
+                        <p class="text-sm text-slate-300">Sub-economia de Plásticos. Todo o montante recorrente gerado **nunca entra no Fluxo de Caixa livre**, é retido para amortecer nativamente os abismos de Coorte mensais. Acionistas blindados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LENDER (APLICANTE) SECTION WITH IFRAME EMBED -->
+    <section id="prototype" class="py-24 bg-[#0B1121] relative">
+        <div class="max-w-7xl mx-auto px-6 grid xl:grid-cols-2 gap-16 items-center">
+            
+            <div class="order-2 xl:order-1 relative">
+                <!-- Browser Mockup Embedding Dashboard Aplicante -->
+                <div class="mockup-browser w-full h-[600px] z-10 relative">
+                    <div class="mockup-browser-toolbar">
+                        <div class="mockup-browser-dots">
+                            <div class="mockup-browser-dot dot-red"></div>
+                            <div class="mockup-browser-dot dot-yellow"></div>
+                            <div class="mockup-browser-dot dot-green"></div>
+                        </div>
+                        <div class="ml-4 w-full bg-slate-900 rounded text-xs text-slate-500 px-3 py-1 font-mono flex items-center">
+                            <i class="fa-solid fa-lock mr-2 text-emerald-500"></i> nexus-platform.com/aplicante/board
+                        </div>
+                    </div>
+                    <!-- IFRAME PROTOTYPE -->
+                    <div class="w-full h-[calc(100%-41px)] bg-slate-950 overflow-hidden relative">
+                        <!-- We link directly to user's local path via file protocol or standard web embed logic -->
+                        <!-- NOTE: Browsers block local IFrames due to cross-origin, BUT as an institutional offline delivery, it works perfectly -->
+                        <!-- If local file is unavailable, we show a stunning placeholder mimicking the screen -->
+                        <iframe src="../../prototype/tela-02-dashboard-aplicante.html" onload="this.style.opacity=1" style="opacity: 0; transition: opacity 1s;" onerror="this.outerHTML='<div class=\'w-full h-full flex flex-col items-center justify-center p-10 text-center\'><i class=\'fa-solid fa-chart-pie text-6xl text-blue-500 mb-6\'></i><h3 class=\'text-2xl font-bold\'>Dashboard Aplicante Prototype</h3><p class=\'text-slate-400 mt-4\'>A view of the live HTML prototype is embedded here. Make sure the relative path `../prototype/` is accessible.</p></div>'"></iframe>
+                        <!-- Fallback visual if iframe fails to load local file in some browsers -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-[-1]">
+                             <i class="fa-solid fa-chart-simple text-7xl text-blue-500 mb-6 node-pulse rounded-full"></i>
+                             <h3 class='text-2xl font-bold'>O Painel do Investidor</h3>
+                             <p class='text-slate-400 mt-4 max-w-sm text-center'>Acesso direto ao HTML do protótipo (Dashboard Aplicante) sendo renderizado dentro do iFrame.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Decorators -->
+                <div class="absolute -bottom-10 -right-10 bg-emerald-500 text-slate-950 px-6 py-4 rounded-xl font-bold text-xl shadow-glow transform rotate-3 z-20">
+                    <i class="fa-solid fa-coins mr-2"></i> USDC Yield Live
+                </div>
+            </div>
+
+            <div class="order-1 xl:order-2 space-y-6">
+                <h4 class="text-blue-500 font-bold uppercase tracking-widest text-sm">O Lado da Oferta (Lender)</h4>
+                <h2 class="font-display text-4xl lg:text-5xl font-black">Visão de Liquidez Absoluta e Composer de Risco</h2>
+                <p class="text-lg text-slate-400 leading-relaxed">
+                    A NEXUS empodera quem possui o capital. Sem intermediários roubando a rentabilidade. O painel superior é o núcleo de comando para gerenciar aportes de USDC.
+                </p>
+                <ul class="space-y-4 mt-6">
+                    <li class="flex items-start">
+                        <div class="mt-1 mr-4 w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check text-xs"></i></div>
+                        <div>
+                            <strong class="text-white">Portfólio Composer (Tela 03):</strong>
+                            <p class="text-slate-400 text-sm mt-1">Crie as regras de distribuição. Alocar 80% do capital no Risco C (Alto Lucro) e 20% no Risco A? A IA faz isso em tempo real.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="mt-1 mr-4 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check text-xs"></i></div>
+                        <div>
+                            <strong class="text-white">A Lógica Macro Hash (Tela 04):</strong>
+                            <p class="text-slate-400 text-sm mt-1">Garantia absoluta de diluição de impacto. Seus R$ 10.000 são diluídos entre 141 verticais de consumo debaixo do Score Paramétrico.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- BORROWER (USUÁRIO) SECTION WITH PHONE IFRAME EMBED -->
+    <section class="py-24 bg-slate-900 border-t border-slate-800 relative overflow-hidden">
+        <div class="absolute left-0 top-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 grid xl:grid-cols-2 gap-16 items-center">
+            
+            <div class="space-y-6">
+                <h4 class="text-emerald-500 font-bold uppercase tracking-widest text-sm">O Lado do Consumo (Borrower)</h4>
+                <h2 class="font-display text-4xl lg:text-5xl font-black">Neo-Banking Focado no Respeito ao Score</h2>
+                <p class="text-lg text-slate-400 leading-relaxed">
+                    Não somos um cartão qualquer. Somos um hub de relacionamento. A Interface mobile (Tela 05) engaja o usuário trazendo clareza cirúrgica da linha de crédito. 
+                </p>
+                
+                <div class="grid sm:grid-cols-2 gap-6 mt-8">
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-emerald-500">
+                        <i class="fa-solid fa-award text-2xl text-emerald-400 mb-3"></i>
+                        <h4 class="font-bold text-white mb-2">NEXUS Score Imutável</h4>
+                        <p class="text-sm text-slate-400">Quanto melhor o comportamento de pagamento, menor a taxa de Juros. Premiação na pele para o usuário leal.</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-emerald-500">
+                        <i class="fa-solid fa-hand-holding-dollar text-2xl text-emerald-400 mb-3"></i>
+                        <h4 class="font-bold text-white mb-2">Simulação Sem Atrito</h4>
+                        <p class="text-sm text-slate-400">Painel com *Sliders* fluidos (Tela 06) para solicitar adiantamentos. O próprio usuário define suas parcelas e vê os custos transparentes.</p>
+                    </div>
+                    <div class="glass-panel p-5 rounded-xl border-l-4 border-emerald-500 sm:col-span-2 flex items-center gap-4">
+                        <i class="fa-solid fa-receipt text-3xl text-emerald-400"></i>
+                        <div>
+                            <h4 class="font-bold text-white">Extrato & Parcelamento (Telas 08/09)</h4>
+                            <p class="text-sm text-slate-400">Contabilidade diária impecável de gastos físicos, vinculados diretamente à carteira digital USDC via PIX/Card.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Phone Mockup Embedding Dashboard Usuário -->
+            <div class="relative flex justify-center">
+                <div class="mockup-phone z-10 transition-transform duration-700 hover:scale-[1.02]">
+                    <div class="notch"></div>
+                    <!-- IFRAME PROTOTYPE iOS -->
+                    <div class="w-full h-full bg-slate-900 pt-[25px]">
+                        <iframe src="../../prototype/tela-05-dashboard-usuario.html" class="w-full h-full" onload="this.style.opacity=1" style="opacity: 0; transition: opacity 1s;"></iframe>
+                    </div>
+                </div>
+                <!-- Decorators -->
+                <div class="absolute top-[20%] -left-[20px] bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-lg flex items-center gap-3 shadow-2xl z-20 pulse-ring">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-slate-900">
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">Score Atualizado</div>
+                        <div class="font-bold text-emerald-400">Rating A+</div>
+                    </div>
+                </div>
+                <div class="absolute bottom-[30%] -right-[30px] bg-slate-800 border border-blue-500/30 text-white px-4 py-3 rounded-lg flex items-center gap-3 shadow-2xl z-20">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">Limite Liberado</div>
+                        <div class="font-bold">R$ 5.400,00</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CORPORATE 360-BOARD ENGINE -->
+    <section class="py-24 bg-[#0B1121] border-t border-slate-800 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="text-center mb-16 max-w-4xl mx-auto">
+                <div class="inline-flex items-center space-x-2 bg-purple-500/10 px-4 py-2 rounded-full border border-purple-500/30 text-purple-400 text-sm font-bold tracking-widest uppercase mb-4">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>Tese de Validação (Série-A)</span>
+                </div>
+                <h2 class="font-display text-4xl lg:text-5xl font-black mb-4">The 360-Board Engine (V8)</h2>
+                <p class="text-xl text-slate-400">
+                    Um negócio que esconde suas despesas invisíveis (CAC, Opex e HQ) morre na beia da rampa. A NEXUS mapeou no DRE Corportativo a Exata Linha d'Água do <strong>Free Cash Flow (Caixa Livre)</strong>.
+                </p>
+            </div>
+
+            <!-- Big Dashboard Iframe embedding DRE v8 -->
+            <div class="mockup-browser w-full h-[700px] z-10 relative shadow-glow-blue border-purple-500/30">
+                <div class="mockup-browser-toolbar">
+                    <div class="mockup-browser-dots">
+                        <div class="mockup-browser-dot dot-red"></div>
+                        <div class="mockup-browser-dot dot-yellow"></div>
+                        <div class="mockup-browser-dot dot-green"></div>
+                    </div>
+                    <div class="ml-4 w-full bg-slate-900 rounded text-xs text-slate-500 px-3 py-1 font-mono flex items-center">
+                        <i class="fa-solid fa-chart-line mr-2 text-purple-400"></i> DRE Controladoria Corporativa NEXUS
+                    </div>
+                </div>
+                <div class="w-full h-[calc(100%-41px)] bg-[#0f172a] relative">
+                    <iframe src="15_Dashboard_DRE_Corporativo_v8.html" class="w-full h-full"></iframe>
+                </div>
+            </div>
+
+            <!-- Validation Points -->
+            <div class="grid md:grid-cols-3 gap-8 mt-16">
+                <div class="text-center px-4">
+                    <div class="text-5xl font-black text-white mb-2">Spread Líquido &gt; 0</div>
+                    <p class="text-slate-400">(Juros Totais + MDR) - (NPL Estimado + Yield Prometido) SEMPRE deve ser mantido Positivo na raiz. Se o Juros cair ou Calote subir as planilhas demonstram a necessidade de ajuste (Menu Mercado).</p>
+                </div>
+                <div class="text-center px-4">
+                    <div class="text-5xl font-black text-emerald-400 mb-2">- 80%</div>
+                    <p class="text-slate-400">Redução massiva na Conta de Impostos via Ação B, isolando puramente a operação e faturamento em base tecnológica de Software.</p>
+                </div>
+                <div class="text-center px-4">
+                    <div class="text-5xl font-black text-blue-500 mb-2">Visão 60 Meses</div>
+                    <p class="text-slate-400">Previsibilidade total em DRE x DFC. Evidência irrefutável para os Conselhos Executivos sobre o payback da folha e investimentos operacionais fixos de Marketing.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 bg-slate-950 text-center border-t border-slate-900">
+        <h2 class="font-display font-black text-3xl mb-4 tracking-tighter text-white">
+            NEXUS<span class="text-emerald-500">.</span>
+        </h2>
+        <p class="text-slate-500 mb-6">Designed by Antigravity AI Engine &bull; P2P Stablecoin Ecosystem</p>
+        <p class="text-sm text-slate-600 max-w-lg mx-auto">This Whitepaper incorporates both HTML Prototypes and JavaScript V8 Mathematical Financial Engines designed directly inside the IDE environments for flawless execution.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,823 @@
+<\!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sobre o NEXUS — Plataforma P2P de Crédito Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{navy:'#0B2447',primary:'#1640D6',gold:'#D97706',success:'#059669',light:'#FAFCFF'},fontFamily:{display:['Playfair Display','serif'],body:['Poppins','sans-serif']}}}}
+</script>
+<style>
+*{font-family:'Poppins',sans-serif}
+h1,h2,.font-display{font-family:'Playfair Display',serif}
+body{background:#FAFCFF;color:#1a2540}
+.hero-sobre{background:linear-gradient(135deg,#0B2447 0%,#1640D6 60%,#0ea5e9 100%);position:relative;overflow:hidden}
+.hero-sobre::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(22,64,214,0.08)}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:.5px}
+.badge-blue{background:#e8eeff;color:#1640D6}
+.badge-gold{background:#fef3c7;color:#b45309}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-navy{background:#e8ecf5;color:#0B2447}
+.pill-nav a{font-size:.85rem;font-weight:500;color:#4b5563;padding:8px 18px;border-radius:30px;transition:all .2s}
+.pill-nav a:hover,.pill-nav a.active{background:#1640D6;color:#fff}
+.stat-big{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:800;line-height:1;color:#0B2447}
+.timeline-item{position:relative;padding-left:32px}
+.timeline-item::before{content:'';position:absolute;left:0;top:6px;width:12px;height:12px;border-radius:50%;background:#1640D6}
+.timeline-item::after{content:'';position:absolute;left:5px;top:18px;width:2px;height:calc(100% + 16px);background:linear-gradient(to bottom,#1640D6,#e5e7eb)}
+.timeline-item:last-child::after{display:none}
+.tech-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:500;color:#374151}
+.hash-line{font-family:'Courier New',monospace;font-size:.7rem;color:#6b7280;word-break:break-all;line-height:1.8}
+.hash-level{border-left:3px solid;padding:12px 16px;margin:6px 0;border-radius:0 8px 8px 0}
+.team-card{transition:transform .25s,box-shadow .25s}
+.team-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(22,64,214,0.15)}
+.value-item{display:flex;align-items:flex-start;gap:14px}
+.value-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reg-badge{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 20px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+@keyframes dash{to{stroke-dashoffset:-20}}
+.float-anim{animation:float 4s ease-in-out infinite}
+.pulse{animation:pulse-ring 2.5s cubic-bezier(0,0,.2,1) infinite}
+.nav-link{font-size:.85rem;font-weight:500;color:#374151;transition:color .2s}
+.nav-link:hover{color:#1640D6}
+</style>
+</head>
+<body>
+
+<\!-- NAV -->
+<nav class="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-navy to-primary flex items-center justify-center">
+        <span class="text-white font-bold text-sm">NX</span>
+      </div>
+      <span class="font-bold text-navy text-lg">NEXUS</span>
+    </a>
+    <div class="hidden md:flex items-center gap-2 pill-nav">
+      <a href="index.html">Home</a>
+      <a href="portfolios.html">Portfólios</a>
+      <a href="como-funciona.html">Como Funciona</a>
+      <a href="sobre.html" class="active">Sobre</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#" class="text-sm font-medium text-navy hover:text-primary transition-colors">Entrar</a>
+      <a href="#" class="bg-primary text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-blue-700 transition-colors">Começar</a>
+    </div>
+  </div>
+</nav>
+
+<\!-- HERO -->
+<section class="hero-sobre text-white py-28 px-6 relative">
+  <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
+    <div>
+      <span class="badge bg-white/20 text-white text-xs mb-6 inline-block">Nossa História</span>
+      <h1 class="font-display text-5xl lg:text-6xl font-bold leading-tight mb-6">Reimaginando o<br/>crédito no Brasil</h1>
+      <p class="text-blue-100 text-lg leading-relaxed mb-8 max-w-lg">O NEXUS nasceu da convicção de que o crédito pode ser mais inteligente, acessível e seguro — conectando quem tem capital para investir com quem precisa de recursos para avançar.</p>
+      <div class="flex flex-wrap gap-3">
+        <span class="bg-white/15 border border-white/25 text-white text-sm px-4 py-2 rounded-full">🏛️ Regulado BACEN</span>
+        <span class="bg-white/15 border border-white/25 text-white text-sm px-4 py-2 rounded-full">🔗 Tecnologia Blockchain</span>
+        <span class="bg-white/15 border border-white/25 text-white text-sm px-4 py-2 rounded-full">🤖 IA Agentic</span>
+      </div>
+    </div>
+    <\!-- Animated SVG illustration -->
+    <div class="flex justify-center lg:justify-end">
+      <svg viewBox="0 0 440 360" class="w-full max-w-sm float-anim" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="gHero" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity=".15"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <\!-- Outer decorative circles -->
+        <circle cx="220" cy="180" r="140" fill="url(#gHero)"/>
+        <circle cx="220" cy="180" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="4 6"/>
+        <circle cx="220" cy="180" r="60" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <\!-- Center nexus -->
+        <circle cx="220" cy="180" r="48" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.4)" stroke-width="2" filter="url(#glow)"/>
+        <text x="220" y="175" text-anchor="middle" font-family="Playfair Display" font-weight="800" font-size="16" fill="white">NEXUS</text>
+        <text x="220" y="192" text-anchor="middle" font-family="Poppins" font-size="8" fill="rgba(255,255,255,0.7)">P2P CREDIT</text>
+        <\!-- Satellite nodes -->
+        <\!-- Aplicantes node -->
+        <circle cx="100" cy="90" r="30" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+        <text x="100" y="87" text-anchor="middle" font-size="8" fill="white" font-weight="600">Aplicantes</text>
+        <text x="100" y="98" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.7)">Investidores</text>
+        <\!-- MACRO HASH node -->
+        <circle cx="360" cy="90" r="30" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+        <text x="360" y="87" text-anchor="middle" font-size="7" fill="white" font-weight="600">MACRO</text>
+        <text x="360" y="98" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.7)">HASH</text>
+        <\!-- Usuarios node -->
+        <circle cx="100" cy="280" r="30" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+        <text x="100" y="277" text-anchor="middle" font-size="8" fill="white" font-weight="600">Usuários</text>
+        <text x="100" y="288" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.7)">Tomadores</text>
+        <\!-- IA Agentic node -->
+        <circle cx="360" cy="280" r="30" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+        <text x="360" y="277" text-anchor="middle" font-size="7" fill="white" font-weight="600">IA</text>
+        <text x="360" y="288" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.7)">Agentic</text>
+        <\!-- BACEN node -->
+        <circle cx="220" cy="320" r="26" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+        <text x="220" y="318" text-anchor="middle" font-size="7" fill="white" font-weight="600">BACEN</text>
+        <text x="220" y="328" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.65)">SCD/CMN</text>
+        <\!-- Connecting lines with animation -->
+        <line x1="125" y1="110" x2="180" y2="148" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5 4">
+          <animate attributeName="stroke-dashoffset" values="0;-18" dur="1.5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="335" y1="110" x2="262" y2="148" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5 4">
+          <animate attributeName="stroke-dashoffset" values="0;-18" dur="1.8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="125" y1="265" x2="180" y2="215" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5 4">
+          <animate attributeName="stroke-dashoffset" values="0;-18" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <line x1="335" y1="265" x2="262" y2="215" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-dasharray="5 4">
+          <animate attributeName="stroke-dashoffset" values="0;-18" dur="1.6s" repeatCount="indefinite"/>
+        </line>
+        <line x1="220" y1="228" x2="220" y2="294" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 4">
+          <animate attributeName="stroke-dashoffset" values="0;-16" dur="2.2s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<\!-- KEY STATS -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="text-center">
+        <div class="stat-big">3–5%</div>
+        <div class="text-sm text-gray-500 mt-1">retorno mensal ao Aplicante</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-big">R$40</div>
+        <div class="text-sm text-gray-500 mt-1">bloco de crédito por liberação</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-big">12</div>
+        <div class="text-sm text-gray-500 mt-1">verticais de consumo cobertas</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-big">SHA‑256</div>
+        <div class="text-sm text-gray-500 mt-1">cadeia hash auditável MACRO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- MISSION / VISION / VALUES -->
+<section class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="badge badge-blue mb-3">Nossa Essência</span>
+      <h2 class="font-display text-4xl font-bold text-navy">Propósito que move</h2>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-8">
+      <\!-- Mission -->
+      <div class="card p-8">
+        <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-7 h-7 text-primary" fill="none" stroke="#1640D6" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-xl text-navy mb-3">Missão</h3>
+        <p class="text-gray-600 leading-relaxed">Democratizar o acesso ao crédito no Brasil, conectando investidores a tomadores por meio de tecnologia auditável, transparente e acessível — com retorno justo para quem investe e dignidade para quem toma.</p>
+      </div>
+      <\!-- Vision -->
+      <div class="card p-8 border-2 border-primary/20">
+        <div class="w-14 h-14 bg-gold/10 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-7 h-7" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-xl text-navy mb-3">Visão</h3>
+        <p class="text-gray-600 leading-relaxed">Ser a principal infraestrutura de crédito P2P do Brasil até 2028 — reconhecida pela solidez tecnológica, conformidade regulatória exemplar e pelo impacto positivo na inclusão financeira de milhões de brasileiros.</p>
+      </div>
+      <\!-- Values -->
+      <div class="card p-8">
+        <div class="w-14 h-14 bg-success/10 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-7 h-7" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+          </svg>
+        </div>
+        <h3 class="font-bold text-xl text-navy mb-3">Valores</h3>
+        <div class="space-y-2 text-gray-600 text-sm">
+          <div class="value-item"><span class="text-primary font-bold">→</span><span><strong>Transparência radical:</strong> cada transação auditável por hash</span></div>
+          <div class="value-item"><span class="text-primary font-bold">→</span><span><strong>Inclusão financeira:</strong> crédito para score ≥ 620</span></div>
+          <div class="value-item"><span class="text-primary font-bold">→</span><span><strong>Segurança técnica:</strong> SHA-256, append-only ledger</span></div>
+          <div class="value-item"><span class="text-primary font-bold">→</span><span><strong>Inovação responsável:</strong> IA sob supervisão regulatória</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- THE PROBLEM WE SOLVE -->
+<section class="py-24 px-6 bg-navy text-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="bg-white/15 text-white text-xs px-3 py-1 rounded-full mb-4 inline-block">O Problema</span>
+      <h2 class="font-display text-4xl font-bold">Por que o NEXUS existe</h2>
+      <p class="text-blue-200 mt-4 max-w-2xl mx-auto">O sistema financeiro tradicional falhou em duas frentes. Investidores recebem retornos irrisórios. Tomadores pagam juros abusivos. Existe um caminho melhor.</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-12">
+      <\!-- Problem side -->
+      <div class="space-y-6">
+        <div class="bg-white/8 border border-white/15 rounded-2xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="text-red-300 text-lg">📉</span>
+            </div>
+            <div>
+              <h4 class="font-semibold text-white mb-1">Investidor sub-remunerado</h4>
+              <p class="text-blue-200 text-sm leading-relaxed">Poupança rende 0,5% a.m. O CDI, ~1,08% a.m. O Aplicante NEXUS pode receber entre 3% e 5% a.m. — até 5x mais, com risco controlado por diversificação de portfólio.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white/8 border border-white/15 rounded-2xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="text-amber-300 text-lg">🏦</span>
+            </div>
+            <div>
+              <h4 class="font-semibold text-white mb-1">Tomador penalizado</h4>
+              <p class="text-blue-200 text-sm leading-relaxed">Cartões de crédito cobram 15–20% a.m. O consignado trava na folha de pagamento. O Usuário NEXUS acessa crédito pré-aprovado via cartão Visa, com parcelas transparentes e sem armadilhas.</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white/8 border border-white/15 rounded-2xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-blue-400/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="text-blue-300 text-lg">🔍</span>
+            </div>
+            <div>
+              <h4 class="font-semibold text-white mb-1">Opacidade sistêmica</h4>
+              <p class="text-blue-200 text-sm leading-relaxed">Bancos não revelam como o crédito é alocado. O NEXUS usa uma cadeia de hashes SHA-256 auditável publicamente — cada transação registrada no MACRO HASH ledger, imutável e verificável por qualquer parte.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <\!-- Solution side: SVG diagram -->
+      <div class="flex items-center justify-center">
+        <svg viewBox="0 0 380 320" class="w-full max-w-sm">
+          <defs>
+            <linearGradient id="gSol" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1640D6"/>
+              <stop offset="100%" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+          <\!-- Tradicional side -->
+          <rect x="10" y="30" width="150" height="260" rx="14" fill="rgba(255,255,255,0.05)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+          <text x="85" y="55" text-anchor="middle" font-size="10" fill="rgba(239,68,68,0.8)" font-weight="600">SISTEMA TRADICIONAL</text>
+          <rect x="30" y="65" width="110" height="38" rx="8" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="85" y="82" text-anchor="middle" font-size="9" fill="white">Investidor: 0.5% a.m.</text>
+          <text x="85" y="94" text-anchor="middle" font-size="8" fill="rgba(239,68,68,0.7)">(Poupança)</text>
+          <rect x="30" y="115" width="110" height="38" rx="8" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="85" y="132" text-anchor="middle" font-size="9" fill="white">Tomador: 18% a.m.</text>
+          <text x="85" y="144" text-anchor="middle" font-size="8" fill="rgba(239,68,68,0.7)">(Cartão rotativo)</text>
+          <rect x="30" y="165" width="110" height="38" rx="8" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="85" y="182" text-anchor="middle" font-size="9" fill="white">Opacidade total</text>
+          <text x="85" y="194" text-anchor="middle" font-size="8" fill="rgba(239,68,68,0.7)">(sem auditoria)</text>
+          <text x="85" y="262" text-anchor="middle" font-size="24">😞</text>
+          <\!-- VS -->
+          <circle cx="190" cy="160" r="18" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <text x="190" y="165" text-anchor="middle" font-size="9" fill="white" font-weight="700">VS</text>
+          <\!-- NEXUS side -->
+          <rect x="220" y="30" width="150" height="260" rx="14" fill="rgba(22,64,214,0.25)" stroke="rgba(14,165,233,0.5)" stroke-width="1.5"/>
+          <text x="295" y="55" text-anchor="middle" font-size="10" fill="#93c5fd" font-weight="600">NEXUS P2P</text>
+          <rect x="240" y="65" width="110" height="38" rx="8" fill="rgba(5,150,105,0.2)" stroke="rgba(5,150,105,0.4)" stroke-width="1"/>
+          <text x="295" y="82" text-anchor="middle" font-size="9" fill="white">Aplicante: 3–5% a.m.</text>
+          <text x="295" y="94" text-anchor="middle" font-size="8" fill="rgba(110,231,183,0.8)">(retorno P2P)</text>
+          <rect x="240" y="115" width="110" height="38" rx="8" fill="rgba(5,150,105,0.2)" stroke="rgba(5,150,105,0.4)" stroke-width="1"/>
+          <text x="295" y="132" text-anchor="middle" font-size="9" fill="white">Usuário: taxa justa</text>
+          <text x="295" y="144" text-anchor="middle" font-size="8" fill="rgba(110,231,183,0.8)">(cartão Visa pré-pago)</text>
+          <rect x="240" y="165" width="110" height="38" rx="8" fill="rgba(5,150,105,0.2)" stroke="rgba(5,150,105,0.4)" stroke-width="1"/>
+          <text x="295" y="182" text-anchor="middle" font-size="9" fill="white">SHA-256 auditável</text>
+          <text x="295" y="194" text-anchor="middle" font-size="8" fill="rgba(110,231,183,0.8)">(MACRO HASH ledger)</text>
+          <text x="295" y="262" text-anchor="middle" font-size="24">🚀</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- TECHNOLOGY: MACRO HASH -->
+<section class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="badge badge-navy mb-3">Tecnologia Core</span>
+      <h2 class="font-display text-4xl font-bold text-navy">MACRO HASH Ledger</h2>
+      <p class="text-gray-500 mt-4 max-w-2xl mx-auto">Uma cadeia de hashes SHA-256 de 5 camadas que garante a imutabilidade e auditabilidade de cada transação — do investimento até o bloco de crédito entregue.</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <\!-- Hash chain visual -->
+      <div class="card p-8">
+        <div class="space-y-1">
+          <div class="hash-level border-primary/60 bg-primary/5">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-bold text-primary uppercase tracking-wider">L1 — Platform State</span>
+                <div class="text-xs text-gray-500 mt-0.5">Estado global da plataforma</div>
+              </div>
+              <span class="badge badge-blue text-xs">Raiz</span>
+            </div>
+            <div class="hash-line">H(platform_id || timestamp || config_hash)</div>
+          </div>
+          <div class="hash-level border-gold/60 bg-amber-50 ml-4">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">L2 — Investor Block</span>
+                <div class="text-xs text-gray-500 mt-0.5">Portfólio e aportes do Aplicante</div>
+              </div>
+              <span class="badge badge-gold text-xs">L1 ⊕</span>
+            </div>
+            <div class="hash-line">H(investor_id || portfolio_id || amount || L1_hash)</div>
+          </div>
+          <div class="hash-level border-blue-400/60 bg-blue-50 ml-8">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">L3 — Portfolio Block</span>
+                <div class="text-xs text-gray-500 mt-0.5">Parâmetros e alocação de portfólio</div>
+              </div>
+              <span class="badge badge-blue text-xs">L2 ⊕</span>
+            </div>
+            <div class="hash-line">H(portfolio_params || allocation || L2_hash)</div>
+          </div>
+          <div class="hash-level border-success/60 bg-green-50 ml-12">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-bold text-green-700 uppercase tracking-wider">L4 — Contract Block</span>
+                <div class="text-xs text-gray-500 mt-0.5">Contrato assinado com o Usuário</div>
+              </div>
+              <span class="badge badge-green text-xs">L3 ⊕</span>
+            </div>
+            <div class="hash-line">H(contract_id || user_id || terms || L3_hash)</div>
+          </div>
+          <div class="hash-level border-red-400/60 bg-red-50 ml-16">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-bold text-red-700 uppercase tracking-wider">L5 — Block State</span>
+                <div class="text-xs text-gray-500 mt-0.5">Bloco R$40 liberado ao cartão</div>
+              </div>
+              <span class="badge bg-red-100 text-red-700 text-xs">L4 ⊕ Final</span>
+            </div>
+            <div class="hash-line">H(block_id || amount_R40 || card_token || L4_hash)</div>
+          </div>
+        </div>
+        <div class="mt-6 pt-5 border-t border-gray-100 flex items-center gap-3">
+          <span class="text-2xl">🔒</span>
+          <div>
+            <div class="text-sm font-semibold text-navy">Append-only · Imutável · Auditável</div>
+            <div class="text-xs text-gray-500">Nenhum registro pode ser alterado retroativamente</div>
+          </div>
+        </div>
+      </div>
+      <\!-- Explanation -->
+      <div class="space-y-8">
+        <div>
+          <h3 class="font-bold text-xl text-navy mb-4">Por que MACRO HASH importa</h3>
+          <div class="space-y-4">
+            <div class="value-item">
+              <div class="value-icon bg-primary/10">
+                <span class="text-lg">🔗</span>
+              </div>
+              <div>
+                <div class="font-semibold text-navy text-sm">Encadeamento criptográfico</div>
+                <div class="text-gray-500 text-sm leading-relaxed">Cada bloco inclui o hash do bloco anterior. Qualquer tentativa de adulteração quebra toda a cadeia subsequente — detectável imediatamente.</div>
+              </div>
+            </div>
+            <div class="value-item">
+              <div class="value-icon bg-gold/10">
+                <span class="text-lg">📋</span>
+              </div>
+              <div>
+                <div class="font-semibold text-navy text-sm">Auditoria regulatória</div>
+                <div class="text-gray-500 text-sm leading-relaxed">O BACEN e auditores externos podem verificar qualquer transação historicamente, sem depender de relatórios da plataforma — confiança zero necessária.</div>
+              </div>
+            </div>
+            <div class="value-item">
+              <div class="value-icon bg-success/10">
+                <span class="text-lg">⚡</span>
+              </div>
+              <div>
+                <div class="font-semibold text-navy text-sm">Rastreabilidade end-to-end</div>
+                <div class="text-gray-500 text-sm leading-relaxed">Do aporte do Aplicante (L2) até o bloco R$40 creditado no cartão Visa do Usuário (L5) — rastreável em microsegundos.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card p-6 bg-gradient-to-br from-navy to-primary text-white">
+          <div class="font-semibold mb-2">Prova de integridade pública</div>
+          <div class="text-blue-200 text-sm leading-relaxed">O NEXUS publica o hash raiz de cada período em registro público. Qualquer entidade pode verificar a integridade completa do ledger sem acesso aos dados sensíveis — apenas comparando hashes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- IA AGENTIC -->
+<section class="py-24 px-6 bg-gradient-to-br from-slate-50 to-blue-50">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="badge badge-blue mb-3">Inteligência Artificial</span>
+      <h2 class="font-display text-4xl font-bold text-navy">Motor Agentic de Crédito</h2>
+      <p class="text-gray-500 mt-4 max-w-2xl mx-auto">Celery/Redis orquestrando workers autônomos que avaliam, aprovam e distribuem crédito em tempo real — sem intervenção humana, com regras auditáveis.</p>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-8 mb-12">
+      <div class="card p-7 text-center">
+        <div class="w-16 h-16 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-8 h-8" fill="none" stroke="#1640D6" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+          </svg>
+        </div>
+        <h4 class="font-bold text-navy mb-2">Score Engine</h4>
+        <p class="text-gray-500 text-sm leading-relaxed">Consulta Serasa Experian em tempo real. Score mínimo de 620 pts. Decisão automática em menos de 2 segundos. Sem viés humano.</p>
+      </div>
+      <div class="card p-7 text-center border-2 border-primary/20">
+        <div class="w-16 h-16 mx-auto bg-gold/10 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-8 h-8" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+        <h4 class="font-bold text-navy mb-2">FIFO Queue</h4>
+        <p class="text-gray-500 text-sm leading-relaxed">Fila ordenada de solicitações elegíveis. Distribuição equitativa por ordem de chegada. Sem privilégios ou discriminação de acesso.</p>
+      </div>
+      <div class="card p-7 text-center">
+        <div class="w-16 h-16 mx-auto bg-success/10 rounded-2xl flex items-center justify-center mb-5">
+          <svg class="w-8 h-8" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+        </div>
+        <h4 class="font-bold text-navy mb-2">Block Delivery</h4>
+        <p class="text-gray-500 text-sm leading-relaxed">R$40 creditados diretamente no cartão Visa pré-pago via Subadquirente Dock/BS2. BIN Sponsor homologado Visa/Mastercard.</p>
+      </div>
+    </div>
+    <\!-- IA Flow SVG -->
+    <div class="card p-8 overflow-x-auto">
+      <h4 class="font-bold text-navy mb-6 text-center">Fluxo do Worker Agentic</h4>
+      <svg viewBox="0 0 860 160" class="w-full min-w-[600px]">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#1640D6"/>
+          </marker>
+        </defs>
+        <\!-- Step boxes -->
+        <rect x="10" y="45" width="130" height="60" rx="10" fill="#e8eeff" stroke="#1640D6" stroke-width="1.5"/>
+        <text x="75" y="72" text-anchor="middle" font-size="10" fill="#0B2447" font-weight="600">Solicitação</text>
+        <text x="75" y="86" text-anchor="middle" font-size="9" fill="#4b5563">Usuário Elegível</text>
+        <text x="75" y="98" text-anchor="middle" font-size="8" fill="#6b7280">score ≥ 620</text>
+
+        <rect x="175" y="45" width="130" height="60" rx="10" fill="#fef3c7" stroke="#D97706" stroke-width="1.5"/>
+        <text x="240" y="72" text-anchor="middle" font-size="10" fill="#0B2447" font-weight="600">Redis Queue</text>
+        <text x="240" y="86" text-anchor="middle" font-size="9" fill="#4b5563">FIFO Ordering</text>
+        <text x="240" y="98" text-anchor="middle" font-size="8" fill="#6b7280">Celery Worker</text>
+
+        <rect x="340" y="45" width="130" height="60" rx="10" fill="#e8eeff" stroke="#1640D6" stroke-width="1.5"/>
+        <text x="405" y="72" text-anchor="middle" font-size="10" fill="#0B2447" font-weight="600">Score Check</text>
+        <text x="405" y="86" text-anchor="middle" font-size="9" fill="#4b5563">Serasa Experian</text>
+        <text x="405" y="98" text-anchor="middle" font-size="8" fill="#6b7280">API realtime</text>
+
+        <rect x="505" y="45" width="130" height="60" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+        <text x="570" y="72" text-anchor="middle" font-size="10" fill="#0B2447" font-weight="600">MACRO HASH</text>
+        <text x="570" y="86" text-anchor="middle" font-size="9" fill="#4b5563">L4 Contract Block</text>
+        <text x="570" y="98" text-anchor="middle" font-size="8" fill="#6b7280">SHA-256 signed</text>
+
+        <rect x="670" y="45" width="130" height="60" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+        <text x="735" y="72" text-anchor="middle" font-size="10" fill="#0B2447" font-weight="600">Card Credit</text>
+        <text x="735" y="86" text-anchor="middle" font-size="9" fill="#4b5563">R$40 Visa Dock</text>
+        <text x="735" y="98" text-anchor="middle" font-size="8" fill="#6b7280">L5 Block State</text>
+
+        <\!-- Arrows -->
+        <line x1="140" y1="75" x2="172" y2="75" stroke="#1640D6" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="305" y1="75" x2="337" y2="75" stroke="#1640D6" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="470" y1="75" x2="502" y2="75" stroke="#1640D6" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="635" y1="75" x2="667" y2="75" stroke="#059669" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <\!-- Step numbers -->
+        <circle cx="75" cy="45" r="10" fill="#1640D6"/>
+        <text x="75" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="700">1</text>
+        <circle cx="240" cy="45" r="10" fill="#D97706"/>
+        <text x="240" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="700">2</text>
+        <circle cx="405" cy="45" r="10" fill="#1640D6"/>
+        <text x="405" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="700">3</text>
+        <circle cx="570" cy="45" r="10" fill="#059669"/>
+        <text x="570" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="700">4</text>
+        <circle cx="735" cy="45" r="10" fill="#059669"/>
+        <text x="735" y="49" text-anchor="middle" font-size="9" fill="white" font-weight="700">5</text>
+
+        <\!-- Labels below -->
+        <text x="75" y="135" text-anchor="middle" font-size="8" fill="#9ca3af">Entrada</text>
+        <text x="240" y="135" text-anchor="middle" font-size="8" fill="#9ca3af">Fila Justa</text>
+        <text x="405" y="135" text-anchor="middle" font-size="8" fill="#9ca3af">Verificação</text>
+        <text x="570" y="135" text-anchor="middle" font-size="8" fill="#9ca3af">Registro</text>
+        <text x="735" y="135" text-anchor="middle" font-size="8" fill="#9ca3af">Entrega</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<\!-- REGULATORY COMPLIANCE -->
+<section class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="badge badge-green mb-3">Conformidade</span>
+      <h2 class="font-display text-4xl font-bold text-navy">Regulado e seguro</h2>
+      <p class="text-gray-500 mt-4 max-w-2xl mx-auto">O NEXUS opera sob as mais rigorosas regulamentações do Banco Central do Brasil, com framework jurídico desenhado para proteger todas as partes.</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-start">
+      <div class="space-y-5">
+        <div class="reg-badge">
+          <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="text-lg">🏛️</span>
+          </div>
+          <div>
+            <div class="font-semibold text-navy text-sm">CMN 5050/2022 · BACEN</div>
+            <div class="text-xs text-gray-500 mt-0.5">Sociedade de Crédito Direto (SCD) — autorização para operação de crédito P2P no Brasil</div>
+          </div>
+          <span class="badge badge-green ml-auto text-xs flex-shrink-0">Vigente</span>
+        </div>
+        <div class="reg-badge">
+          <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="text-lg">💳</span>
+          </div>
+          <div>
+            <div class="font-semibold text-navy text-sm">Subadquirente · Dock / BS2</div>
+            <div class="text-xs text-gray-500 mt-0.5">BIN Sponsor para emissão de cartões Visa/Mastercard pré-pagos · Processamento homologado</div>
+          </div>
+          <span class="badge badge-blue ml-auto text-xs flex-shrink-0">Parceiro</span>
+        </div>
+        <div class="reg-badge">
+          <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="text-lg">📊</span>
+          </div>
+          <div>
+            <div class="font-semibold text-navy text-sm">Serasa Experian · Bureau de Crédito</div>
+            <div class="text-xs text-gray-500 mt-0.5">Consulta de score em tempo real via API certificada. Critério objetivo e auditável.</div>
+          </div>
+          <span class="badge badge-blue ml-auto text-xs flex-shrink-0">Integrado</span>
+        </div>
+        <div class="reg-badge">
+          <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="text-lg">🔐</span>
+          </div>
+          <div>
+            <div class="font-semibold text-navy text-sm">LGPD · Lei Geral de Proteção de Dados</div>
+            <div class="text-xs text-gray-500 mt-0.5">Dados pessoais criptografados em repouso e em trânsito. DPO designado. Privacy by design.</div>
+          </div>
+          <span class="badge badge-green ml-auto text-xs flex-shrink-0">Compliant</span>
+        </div>
+        <div class="reg-badge">
+          <div class="w-10 h-10 bg-navy/10 rounded-xl flex items-center justify-center flex-shrink-0">
+            <span class="text-lg">⚡</span>
+          </div>
+          <div>
+            <div class="font-semibold text-navy text-sm">PIX · Banco Central do Brasil</div>
+            <div class="text-xs text-gray-500 mt-0.5">Liquidação de amortizações e retornos ao Aplicante em D+1 via PIX. Integração DICT/BCB.</div>
+          </div>
+          <span class="badge badge-blue ml-auto text-xs flex-shrink-0">Integrado</span>
+        </div>
+      </div>
+      <\!-- Trust logos / regulatory seals -->
+      <div class="card p-8">
+        <h4 class="font-bold text-navy mb-6">Ecossistema de parceiros</h4>
+        <div class="grid grid-cols-3 gap-4 mb-8">
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-navy text-sm">BACEN</div>
+            <div class="text-xs text-gray-400 mt-1">Regulador</div>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-blue-600 text-sm">VISA</div>
+            <div class="text-xs text-gray-400 mt-1">Bandeira</div>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-red-600 text-sm">MC</div>
+            <div class="text-xs text-gray-400 mt-1">Bandeira</div>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-teal-700 text-sm">DOCK</div>
+            <div class="text-xs text-gray-400 mt-1">Subadquirente</div>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-indigo-700 text-sm">BS2</div>
+            <div class="text-xs text-gray-400 mt-1">Bancário</div>
+          </div>
+          <div class="flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 h-20">
+            <div class="font-bold text-orange-600 text-sm">SERASA</div>
+            <div class="text-xs text-gray-400 mt-1">Score</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-r from-navy to-primary text-white rounded-xl p-5">
+          <div class="text-sm font-semibold mb-2">Compromisso com a conformidade</div>
+          <div class="text-blue-200 text-xs leading-relaxed">O NEXUS foi desenhado do zero com conformidade como requisito de arquitetura — não como add-on. Cada componente técnico foi revisado por especialistas jurídicos em fintech e regulação financeira.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- ROADMAP -->
+<section class="py-24 px-6 bg-slate-50">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16">
+      <span class="badge badge-gold mb-3">Evolução</span>
+      <h2 class="font-display text-4xl font-bold text-navy">Roadmap NEXUS</h2>
+    </div>
+    <div class="space-y-8">
+      <div class="timeline-item pb-8">
+        <div class="card p-6 ml-4">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <span class="badge badge-green text-xs mb-2">Fase 1 — Fundação</span>
+              <h4 class="font-bold text-navy">Infraestrutura & Regulatório</h4>
+            </div>
+            <span class="text-sm text-gray-400 font-mono">2024 Q1–Q2</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-3 leading-relaxed">Arquitetura MACRO HASH, integração Serasa Experian, setup BIN Sponsor Dock/BS2, pedido de licença SCD ao BACEN, MVP backend com Celery/Redis.</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="tech-chip">SHA-256 Ledger</span>
+            <span class="tech-chip">Serasa API</span>
+            <span class="tech-chip">Dock BIN</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item pb-8">
+        <div class="card p-6 ml-4">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <span class="badge badge-blue text-xs mb-2">Fase 2 — Beta</span>
+              <h4 class="font-bold text-navy">Piloto com Aplicantes & Usuários</h4>
+            </div>
+            <span class="text-sm text-gray-400 font-mono">2024 Q3–Q4</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-3 leading-relaxed">Beta fechado com 500 Aplicantes e 1.000 Usuários. Validação do fluxo end-to-end: aporte → FIFO queue → cartão Visa → amortização → retorno PIX D+1.</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="tech-chip">500 Aplicantes Beta</span>
+            <span class="tech-chip">1k Usuários</span>
+            <span class="tech-chip">PIX D+1</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item pb-8">
+        <div class="card p-6 ml-4 border-2 border-primary/20">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <span class="badge badge-blue text-xs mb-2">Fase 3 — Lançamento ← Atual</span>
+              <h4 class="font-bold text-navy">Abertura da Plataforma</h4>
+            </div>
+            <span class="text-sm text-gray-400 font-mono">2025 Q1–Q2</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-3 leading-relaxed">Lançamento público com todos os 12 verticais de consumo. Portfólios A, B, C com taxas diferenciadas. Dashboard avançado para Aplicantes. App mobile.</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="tech-chip">12 Verticais</span>
+            <span class="tech-chip">App Mobile</span>
+            <span class="tech-chip">Dashboard Pro</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="card p-6 ml-4 opacity-80">
+          <div class="flex items-start justify-between flex-wrap gap-3">
+            <div>
+              <span class="badge badge-gold text-xs mb-2">Fase 4 — Escala</span>
+              <h4 class="font-bold text-navy">Expansão Nacional</h4>
+            </div>
+            <span class="text-sm text-gray-400 font-mono">2025 Q3–2026</span>
+          </div>
+          <p class="text-gray-500 text-sm mt-3 leading-relaxed">10.000+ Aplicantes. 100.000+ Usuários. Expansão para LATAM. Integração com Open Finance. Emissão de CRI/CRA lastreados em carteiras P2P.</p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span class="tech-chip">Open Finance</span>
+            <span class="tech-chip">LATAM</span>
+            <span class="tech-chip">CRI/CRA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- TECH STACK -->
+<section class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-14">
+      <span class="badge badge-navy mb-3">Stack Técnico</span>
+      <h2 class="font-display text-4xl font-bold text-navy">Construído para escalar</h2>
+    </div>
+    <div class="grid lg:grid-cols-4 gap-6">
+      <div class="card p-6">
+        <div class="text-2xl mb-3">⚙️</div>
+        <h4 class="font-bold text-navy mb-3">Backend</h4>
+        <div class="space-y-1.5">
+          <div class="tech-chip">Python / FastAPI</div>
+          <div class="tech-chip">Celery / Redis</div>
+          <div class="tech-chip">PostgreSQL</div>
+          <div class="tech-chip">Docker / K8s</div>
+        </div>
+      </div>
+      <div class="card p-6">
+        <div class="text-2xl mb-3">🔐</div>
+        <h4 class="font-bold text-navy mb-3">Segurança</h4>
+        <div class="space-y-1.5">
+          <div class="tech-chip">SHA-256 Hash Chain</div>
+          <div class="tech-chip">JWT / OAuth2</div>
+          <div class="tech-chip">AES-256 at rest</div>
+          <div class="tech-chip">TLS 1.3 transit</div>
+        </div>
+      </div>
+      <div class="card p-6">
+        <div class="text-2xl mb-3">💳</div>
+        <h4 class="font-bold text-navy mb-3">Pagamentos</h4>
+        <div class="space-y-1.5">
+          <div class="tech-chip">PIX BCB DICT</div>
+          <div class="tech-chip">Dock BIN Sponsor</div>
+          <div class="tech-chip">BS2 Banking</div>
+          <div class="tech-chip">Visa / MC API</div>
+        </div>
+      </div>
+      <div class="card p-6">
+        <div class="text-2xl mb-3">🤖</div>
+        <h4 class="font-bold text-navy mb-3">IA & Dados</h4>
+        <div class="space-y-1.5">
+          <div class="tech-chip">Serasa Experian</div>
+          <div class="tech-chip">ML Score Engine</div>
+          <div class="tech-chip">Redis Pub/Sub</div>
+          <div class="tech-chip">Analytics BI</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<\!-- CTA SECTION -->
+<section class="py-24 px-6 bg-gradient-to-br from-navy via-primary to-blue-500 text-white">
+  <div class="max-w-4xl mx-auto text-center">
+    <span class="bg-white/15 text-white text-xs px-4 py-2 rounded-full mb-6 inline-block">Faça Parte</span>
+    <h2 class="font-display text-4xl lg:text-5xl font-bold mb-6">Junte-se à revolução do crédito P2P</h2>
+    <p class="text-blue-100 text-lg leading-relaxed mb-10 max-w-2xl mx-auto">O NEXUS está abrindo a plataforma para os primeiros Aplicantes e Usuários. Seja parte da transformação do crédito no Brasil.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="index.html#aplicante" class="bg-gold hover:bg-amber-500 text-white font-bold px-10 py-4 rounded-full transition-colors text-lg">
+        Quero Investir
+      </a>
+      <a href="index.html#usuario" class="bg-white/15 hover:bg-white/25 text-white border border-white/30 font-bold px-10 py-4 rounded-full transition-colors text-lg">
+        Quero Crédito
+      </a>
+    </div>
+  </div>
+</section>
+
+<\!-- FOOTER -->
+<footer class="bg-navy text-white py-16 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-4 gap-10 mb-12">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+            <span class="text-white font-bold text-sm">NX</span>
+          </div>
+          <span class="font-bold text-white text-lg">NEXUS</span>
+        </div>
+        <p class="text-blue-300 text-sm leading-relaxed">Plataforma P2P de crédito inteligente. Regulado BACEN · CMN 5050/2022 · SCD.</p>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm uppercase tracking-wider text-blue-300">Plataforma</div>
+        <div class="space-y-2 text-sm text-blue-200">
+          <div><a href="index.html" class="hover:text-white transition-colors">Home</a></div>
+          <div><a href="portfolios.html" class="hover:text-white transition-colors">Portfólios</a></div>
+          <div><a href="como-funciona.html" class="hover:text-white transition-colors">Como Funciona</a></div>
+        </div>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm uppercase tracking-wider text-blue-300">Tecnologia</div>
+        <div class="space-y-2 text-sm text-blue-200">
+          <div>MACRO HASH Ledger</div>
+          <div>IA Agentic Engine</div>
+          <div>PIX D+1 Settlement</div>
+          <div>Visa/MC Prepaid</div>
+        </div>
+      </div>
+      <div>
+        <div class="font-semibold mb-4 text-sm uppercase tracking-wider text-blue-300">Contato</div>
+        <div class="space-y-2 text-sm text-blue-200">
+          <div>contato@nexusp2p.com.br</div>
+          <div>São Paulo, SP — Brasil</div>
+          <div class="mt-4 flex gap-3">
+            <a href="#" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-colors">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="text-blue-300 text-xs">© 2025 NEXUS P2P Credit Platform. Todos os direitos reservados.</div>
+      <div class="flex gap-4 text-xs text-blue-300">
+        <a href="#" class="hover:text-white transition-colors">Termos de Uso</a>
+        <a href="#" class="hover:text-white transition-colors">Privacidade</a>
+        <a href="#" class="hover:text-white transition-colors">LGPD</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS Score — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* GAUGE GRANDE */
+.gauge-container{display:flex;flex-direction:column;align-items:center;padding:28px 20px 16px}
+.gauge-svg{width:260px;height:150px;overflow:visible}
+.gauge-val{text-align:center;margin-top:-8px}
+.gauge-num{font-size:52px;font-weight:800;color:var(--t1);letter-spacing:-2px;line-height:1}
+.gauge-pts{font-size:14px;color:var(--t3);margin-top:2px}
+.gauge-tier{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700;margin-top:10px}
+.gauge-tier.bom{background:var(--green-light);color:var(--green)}
+.gauge-tier.regular{background:var(--gold-light);color:var(--gold)}
+.gauge-tier.ruim{background:var(--red-light);color:var(--red)}
+.gauge-tier.otimo{background:var(--primary-50);color:var(--primary)}
+
+/* SCORE TIERS BAR */
+.tiers-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:16px 20px 8px}
+.tier-seg{flex:1}
+.tier-labels{display:flex;justify-content:space-between;padding:0 20px 16px;font-size:10.5px;color:var(--t3)}
+.tier-marker{position:relative;background:var(--t1);width:3px;height:18px;border-radius:2px;margin:0 auto;margin-top:-14px}
+.tier-marker::after{content:'720';position:absolute;bottom:20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--t1);white-space:nowrap}
+
+/* BLOCOS COMPONENTES */
+.bloco-card{border-radius:12px;border:1px solid var(--border);background:var(--white);overflow:hidden;margin-bottom:12px}
+.bc-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;transition:.12s}
+.bc-header:hover{background:var(--bg)}
+.bc-left{display:flex;align-items:center;gap:12px}
+.bc-badge{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.bc-name{font-size:13.5px;font-weight:700;color:var(--t1)}
+.bc-sub{font-size:11.5px;color:var(--t3);margin-top:1px}
+.bc-score{text-align:right}
+.bc-pts{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.bc-pcts{font-size:11px;color:var(--t3)}
+.bc-body{padding:14px 16px;border-top:1px solid var(--border-light);background:var(--bg)}
+.bc-factors{display:flex;flex-direction:column;gap:9px}
+.factor-row{display:flex;align-items:center;gap:10px}
+.factor-lbl{font-size:12px;color:var(--t2);flex:1}
+.factor-track{width:120px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden}
+.factor-fill{height:100%;border-radius:4px}
+.factor-val{font-size:12px;font-weight:600;color:var(--t1);width:36px;text-align:right}
+.factor-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+
+/* HISTÓRICO CHART */
+.score-hist{height:160px}
+
+/* DICAS */
+.tip-card{display:flex;gap:12px;padding:13px 16px;border-radius:10px;background:var(--bg);border:1px solid var(--border);margin-bottom:8px}
+.tip-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.tip-body{flex:1}
+.tip-title{font-size:13px;font-weight:600;color:var(--t1)}
+.tip-desc{font-size:11.5px;color:var(--t2);margin-top:2px;line-height:1.5}
+.tip-pts{font-size:12px;font-weight:700;color:var(--green);margin-top:4px}
+
+/* EVENTOS TIMELINE */
+.evt-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.evt-row:last-child{border-bottom:none}
+.evt-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.evt-body{flex:1}
+.evt-text{font-size:12.5px;color:var(--t1)}
+.evt-date{font-size:11px;color:var(--t3);margin-top:2px}
+.evt-delta{font-size:12px;font-weight:700}
+.evt-delta.up{color:var(--green)}.evt-delta.dn{color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon" style="background:var(--green)">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-05-dashboard-usuario.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="ni" href="tela-08-extrato-cartao.html">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Meu Cartão
+      </a>
+      <a class="ni active" href="tela-07-nexus-score.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Crédito</div>
+      <a class="ni" href="tela-06-solicitar-credito.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Solicitar Crédito
+      </a>
+      <a class="ni" href="tela-09-parcelas.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Parcelas
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Conta</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </a>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        MACRO HASH
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+      <div>
+        <div class="u-name">Maria Ramos</div>
+        <div class="u-role"><span class="role-badge rb-u">Usuário</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">NEXUS Score Proprietário</div>
+    <div class="pg-sub">Score 0–1000 · 5 Blocos de análise · Atualizado diariamente</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div style="background:var(--green-light);border:1px solid var(--green-50);border-radius:8px;padding:7px 14px;font-size:12.5px;color:var(--green);font-weight:600">
+    ▲ +15 pts nos últimos 30 dias
+  </div>
+  <button class="ib">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+</header>
+
+<main class="main">
+
+  <div style="display:grid;grid-template-columns:320px 1fr 280px;gap:16px;align-items:start">
+
+    <!-- COL 1: GAUGE + Escala -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <div class="card">
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 280 160">
+            <!-- Faixas coloridas -->
+            <!-- Ruim 0-400 (0° a 144°) -->
+            <path d="M 30 140 A 110 110 0 0 1 140 30" fill="none" stroke="#FECACA" stroke-width="18" stroke-linecap="butt"/>
+            <!-- Regular 400-700 -->
+            <path d="M 140 30 A 110 110 0 0 1 222 65" fill="none" stroke="#FDE68A" stroke-width="18" stroke-linecap="butt"/>
+            <!-- Bom 700-850 -->
+            <path d="M 222 65 A 110 110 0 0 1 248 140" fill="none" stroke="#86EFAC" stroke-width="18" stroke-linecap="butt"/>
+            <!-- Ótimo 850-1000 — não existe aqui, coberto pelo bom -->
+            <!-- Ponteiro em 720/1000 = 72% do semicírculo = ~130° -->
+            <!-- 0° = 180°, 100% = 0° → ângulo = 180° - 72%×180° = 180° - 130° = 50° em relação ao topo -->
+            <!-- Em coordenadas: ângulo a partir da esquerda (π) → 720/1000 * π -->
+            <line x1="140" y1="140" x2="225" y2="67" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="140" cy="140" r="7" fill="#0F172A"/>
+            <circle cx="140" cy="140" r="4" fill="#fff"/>
+            <!-- Labels nas faixas -->
+            <text x="22" y="160" font-size="11" fill="#94A3B8" font-family="Inter">0</text>
+            <text x="128" y="22" font-size="11" fill="#94A3B8" font-family="Inter">500</text>
+            <text x="255" y="160" font-size="11" fill="#94A3B8" font-family="Inter">1000</text>
+          </svg>
+          <div class="gauge-val">
+            <div class="gauge-num">720</div>
+            <div class="gauge-pts">de 1.000 pontos</div>
+            <div><span class="gauge-tier bom">● Bom — Tier 3</span></div>
+          </div>
+        </div>
+
+        <!-- Barra de tiers -->
+        <div class="tiers-bar">
+          <div class="tier-seg" style="background:#FECACA"></div>
+          <div class="tier-seg" style="background:#FDE68A"></div>
+          <div class="tier-seg" style="background:#86EFAC"></div>
+          <div class="tier-seg" style="background:#4ADE80"></div>
+        </div>
+        <div class="tier-labels">
+          <span>Ruim<br>0–400</span>
+          <span>Regular<br>400–700</span>
+          <span style="color:var(--green);font-weight:600">Bom★<br>700–850</span>
+          <span>Ótimo<br>850+</span>
+        </div>
+
+        <div style="padding:14px 16px;border-top:1px solid var(--border-light);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:9px;padding:12px;text-align:center">
+            <div style="font-size:11px;color:var(--t3)">Limite atual</div>
+            <div style="font-size:18px;font-weight:800;color:var(--t1)">10 blocos</div>
+            <div style="font-size:11px;color:var(--t2)">R$ 400,00</div>
+          </div>
+          <div style="background:var(--bg);border-radius:9px;padding:12px;text-align:center">
+            <div style="font-size:11px;color:var(--t3)">Para Ótimo</div>
+            <div style="font-size:18px;font-weight:800;color:var(--gold)">+130 pts</div>
+            <div style="font-size:11px;color:var(--t2)">Score 850</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Histórico Score -->
+      <div class="card">
+        <div class="ch"><div class="ct">Evolução do Score</div><div class="cs">Últimos 6 meses</div></div>
+        <div class="cb"><canvas id="scoreHistChart" class="score-hist"></canvas></div>
+      </div>
+    </div>
+
+    <!-- COL 2: Blocos A-E detalhados -->
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--t2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.4px">Composição do Score — 5 Blocos de Análise</div>
+
+      <!-- Bloco A -->
+      <div class="bloco-card">
+        <div class="bc-header">
+          <div class="bc-left">
+            <div class="bc-badge" style="background:var(--green-light);color:var(--green)">A</div>
+            <div>
+              <div class="bc-name">Histórico de Pagamentos</div>
+              <div class="bc-sub">Peso 35% · Score parcial: 252/350</div>
+            </div>
+          </div>
+          <div class="bc-score">
+            <div class="bc-pts" style="color:var(--green)">252</div>
+            <div class="bc-pcts">72% do máximo</div>
+          </div>
+        </div>
+        <div class="bc-body">
+          <div class="bc-factors">
+            <div class="factor-row">
+              <div class="factor-lbl">Parcelas em dia</div>
+              <div class="factor-track"><div class="factor-fill" style="width:100%;background:var(--green)"></div></div>
+              <div class="factor-val">3/3</div>
+              <span class="factor-status" style="background:var(--green-light);color:var(--green)">Ótimo</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Atrasos históricos</div>
+              <div class="factor-track"><div class="factor-fill" style="width:80%;background:var(--green)"></div></div>
+              <div class="factor-val">0</div>
+              <span class="factor-status" style="background:var(--green-light);color:var(--green)">Ótimo</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Tempo como cliente</div>
+              <div class="factor-track"><div class="factor-fill" style="width:40%;background:var(--gold)"></div></div>
+              <div class="factor-val">4 meses</div>
+              <span class="factor-status" style="background:var(--gold-light);color:var(--gold)">Regular</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco B -->
+      <div class="bloco-card">
+        <div class="bc-header">
+          <div class="bc-left">
+            <div class="bc-badge" style="background:var(--primary-50);color:var(--primary)">B</div>
+            <div>
+              <div class="bc-name">Comportamento do Cartão</div>
+              <div class="bc-sub">Peso 25% · Score parcial: 175/250</div>
+            </div>
+          </div>
+          <div class="bc-score">
+            <div class="bc-pts" style="color:var(--primary)">175</div>
+            <div class="bc-pcts">70% do máximo</div>
+          </div>
+        </div>
+        <div class="bc-body">
+          <div class="bc-factors">
+            <div class="factor-row">
+              <div class="factor-lbl">Uso por verticais prev.</div>
+              <div class="factor-track"><div class="factor-fill" style="width:85%;background:var(--primary)"></div></div>
+              <div class="factor-val">85%</div>
+              <span class="factor-status" style="background:var(--primary-50);color:var(--primary)">Bom</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Frequência de compras</div>
+              <div class="factor-track"><div class="factor-fill" style="width:70%;background:var(--primary)"></div></div>
+              <div class="factor-val">14/mês</div>
+              <span class="factor-status" style="background:var(--primary-50);color:var(--primary)">Bom</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Saldo médio mantido</div>
+              <div class="factor-track"><div class="factor-fill" style="width:55%;background:var(--gold)"></div></div>
+              <div class="factor-val">R$96</div>
+              <span class="factor-status" style="background:var(--gold-light);color:var(--gold)">Regular</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco C -->
+      <div class="bloco-card">
+        <div class="bc-header">
+          <div class="bc-left">
+            <div class="bc-badge" style="background:var(--purple-light);color:var(--purple)">C</div>
+            <div>
+              <div class="bc-name">Dados Alternativos</div>
+              <div class="bc-sub">Peso 20% · Score parcial: 130/200</div>
+            </div>
+          </div>
+          <div class="bc-score">
+            <div class="bc-pts" style="color:var(--purple)">130</div>
+            <div class="bc-pcts">65% do máximo</div>
+          </div>
+        </div>
+        <div class="bc-body">
+          <div class="bc-factors">
+            <div class="factor-row">
+              <div class="factor-lbl">PIX recebidos (renda)</div>
+              <div class="factor-track"><div class="factor-fill" style="width:70%;background:var(--purple)"></div></div>
+              <div class="factor-val">R$1.2k</div>
+              <span class="factor-status" style="background:var(--purple-light);color:var(--purple)">Bom</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Estabilidade residencial</div>
+              <div class="factor-track"><div class="factor-fill" style="width:60%;background:var(--purple)"></div></div>
+              <div class="factor-val">12 meses</div>
+              <span class="factor-status" style="background:var(--gold-light);color:var(--gold)">Regular</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Telefone validado</div>
+              <div class="factor-track"><div class="factor-fill" style="width:100%;background:var(--green)"></div></div>
+              <div class="factor-val">Sim</div>
+              <span class="factor-status" style="background:var(--green-light);color:var(--green)">Ótimo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco D -->
+      <div class="bloco-card">
+        <div class="bc-header">
+          <div class="bc-left">
+            <div class="bc-badge" style="background:var(--gold-light);color:var(--gold)">D</div>
+            <div>
+              <div class="bc-name">Relacionamento NEXUS</div>
+              <div class="bc-sub">Peso 12% · Score parcial: 94/120</div>
+            </div>
+          </div>
+          <div class="bc-score">
+            <div class="bc-pts" style="color:var(--gold)">94</div>
+            <div class="bc-pcts">78% do máximo</div>
+          </div>
+        </div>
+        <div class="bc-body">
+          <div class="bc-factors">
+            <div class="factor-row">
+              <div class="factor-lbl">Contratos concluídos</div>
+              <div class="factor-track"><div class="factor-fill" style="width:50%;background:var(--gold)"></div></div>
+              <div class="factor-val">0</div>
+              <span class="factor-status" style="background:var(--gold-light);color:var(--gold)">Regular</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Solicitações recentes</div>
+              <div class="factor-track"><div class="factor-fill" style="width:90%;background:var(--green)"></div></div>
+              <div class="factor-val">Normal</div>
+              <span class="factor-status" style="background:var(--green-light);color:var(--green)">Bom</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco E -->
+      <div class="bloco-card" style="margin-bottom:0">
+        <div class="bc-header">
+          <div class="bc-left">
+            <div class="bc-badge" style="background:var(--bg);color:var(--t2)">E</div>
+            <div>
+              <div class="bc-name">Dados de Bureau</div>
+              <div class="bc-sub">Peso 8% · Score parcial: 48/80</div>
+            </div>
+          </div>
+          <div class="bc-score">
+            <div class="bc-pts" style="color:var(--t2)">48</div>
+            <div class="bc-pcts">60% do máximo</div>
+          </div>
+        </div>
+        <div class="bc-body">
+          <div class="bc-factors">
+            <div class="factor-row">
+              <div class="factor-lbl">SPC/Serasa negativações</div>
+              <div class="factor-track"><div class="factor-fill" style="width:40%;background:var(--red)"></div></div>
+              <div class="factor-val">1 ocorr.</div>
+              <span class="factor-status" style="background:var(--red-light);color:var(--red)">Atenção</span>
+            </div>
+            <div class="factor-row">
+              <div class="factor-lbl">Dívidas ativas</div>
+              <div class="factor-track"><div class="factor-fill" style="width:70%;background:var(--gold)"></div></div>
+              <div class="factor-val">R$0</div>
+              <span class="factor-status" style="background:var(--green-light);color:var(--green)">Bom</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: Dicas + Timeline -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <div class="card">
+        <div class="ch"><div class="ct">Como melhorar</div><div class="cs">Ações recomendadas pela IA</div></div>
+        <div class="cb" style="padding:12px 16px">
+          <div class="tip-card">
+            <div class="tip-icon" style="background:var(--green-light)">📅</div>
+            <div class="tip-body">
+              <div class="tip-title">Pague a parcela em dia</div>
+              <div class="tip-desc">Manter pontualidade por 3 meses seguidos aumenta o Bloco A em até 40 pts</div>
+              <div class="tip-pts">+40 pts estimados</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon" style="background:var(--purple-light)">💰</div>
+            <div class="tip-body">
+              <div class="tip-title">Aumente os PIX recebidos</div>
+              <div class="tip-desc">Renda acima de R$1.500/mês via PIX impacta o Bloco C (dados alternativos)</div>
+              <div class="tip-pts">+25 pts estimados</div>
+            </div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon" style="background:var(--primary-50)">🛒</div>
+            <div class="tip-body">
+              <div class="tip-title">Use o cartão em verticais preferidas</div>
+              <div class="tip-desc">Compras em Saúde, Educação e Alimentação têm peso maior no Bloco B</div>
+              <div class="tip-pts">+20 pts estimados</div>
+            </div>
+          </div>
+          <div class="tip-card" style="margin-bottom:0">
+            <div class="tip-icon" style="background:var(--red-light)">⚠️</div>
+            <div class="tip-body">
+              <div class="tip-title">Regularize negativação no Serasa</div>
+              <div class="tip-desc">A ocorrência de bureau está reduzindo seu Bloco E em ~32 pts</div>
+              <div class="tip-pts" style="color:var(--red)">-32 pts bloqueados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><div class="ct">Eventos Recentes</div><div class="cs">Impacto no score</div></div>
+        <div class="cb" style="padding:8px 16px">
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--green)"></div>
+            <div class="evt-body"><div class="evt-text">Parcela 3 paga no prazo</div><div class="evt-date">12/abr/2026</div></div>
+            <div class="evt-delta up">+8 pts</div>
+          </div>
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--green)"></div>
+            <div class="evt-body"><div class="evt-text">Compra em vertical Saúde (peso +)</div><div class="evt-date">10/abr/2026</div></div>
+            <div class="evt-delta up">+3 pts</div>
+          </div>
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--green)"></div>
+            <div class="evt-body"><div class="evt-text">Parcela 2 paga no prazo</div><div class="evt-date">05/mar/2026</div></div>
+            <div class="evt-delta up">+8 pts</div>
+          </div>
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--primary)"></div>
+            <div class="evt-body"><div class="evt-text">Novo contrato solicitado</div><div class="evt-date">28/jan/2026</div></div>
+            <div class="evt-delta dn">-4 pts</div>
+          </div>
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--green)"></div>
+            <div class="evt-body"><div class="evt-text">Parcela 1 paga no prazo</div><div class="evt-date">05/fev/2026</div></div>
+            <div class="evt-delta up">+8 pts</div>
+          </div>
+          <div class="evt-row">
+            <div class="evt-dot" style="background:var(--red)"></div>
+            <div class="evt-body"><div class="evt-text">Negativação Serasa detectada</div><div class="evt-date">10/jan/2026</div></div>
+            <div class="evt-delta dn">-32 pts</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+const sCtx = document.getElementById('scoreHistChart').getContext('2d');
+new Chart(sCtx, {
+  type: 'line',
+  data: {
+    labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+    datasets: [{
+      label: 'NEXUS Score',
+      data: [0, 0, 705, 713, 717, 720],
+      borderColor: '#059669',
+      backgroundColor: 'rgba(5,150,105,.1)',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointBackgroundColor: '#059669',
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+      y: {
+        min: 680, max: 740,
+        grid: { color: '#F1F5F9' },
+        ticks: { font: { family: 'Inter', size: 11 } }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Composer de Portfólio — NEXUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.composer-layout{display:grid;grid-template-columns:280px 1fr 320px;gap:16px}
+input[type=range]{width:100%;accent-color:var(--primary);cursor:pointer}
+.slider-wrap{margin-bottom:20px}
+.slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.slider-label span{font-size:12.5px;font-weight:600;color:var(--t1)}
+.slider-label em{font-size:13px;font-weight:700;color:var(--primary);font-style:normal}
+.risk-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg);padding:4px;border-radius:9px;border:1px solid var(--border)}
+.rt{flex:1;padding:7px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;border-radius:7px;color:var(--t2);transition:.12s}
+.rt.on{background:var(--white);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.vertical-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.vitem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:.12s}
+.vitem:hover{border-color:#CBD5E1;background:var(--bg)}
+.vitem.on{border-color:var(--primary);background:var(--primary-50)}
+.vitem-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.vitem-name{flex:1;font-size:12.5px;font-weight:600;color:var(--t1)}
+.vitem-rate{font-size:12px;font-weight:700;color:var(--green)}
+.vcheck{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vitem.on .vcheck{background:var(--primary);border-color:var(--primary)}
+.vitem.on .vcheck::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
+.pct-fill{height:4px;background:var(--primary-50);border-radius:2px;margin-top:3px}
+.pct-bar{height:4px;background:var(--primary);border-radius:2px;transition:width .4s}
+
+/* Projeção */
+.cenario-tabs{display:flex;gap:6px;margin-bottom:16px}
+.ct-btn{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--t2);transition:.12s}
+.ct-btn.pessimista.on{background:#FEF2F2;border-color:#FECACA;color:var(--red)}
+.ct-btn.base.on{background:var(--primary-50);border-color:#BFDBFE;color:var(--primary)}
+.ct-btn.otimista.on{background:var(--green-light);border-color:#A7F3D0;color:var(--green)}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border-bottom:none}
+.metric-key{font-size:12.5px;color:var(--t2)}
+.metric-val{font-size:14px;font-weight:700;color:var(--t1)}
+.metric-val.g{color:var(--green)}.metric-val.r{color:var(--red)}
+
+/* PIX modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:32px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:18px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--t2);margin-bottom:24px}
+.pix-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
+.pix-qr{width:120px;height:120px;background:var(--white);border:1px solid var(--border);border-radius:8px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t3)}
+.pix-code{font-family:'Courier New',monospace;font-size:10.5px;color:var(--t1);word-break:break-all;background:var(--white);padding:8px;border-radius:6px;border:1px solid var(--border);margin-bottom:8px}
+.modal-hash{font-family:'Courier New',monospace;font-size:10px;color:var(--purple);background:var(--purple-light);padding:8px 12px;border-radius:6px;word-break:break-all;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="s-logo"><div class="logo-icon">NX</div><div class="logo-text">NEX<em>US</em></div></div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-02-dashboard-aplicante.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Meu Portfólio</a>
+      <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>Marketplace</a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Investimentos</div>
+      <a class="ni active" href="tela-03-composer-portfolio.html"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Aportar</a>
+      <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>Retornos PIX</a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Rastreabilidade</div>
+      <a class="ni" href="tela-04-macro-hash.html"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><line x1="5" y1="9" x2="5" y2="12"/><line x1="12" y1="9" x2="12" y2="12"/></svg>MACRO HASH</a>
+    </div>
+  </nav>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar">JC</div>
+      <div><div class="u-name">João Carlos Silva</div><div class="u-role"><span class="role-badge rb-a">Aplicante</span></div></div>
+    </div>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div><div class="pg-title">Composer de Portfólio</div><div class="pg-sub">Monte sua carteira de investimentos P2P</div></div>
+  <div class="tb-sep"></div>
+  <div class="chips">
+    <div class="chip on">Portfólio A · Baixo risco</div>
+    <div class="chip">Portfólio B · Médio</div>
+    <div class="chip">Portfólio C · Alto</div>
+  </div>
+  <div class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+  <div class="tb-avatar">JC</div>
+</header>
+
+<main class="main">
+  <div class="composer-layout">
+
+    <!-- COLUNA ESQUERDA — FILTROS -->
+    <div class="card" style="padding:20px;align-self:start">
+      <div style="font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:20px">Configurar Composição</div>
+
+      <div class="slider-wrap">
+        <div class="slider-label"><span>Valor a Aplicar</span><em id="valor-label">R$ 5.000</em></div>
+        <input type="range" min="500" max="100000" step="500" value="5000" id="slider-valor" oninput="updateValor(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-top:4px"><span>R$ 500</span><span>R$ 100k</span></div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:8px">Perfil de Risco</div>
+      <div class="risk-tabs">
+        <div class="rt on" onclick="setRisk(this,'Conservador')">Conserv.</div>
+        <div class="rt" onclick="setRisk(this,'Moderado')">Moderado</div>
+        <div class="rt" onclick="setRisk(this,'Arrojado')">Arrojado</div>
+      </div>
+
+      <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:8px">Prazo do Contrato</div>
+      <select style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--t1);margin-bottom:20px;outline:none;background:var(--white)">
+        <option>12 meses</option>
+        <option>6 meses</option>
+        <option>9 meses</option>
+        <option selected>24 meses</option>
+      </select>
+
+      <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:10px">Verticais de Consumo</div>
+      <div class="vertical-list">
+        <div class="vitem on" onclick="toggleV(this)"><div class="vitem-icon" style="background:#ECFDF5">💊</div><div class="vitem-name">Saúde</div><div class="vitem-rate">3,5%</div><div class="vcheck"></div></div>
+        <div class="vitem on" onclick="toggleV(this)"><div class="vitem-icon" style="background:#EFF3FF">🎓</div><div class="vitem-name">Educação</div><div class="vitem-rate">3,8%</div><div class="vcheck"></div></div>
+        <div class="vitem on" onclick="toggleV(this)"><div class="vitem-icon" style="background:#FFFBEB">🛒</div><div class="vitem-name">Supermercado</div><div class="vitem-rate">4,0%</div><div class="vcheck"></div></div>
+        <div class="vitem" onclick="toggleV(this)"><div class="vitem-icon" style="background:#EDE9FE">🚗</div><div class="vitem-name">Transporte</div><div class="vitem-rate">4,0%</div><div class="vcheck"></div></div>
+        <div class="vitem" onclick="toggleV(this)"><div class="vitem-icon" style="background:#FEF2F2">🏗️</div><div class="vitem-name">Reforma/Cons.</div><div class="vitem-rate">5,0%</div><div class="vcheck"></div></div>
+      </div>
+
+      <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:4px" onclick="generatePortfolio()">
+        <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        Gerar Portfólio Otimizado
+      </button>
+    </div>
+
+    <!-- COLUNA CENTRAL — CANVAS -->
+    <div>
+      <div class="card" style="padding:24px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:4px">Portfólio Projetado</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:20px">Distribuição automática respeitando limite de 25% por vertical</div>
+        <canvas id="donutChart" height="200"></canvas>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px" id="legend-list">
+          <!-- Gerado via JS -->
+        </div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:16px">Projeção de Crescimento</div>
+        <canvas id="growthChart" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA — FORECAST -->
+    <div>
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:16px">Forecast de Retorno</div>
+        <div class="cenario-tabs">
+          <div class="ct-btn pessimista" onclick="setCenario('pessimista',this)">Pessimista</div>
+          <div class="ct-btn base on" onclick="setCenario('base',this)">Base</div>
+          <div class="ct-btn otimista" onclick="setCenario('otimista',this)">Otimista</div>
+        </div>
+        <div id="forecast-content">
+          <div class="metric-row"><div class="metric-key">Capital investido</div><div class="metric-val" id="f-capital">R$ 5.000</div></div>
+          <div class="metric-row"><div class="metric-key">Taxa mensal média</div><div class="metric-val g" id="f-taxa">4,1% a.m.</div></div>
+          <div class="metric-row"><div class="metric-key">Retorno bruto (12m)</div><div class="metric-val g" id="f-bruto">R$ 2.460</div></div>
+          <div class="metric-row"><div class="metric-key">IR estimado (17,5%)</div><div class="metric-val r" id="f-ir">– R$ 431</div></div>
+          <div class="metric-row"><div class="metric-key">Retorno líquido</div><div class="metric-val g" id="f-liquido">R$ 2.029</div></div>
+          <div class="metric-row"><div class="metric-key">Rentabilidade líquida</div><div class="metric-val g" id="f-rentab">40,6% a.a.</div></div>
+          <div class="metric-row"><div class="metric-key">Vs. CDI (13% a.a.)</div><div class="metric-val g" id="f-cdi">3,1× CDI</div></div>
+          <div class="metric-row"><div class="metric-key">Adimplência estimada</div><div class="metric-val" id="f-adim">96%</div></div>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--primary-50);border-radius:8px;font-size:12px;color:var(--primary-dark)">
+          <strong>Stress test:</strong> Se inadimplência chegar a 15%, retorno seria <strong id="f-stress">+28% a.a.</strong>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px">Resumo do Aporte</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12.5px;color:var(--t2)">Portfólio</span><span style="font-size:12.5px;font-weight:600">Mix A/B · 3 verticais</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12.5px;color:var(--t2)">Prazo</span><span style="font-size:12.5px;font-weight:600">24 meses</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:16px"><span style="font-size:12.5px;color:var(--t2)">Valor</span><span style="font-size:16px;font-weight:800;color:var(--primary)" id="resumo-valor">R$ 5.000,00</span></div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;font-size:14px;padding:12px" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Confirmar e Investir via PIX
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL PIX -->
+<div class="modal-overlay" id="modal-pix">
+  <div class="modal">
+    <div class="modal-title">Confirmar Investimento</div>
+    <div class="modal-sub">Escaneie o QR Code ou copie o código PIX para realizar o aporte</div>
+    <div class="pix-box">
+      <div class="pix-qr">QR Code PIX<br><small>R$ 5.000,00</small></div>
+      <div class="pix-code">00020126580014BR.GOV.BCB.PIX0136nexusp2p@pix.com.br5204000053039865406500005802BR5906NEXUSP2P6009SAO PAULO6220051664a3f8c1d9e4b27063044A2B</div>
+      <button style="background:var(--primary);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar código</button>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:8px">MACRO HASH L2 gerado para este investimento</div>
+    <div class="modal-hash">a3f8c1d9e4b27053f1c8a97e621bb4d03e5a1f82c7d94b06e3f2a8c5b91d740e</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-s" style="flex:1;justify-content:center" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-g" style="flex:1;justify-content:center">✓ Confirmar aporte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Donut Chart
+const verticais = [
+  {name:'Saúde',pct:25,color:'#059669',icon:'💊',taxa:'3,5%'},
+  {name:'Educação',pct:25,color:'#1640D6',icon:'🎓',taxa:'3,8%'},
+  {name:'Supermercado',pct:25,color:'#D97706',icon:'🛒',taxa:'4,0%'},
+  {name:'Outros',pct:25,color:'#94A3B8',icon:'📦',taxa:'—'},
+];
+let donut;
+function buildDonut(){
+  const ctx=document.getElementById('donutChart').getContext('2d');
+  if(donut)donut.destroy();
+  donut=new Chart(ctx,{type:'doughnut',data:{labels:verticais.map(v=>v.name),datasets:[{data:verticais.map(v=>v.pct),backgroundColor:verticais.map(v=>v.color),borderWidth:3,borderColor:'#fff',hoverOffset:8}]},options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'%'}}}}});
+  const legend=document.getElementById('legend-list');
+  legend.innerHTML=verticais.map(v=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)"><div style="width:10px;height:10px;border-radius:50%;background:${v.color};flex-shrink:0"></div><div style="font-size:14px">${v.icon}</div><div style="flex:1;font-size:12.5px;font-weight:600;color:var(--t1)">${v.name}</div><div style="font-size:11.5px;color:var(--t2)">${v.pct}%</div><div style="font-size:12px;font-weight:600;color:var(--green)">${v.taxa}</div></div>`).join('');
+}
+buildDonut();
+
+// Growth chart
+const gctx=document.getElementById('growthChart').getContext('2d');
+const months=['Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr'];
+new Chart(gctx,{type:'line',data:{labels:months,datasets:[{label:'Capital + Juros',data:[5000,5210,5428,5654,5888,6132,6385,6648,6921,7205,7499,7805],borderColor:'#1640D6',backgroundColor:'rgba(22,64,214,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#1640D6'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'R$'+Math.round(v/1000)+'k',font:{family:'Inter',size:10}},grid:{color:'rgba(0,0,0,.04)'}},x:{ticks:{font:{family:'Inter',size:10}},grid:{display:false}}}}});
+
+function updateValor(v){
+  const fmt='R$ '+Number(v).toLocaleString('pt-BR');
+  document.getElementById('valor-label').textContent=fmt;
+  document.getElementById('resumo-valor').textContent=fmt+',00';
+  document.getElementById('f-capital').textContent=fmt;
+}
+function setRisk(el,name){document.querySelectorAll('.rt').forEach(e=>e.classList.remove('on'));el.classList.add('on')}
+function toggleV(el){el.classList.toggle('on')}
+function generatePortfolio(){buildDonut();alert('Portfólio otimizado gerado!')}
+const cenarios={
+  pessimista:{taxa:'3,2% a.m.',bruto:'R$ 1.848',ir:'– R$ 416',liquido:'R$ 1.432',rentab:'28,6% a.a.',cdi:'2,2× CDI',adim:'90%',stress:'+15% a.a.',class:'r'},
+  base:{taxa:'4,1% a.m.',bruto:'R$ 2.460',ir:'– R$ 431',liquido:'R$ 2.029',rentab:'40,6% a.a.',cdi:'3,1× CDI',adim:'96%',stress:'+28% a.a.',class:'g'},
+  otimista:{taxa:'5,0% a.m.',bruto:'R$ 3.150',ir:'– R$ 473',liquido:'R$ 2.677',rentab:'53,5% a.a.',cdi:'4,1× CDI',adim:'98%',stress:'+38% a.a.',class:'g'},
+};
+function setCenario(c,el){
+  document.querySelectorAll('.ct-btn').forEach(e=>e.classList.remove('on'));
+  el.classList.add('on');
+  const d=cenarios[c];
+  document.getElementById('f-taxa').textContent=d.taxa;
+  document.getElementById('f-taxa').className='metric-val '+d.class;
+  document.getElementById('f-bruto').textContent=d.bruto;
+  document.getElementById('f-ir').textContent=d.ir;
+  document.getElementById('f-liquido').textContent=d.liquido;
+  document.getElementById('f-liquido').className='metric-val '+d.class;
+  document.getElementById('f-rentab').textContent=d.rentab;
+  document.getElementById('f-cdi').textContent=d.cdi;
+  document.getElementById('f-adim').textContent=d.adim;
+  document.getElementById('f-stress').textContent=d.stress;
+}
+function openModal(){document.getElementById('modal-pix').classList.add('show')}
+function closeModal(){document.getElementById('modal-pix').classList.remove('show')}
+</script>
+</body>
+</html>

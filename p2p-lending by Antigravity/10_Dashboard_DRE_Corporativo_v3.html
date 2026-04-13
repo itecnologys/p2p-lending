@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - DRE Corporate Dashboard v3 (MDR Partnership)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .header-bg { background-color: #0F172A; }
+        
+        .kpi-card { border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;}
+        .kpi-calc-btn { 
+            background: rgba(255,255,255,0.15); border-radius: 4px; padding: 2px 6px; 
+            font-size: 10px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-top: 8px; align-self: flex-start; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .kpi-calc-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .dre-header { background-color: #1E293B; color: white; }
+        .dre-section { background-color: #F1F5F9; font-weight: bold; color: #1E293B; text-transform: uppercase;}
+        .dre-result { background-color: #E2E8F0; font-weight: bold; color: #0F172A; }
+        .link-row { cursor: pointer; transition: background-color 0.2s; border-left: 3px solid transparent; }
+        .link-row:hover { background-color: #DBEAFE !important; border-left: 3px solid #3B82F6; }
+        
+        .table-container::-webkit-scrollbar { height: 10px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+    </style>
+</head>
+<body class="bg-slate-50 flex flex-col h-screen">
+
+    <!-- Navbar -->
+    <nav class="header-bg text-white p-4 flex justify-between items-center shadow-lg shrink-0">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight">NEXUS <span class="text-blue-400">BOARD v3</span></h1>
+        </div>
+        <div class="flex space-x-3 text-sm font-medium items-center">
+            <button onclick="toggleModal('hrModal')" class="bg-amber-600 text-white px-4 py-2 rounded shadow hover:bg-amber-500 transition">💼 Remuneração da Rede</button>
+            <button onclick="toggleModal('settingsModal')" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-500 transition">⚙️ Setup Spreads</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden flex flex-col p-6 space-y-4">
+        
+        <!-- KPI Cards -->
+        <div id="kpi-container" class="grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0">
+            <!-- Filled by JS -->
+        </div>
+
+        <div class="flex justify-between items-center bg-white p-3 rounded shadow shrink-0 border border-gray-200">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-semibold text-gray-700">Visão da Modelagem:</span>
+                <select id="sel-period" class="border border-gray-300 rounded p-1 text-sm bg-gray-50 outline-none" onchange="runSimulation()">
+                    <option value="12">Acumulado 12 Meses</option>
+                    <option value="24" selected>Acumulado 24 Meses</option>
+                </select>
+                <span class="ml-4 text-xs text-blue-600 font-medium italic">As Comissões Operacionais agora são extraídas do Lucro MDR da NEXUS. Clique nas linhas para ver as regras!</span>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded shadow flex-1 overflow-auto table-container border border-gray-200">
+            <table class="w-full text-sm text-left whitespace-nowrap min-w-max" id="dre-table">
+                <thead id="dre-thead" class="sticky top-0 z-20 shadow-md">
+                </thead>
+                <tbody id="dre-tbody" class="divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Settings Modal: Spreads -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50" id="settingsModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('settingsModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-lg shadow-2xl z-50 overflow-y-auto max-h-[90vh]">
+            <div class="py-4 text-left px-6">
+                <!--Title-->
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <p class="text-xl font-bold text-slate-800">Setup de Variáveis Financeiras V3</p>
+                    <div class="cursor-pointer z-50 text-gray-400 hover:text-red-500" onclick="toggleModal('settingsModal')">✖</div>
+                </div>
+
+                <!--Body-->
+                <div class="grid grid-cols-2 gap-6 mt-5 bg-slate-50 p-4 rounded border border-slate-200">
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm border-b pb-1">1. Crédito P2P</h3>
+                        <div><label class="text-xs text-gray-600">Juros Fatura / Luva (%)</label><input type="number" id="p-fee" value="6.0" step="0.1" class="w-full border p-1 border-gray-300 rounded"></div>
+                        <div><label class="text-xs text-gray-600">Inadimplência NPL (%)</label><input type="number" id="p-npl" value="3.5" step="0.1" class="w-full border p-1 border-gray-300 rounded"></div>
+                        <div><label class="text-xs text-gray-600">Repasse Aplicantes (%)</label><input type="number" id="p-poolreturn" value="2.5" step="0.1" class="w-full border p-1 border-gray-300 rounded"></div>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm border-b pb-1">2. Volume e Base Acumulável</h3>
+                        <div><label class="text-xs text-gray-600">Usuários Mês 01</label><input type="number" id="p-users" value="25000" class="w-full border p-1 border-gray-300 rounded"></div>
+                        <div><label class="text-xs text-gray-600">Crescimento Mensal (%)</label><input type="number" id="p-growth" value="7.0" step="0.1" class="w-full border p-1 border-gray-300 rounded"></div>
+                        <div><label class="text-xs text-gray-600">Ticket Médio (Faturamento R$)</label><input type="number" id="p-ticket" value="2500" class="w-full border p-1 border-gray-300 rounded"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mt-3 pl-2">
+                    <div><label class="text-xs text-gray-600">Interchange Banco (MDR %)</label><input type="number" id="p-mdr" value="1.5" step="0.1" class="w-full border p-1 text-sm font-bold text-blue-700"></div>
+                    <div><label class="text-xs text-gray-600">Custo Manut. BaaS (R$)</label><input type="number" id="p-maint" value="1.50" step="0.1" class="w-full border p-1 text-sm border-gray-300 rounded"></div>
+                    <div><label class="text-xs text-gray-600">Custo Plástico (R$)</label><input type="number" id="p-issue" value="15.00" class="w-full border p-1 text-sm border-gray-300 rounded"></div>
+                    <div class="col-span-3 flex items-center space-x-2 bg-blue-50 p-2 rounded">
+                        <input type="checkbox" id="p-finance" checked class="w-4 h-4 text-blue-600 rounded">
+                        <label class="text-xs text-blue-900 font-medium">Auto-financiar Custo do Cartão ao tomador (Retém R$ 1,25 em 12x)</label>
+                    </div>
+                </div>
+
+                <!--Footer-->
+                <div class="flex justify-end pt-4 space-x-3 mt-2">
+                    <button class="px-5 py-2 bg-blue-600 rounded text-white font-medium hover:bg-blue-700" onclick="saveAndSimulate('settingsModal')">Gravar Modelo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HR Modal: Comissão Baseada No MDR -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50" id="hrModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('hrModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-4xl mx-auto rounded-lg shadow-2xl z-50 overflow-y-auto max-h-[90vh]">
+            <div class="py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <div>
+                        <p class="text-xl font-bold text-amber-800">💼 Motor de Profit Sharing do MDR (NEXUS Partnership)</p>
+                        <p class="text-xs text-gray-600 mt-1">Agora a Rede Executiva é remunerada extraindo uma <b>FATIA DO PRÓPRIO GANHO DA NEXUS (MDR)</b>, ao modelo Acquirer.<br>Eles não drenam o Spread de Crédito P2P, garantindo blindagem do Pool financeiro.</p>
+                    </div>
+                    <div class="cursor-pointer z-50 text-gray-400 hover:text-red-500" onclick="toggleModal('hrModal')">✖</div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mt-5 bg-amber-50 p-4 rounded border border-amber-200">
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-amber-800 text-sm border-b border-amber-200 pb-1">Assistente Executivo</h3>
+                        <p class="text-[11px] text-gray-600">O Assistente gerencia diretamente 500 carteiras físicas.</p>
+                        <label class="text-xs font-semibold text-amber-900 mt-2 block">Share (%) do MDR Gerado</label>
+                        <input type="number" id="hr-ass-pct" value="15.0" step="1.0" class="w-full border p-1 rounded font-bold text-amber-900 bg-white">
+                        <p class="text-[10px] text-gray-700 mt-1" id="hr-ass-sim"></p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-amber-800 text-sm border-b border-amber-200 pb-1">Executivo de Contas</h3>
+                        <p class="text-[11px] text-gray-600">Recebe comissão sobre a base dos 5 Assistentes dele.</p>
+                        <label class="text-xs font-semibold text-amber-900 mt-2 block">Share (%) do MDR Gerado</label>
+                        <input type="number" id="hr-exc-pct" value="5.0" step="1.0" class="w-full border p-1 rounded font-bold text-amber-900 bg-white">
+                        <p class="text-[10px] text-gray-700 mt-1" id="hr-exc-sim"></p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-amber-800 text-sm border-b border-amber-200 pb-1">Gerente de Área</h3>
+                        <p class="text-[11px] text-gray-600">Comissionado sobre a engrenagem de 5 Executivos.</p>
+                        <label class="text-xs font-semibold text-amber-900 mt-2 block">Share (%) do MDR Gerado</label>
+                        <input type="number" id="hr-ger-pct" value="2.0" step="0.5" class="w-full border p-1 rounded font-bold text-amber-900 bg-white">
+                        <p class="text-[10px] text-gray-700 mt-1" id="hr-ger-sim"></p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-amber-800 text-sm border-b border-amber-200 pb-1">Diretor Regional</h3>
+                        <p class="text-[11px] text-gray-600">Lidera 4 Gerentes que compõem 50.000 usuários base.</p>
+                        <label class="text-xs font-semibold text-amber-900 mt-2 block">Share (%) do MDR Gerado</label>
+                        <input type="number" id="hr-dir-pct" value="1.0" step="0.5" class="w-full border p-1 rounded font-bold text-amber-900 bg-white">
+                        <p class="text-[10px] text-gray-700 mt-1" id="hr-dir-sim"></p>
+                    </div>
+                </div>
+
+                <div class="mt-3 bg-red-50 p-2 rounded text-xs border border-red-100 flex justify-between">
+                    <span>* Percentual da NEXUS sobre o MDR livre retido (Margem Bruta Tech):</span>
+                    <span id="nexus-mdr-share" class="font-bold text-red-700 text-sm">77% do MDR</span>
+                </div>
+                
+                <div class="mt-4 flex justify-end">
+                    <button class="px-5 py-2 bg-amber-600 rounded text-white font-medium hover:bg-amber-700" onclick="saveAndSimulate('hrModal')">Gravar Plano de Metas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-[60]" id="alertModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('alertModal')"></div>
+        <div class="bg-white w-10/12 max-w-2xl mx-auto rounded shadow-2xl z-[60] overflow-y-auto border-t-8 border-blue-600">
+            <div class="py-6 text-left px-6">
+                <h3 class="text-xl font-bold text-blue-900 uppercase" id="alert-title">Calculation Info</h3>
+                <div class="w-full h-px bg-blue-100 my-3"></div>
+                <p class="text-base text-slate-700 leading-relaxed whitespace-pre-line" id="alert-desc"></p>
+                <div class="mt-6 text-right"><button class="px-5 py-2 bg-blue-600 text-white font-bold rounded shadow hover:bg-blue-700 uppercase tracking-wide text-xs" onclick="toggleModal('alertModal')">Entendi a Matemática</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
+        const formatNum = (v) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(v);
+        
+        let P = {};
+        
+        function toggleModal(modalID){
+            const el = document.getElementById(modalID);
+            el.classList.toggle('opacity-0'); el.classList.toggle('pointer-events-none');
+        }
+
+        function showAlert(title, desc) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-desc').innerText = desc;
+            toggleModal('alertModal');
+        }
+
+        function recalcHRSimSamples() {
+            const tk = parseFloat(document.getElementById('p-ticket').value) || 2500;
+            const mdrRate = parseFloat(document.getElementById('p-mdr').value) / 100 || 0.015;
+            
+            // Transform user inputs (% of MDR) to floats
+            const cA = parseFloat(document.getElementById('hr-ass-pct').value)/100;
+            const cE = parseFloat(document.getElementById('hr-exc-pct').value)/100;
+            const cG = parseFloat(document.getElementById('hr-ger-pct').value)/100;
+            const cD = parseFloat(document.getElementById('hr-dir-pct').value)/100;
+
+            const mdrAss = (500 * tk) * mdrRate;
+            const mdrExc = (2500 * tk) * mdrRate;
+            const mdrGer = (12500 * tk) * mdrRate;
+            const mdrDir = (50000 * tk) * mdrRate;
+
+            document.getElementById('hr-ass-sim').innerHTML = `Giro Base: ${formatBRL(500 * tk)}<br>MDR NEXUS Base: ${formatBRL(mdrAss)}<br><b>Ganho Parceiro: <span class="text-amber-800">${formatBRL(mdrAss * cA)}</span></b>`;
+            document.getElementById('hr-exc-sim').innerHTML = `Giro Escala: ${formatBRL(2500 * tk)}<br>MDR NEXUS Base: ${formatBRL(mdrExc)}<br><b>Ganho Parceiro: <span class="text-amber-800">${formatBRL(mdrExc * cE)}</span></b>`;
+            document.getElementById('hr-ger-sim').innerHTML = `Giro Regional: ${formatBRL(12500 * tk)}<br>MDR NEXUS Base: ${formatBRL(mdrGer)}<br><b>Ganho Parceiro: <span class="text-amber-800">${formatBRL(mdrGer * cG)}</span></b>`;
+            document.getElementById('hr-dir-sim').innerHTML = `Giro Diretor: ${formatBRL(50000 * tk)}<br>MDR NEXUS Base: ${formatBRL(mdrDir)}<br><b>Ganho Parceiro: <span class="text-amber-800">${formatBRL(mdrDir * cD)}</span></b>`;
+            
+            const totalGiven = cA + cE + cG + cD;
+            document.getElementById('nexus-mdr-share').innerText = `${((1 - totalGiven)*100).toFixed(1)}% do MDR Global Fica na NEXUS`;
+        }
+
+        function saveAndSimulate(modalID) {
+            toggleModal(modalID);
+            runSimulation();
+        }
+
+        function runSimulation() {
+            P = {
+                fee: parseFloat(document.getElementById('p-fee').value) / 100,
+                npl: parseFloat(document.getElementById('p-npl').value) / 100,
+                poolrep: parseFloat(document.getElementById('p-poolreturn').value) / 100,
+                mdr: parseFloat(document.getElementById('p-mdr').value) / 100,
+                maint: parseFloat(document.getElementById('p-maint') ? document.getElementById('p-maint').value : 1.50),
+                issue: parseFloat(document.getElementById('p-issue').value),
+                users: parseFloat(document.getElementById('p-users').value),
+                growth: parseFloat(document.getElementById('p-growth').value) / 100,
+                ticket: parseFloat(document.getElementById('p-ticket').value),
+                finance: document.getElementById('p-finance').checked,
+                mth: parseInt(document.getElementById('sel-period').value),
+                hr_ass: parseFloat(document.getElementById('hr-ass-pct').value) / 100,
+                hr_exe: parseFloat(document.getElementById('hr-exc-pct').value) / 100,
+                hr_ger: parseFloat(document.getElementById('hr-ger-pct').value) / 100,
+                hr_dir: parseFloat(document.getElementById('hr-dir-pct').value) / 100,
+            };
+
+            recalcHRSimSamples();
+
+            const data = [];
+            let cUsers = P.users;
+            let actFinList = {}; 
+            
+            let T = { giro:0, sp2p:0, stec:0, mdrBruto: 0, shr:0, opex:0, ebitda:0 }; 
+
+            for (let m = 1; m <= P.mth; m++) {
+                const prevU = m === 1 ? P.users : data[m - 2].usuarios_totais;
+                const newU = m === 1 ? P.users : (cUsers - prevU);
+                
+                const cap = cUsers * P.ticket;
+                
+                // Spread P2P
+                const rJur = cap * P.fee;
+                const dNpl = cap * P.npl;
+                const dRep = cap * P.poolrep;
+                const sp2p = rJur - dNpl - dRep;
+
+                // Spread Tecnologico (Interchange puro)
+                const rMdr = cap * P.mdr;
+
+                // Fluxo de Caixas de Emissão
+                let rCar = 0;
+                if(P.finance) {
+                    actFinList[m] = newU;
+                    for(let k = Math.max(1, m - 11); k <= m; k++) {
+                        if(actFinList[k]) rCar += (actFinList[k] * (P.issue / 12));
+                    }
+                }
+                const cEmis = newU * P.issue; 
+                const fluxoCar = rCar - cEmis; 
+
+                // Quantidades (Headcount)
+                const qA = Math.ceil(cUsers / 500); 
+                const qE = Math.ceil(qA / 5); 
+                const qG = Math.ceil(qE / 5); 
+                const qD = Math.ceil(qG / 4); 
+
+                // HR rules V3 (Comission is a FATIA of the MDR Total)
+                // The total MDR generated in the month is rMdr.
+                // Assistentes gather P.hr_ass slice of the TOTAL MDR. 
+                const hrCostA = rMdr * P.hr_ass; 
+                const hrCostE = rMdr * P.hr_exe;
+                const hrCostG = rMdr * P.hr_ger;
+                const hrCostD = rMdr * P.hr_dir;
+                const totalHRCommission = hrCostA + hrCostE + hrCostG + hrCostD;
+                // Nexux Net MDR = rMdr - totalHRCommission
+
+                // OPEX (Only System Maintenance, because HR is extracted from MDR and Cards use their own flow)
+                const cBaaS = cUsers * P.maint;
+                const opex = cBaaS; // Emissão de Plástico tratada na seção II. e RH tratado como dedução da Seção III.
+                
+                // EBITDA = P2P + (MDR - HR) + Fluxo_Cartoes - OPEX
+                const ebitda = sp2p + (rMdr - totalHRCommission) + fluxoCar - opex;
+
+                data.push({
+                    mes: m, usuarios_totais: cUsers, novos_usuarios: newU, cap: cap,
+                    r_jur: rJur, d_npl: dNpl, d_rep: dRep, sp2p: sp2p,
+                    r_mdr: rMdr, r_car: rCar, fluxo_car: fluxoCar,
+                    c_baas: cBaaS, c_emis: cEmis, c_hr: totalHRCommission,
+                    mdr_liquido: rMdr - totalHRCommission, opex: opex, ebitda: ebitda,
+                    qA: qA, qE: qE, qG: qG, qD: qD
+                });
+
+                T.giro += cap; T.sp2p += sp2p; T.stec += rMdr; T.mdrBruto += rMdr; 
+                T.shr += totalHRCommission; T.opex += opex; T.ebitda += ebitda;
+                
+                cUsers *= (1 + P.growth);
+            }
+
+            renderKPIs(T);
+            renderTable(data, P.mth);
+        }
+
+        function renderKPIs(T) {
+            document.getElementById('kpi-container').innerHTML = `
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); color:white;">
+                    <span class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Giro Cartões</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">${formatBRL(T.giro)}</span>
+                    <button class="kpi-calc-btn border-slate-500" onclick="showAlert('Giro / Volume Total Pivotado', 'A fundação da estrutura.\\n\\nFórmula: Base Atualizada Total de Usuários Ativos no Mês\\nMultiplicado X\\nO Limite/Ticket Médio gasto no Cartão NEXUS.')">🔍 Ver Cálculo</button>
+                </div>
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #166534 0%, #14532D 100%); color:white;">
+                    <span class="text-green-300 text-[10px] font-bold tracking-widest uppercase">Lucro P2P Emprestado</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">${formatBRL(T.sp2p)}</span>
+                    <button class="kpi-calc-btn border-green-500" onclick="showAlert('Spread Financeiro (P2P)', 'A saúde do Banco.\\n\\nFórmula:\\n[+] Faturamento (Luva/Juros sobre Giro Total)\\n[-] NPL: Dinheiro Caloteado Abatido do Balanço\\n[-] Retorno Fundo: Pagamento da promessa de repasse aos Aplicantes.\\n\\nSe Verde, o crédito ganha dinheiro na ponta sem sangrar o cofre, gerando sustentabilidade matemática profunda.')">🔍 Ver Cálculo</button>
+                </div>
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #1E3A8A 0%, #1E40AF 100%); color:white;">
+                    <span class="text-blue-300 text-[10px] font-bold tracking-widest uppercase">Lucro Intercâmbio MDR</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">${formatBRL(T.mdrBruto)}</span>
+                    <button class="kpi-calc-btn border-blue-400" onclick="showAlert('Receita Bruta Tecnológica (MDR)', 'Fórmula: (Volume Faturado em Cartão NEXUS) * Taxa MDR da VISA/MASTERCARD.\\n\\nO Spread Intercambiável. Este é O GANHO DA NEXUS, livre de risco de calote. Usamos este bolso para financiar a rede de Parceiros/Funcionários Independentes!')">🔍 Ver Banco</button>
+                </div>
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #92400E 0%, #78350F 100%); color:white;">
+                    <span class="text-amber-200 text-[10px] font-bold tracking-widest uppercase">Custo Pagamento Rede</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">-${formatBRL(T.shr)}</span>
+                    <button class="kpi-calc-btn border-amber-600 outline-none hover:bg-amber-800" onclick="showAlert('A Rede Acquirer (Partnership comissões)', 'Fórmula: (MDR Total Gerado no Mês) \\nMultiplicado pelas fatias de cada Parceiro (Ass, Exc, Ger, Dir).\\n\\nNova Regra Estratégica: Ao invés de esvair capital da carteira principal, o RH sangra 100% da própria MTC (Margem de Transação) da Nexus. Eles atuam como corretores independentes sobre o fluxo de pagamentos, gerando zero passivo trabalhista!')">🔍 Entender Rede</button>
+                </div>
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #7F1D1D 0%, #991B1B 100%); color:white;">
+                    <span class="text-red-300 text-[10px] font-bold tracking-widest uppercase">Gastos em BaaS (Tecnologia)</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">-${formatBRL(T.opex)}</span>
+                    <button class="kpi-calc-btn border-red-500" onclick="showAlert('OPEX Tecnológico Residual', 'Fórmula: (Base Ativa Mensal de Cartões Ativos logados na Blockchain/BaaS)\\nMultiplicado pelo \\nCusto de Manutenção Unitário da Plataforma Dock (Ex: 1,50).\\n\\nRepare que extraímos o Plástico Impresso deste Opex pois ele se autoabastece em seu Fluxo de Caixa Independente na Tabela abaixo.')">🔍 Ver Custo</button>
+                </div>
+                <div class="kpi-card p-4" style="background: linear-gradient(180deg, #065F46 0%, #047857 100%); color:white;">
+                    <span class="text-emerald-300 text-[10px] font-bold tracking-widest uppercase">Gerencial EBITDA Final</span>
+                    <span class="text-xl font-extrabold mt-1 tracking-tight">${formatBRL(T.ebitda)}</span>
+                    <button class="kpi-calc-btn border-emerald-500" onclick="showAlert('O Caixa Soberano da Matrix (EBITDA)', 'Equação V3 de Viabilidade Global:\\n\\nBloco I: Lucro do Spread Financeiro P2P\\nSomado com\\nBloco II: Margem Liquida Intercâmbio (MDR Bruto - Comissões Parceiros RH)\\nSomado Com\\nBloco III: Saldo da Estrutura de Emissão de Cartões Financiada\\nSubtraido Por\\nBlocos de Licenças/Sistema BaaS.\\n\\nCoração da Companhia: Prova se sobrevivem perfeitamente às custas da Rede de Crédito.')">🔍 Ver Tese Inteira</button>
+                </div>
+            `;
+        }
+
+        function bRow(title, prop, pData, type="normal", msg="") {
+            let trClass = "link-row bg-white border-b border-gray-100 group"; 
+            let vClass = "text-gray-700"; let tdClass="pl-8 text-gray-800";
+            let cFunc = msg ? `onclick="showAlert('${title}', '${msg}')"` : "";
+
+            if (type === "section") { trClass = "dre-section border-b-2 border-slate-300 bg-slate-100"; vClass = "text-slate-900"; tdClass="pl-3 uppercase text-[11px] tracking-wide pointer-events-none"; cFunc=""; }
+            else if (type === "result") { trClass = "dre-result link-row bg-slate-200"; vClass = "text-blue-900 font-extrabold"; tdClass="pl-6 uppercase text-[12px]"; }
+            else if (type === "deduction") { vClass = "text-red-600"; tdClass="pl-8 text-gray-700 italic border-l-2 border-red-300 group-hover:bg-red-50 transition"; }
+            else if (type === "info") { vClass = "text-gray-400 text-xs"; tdClass="pl-8 text-slate-500 italic text-[11px] font-semibold"; } 
+            
+            let html = `<tr class="${trClass}" ${cFunc}>
+                <td class="p-2.5 text-xs z-10 sticky left-0 border-r border-gray-200 group-hover:bg-slate-100 ${tdClass}">
+                    <div class="flex justify-between items-center w-full">
+                        <span>${title}</span>
+                        ${msg ? '<span class="text-slate-300 group-hover:text-blue-500 font-bold ml-2">🔍</span>' : ''}
+                    </div>
+                </td>`;
+            pData.forEach(m => {
+                let v = prop ? m[prop] : "";
+                let txt = (type === "info") ? formatNum(v) : ((typeof v === 'number') ? formatBRL(v) : v);
+                let sign = (type === "deduction" && v > 0) ? "- " : "";
+                html += `<td class="p-2.5 text-right font-medium ${vClass}">${sign}${txt}</td>`;
+            }); return html + `</tr>`;
+        }
+
+        function renderTable(data, months) {
+            let thead = `<tr class="dre-header"><th class="p-3 text-left sticky left-0 z-20 dre-header border-r border-slate-600 uppercase text-xs tracking-wider">Detalhamento dos Balanços Financeiros</th>`;
+            for(let i=1; i<=months; i++) { thead += `<th class="p-2 text-right bg-slate-800 text-xs min-w-[130px] font-semibold text-slate-200 uppercase tracking-wider border-l border-slate-700">Mês ${i}</th>`; }
+            thead += `</tr>`; document.getElementById('dre-thead').innerHTML = thead;
+            
+            let tbody = "";
+
+            tbody += bRow("📈 MÉTRICAS DE BASE E PESSOAL", "", data, "section");
+            tbody += bRow("(+) Novos Usuários Integrados no Mês", "novos_usuarios", data, "info", `Volume exato de novas pessoas entrando mês a mês (Iniciando com crescimento configurado no Dashboard).`);
+            tbody += bRow("Total de Usuários Ativos (Faturando)", "usuarios_totais", data, "info", `A base de acúmulo da plataforma, o alicerce fundamental para a projeção M/M.`);
+            tbody += bRow("Volume Global (Giro Limit) p/ Mês", "cap", data, "normal", `Relação = (Total de Usuários Logados Ativos) vezes (Ticket Médio de Fatura Mensal)\\nMontante exposto na operação.`);
+            tbody += bRow("💡 Qtd. Físicas Assistentes na Rede", "qA", data, "info", "Equivalência de 1 Vaga para CADA 500 usuários ativos na rua. Liderados em cascata.");
+            tbody += bRow("💡 Qtd. Executivos Alocados", "qE", data, "info", "Equivalência: 1 Gestão atuante para cada 5 Assistentes em formação.");
+            tbody += bRow("💡 Qtd. Gerência Maior", "qG", data, "info", "Equivalência: 1 Posição para Cobertura Macro Regional administrando fluxos e liberação.");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("I. SPREAD FINANCEIRO CRUZADO (P2P LENDING)", "", data, "section");
+            tbody += bRow("(+) Luva Juros Paga pela Fatura Mês", "r_jur", data, "normal", `Taxa nominal base paga pelo pagador à plataforma via débito/fatura rotativa gerada.`);
+            tbody += bRow("(-) Desconto/Rebate do Repasse (Aplicantes Pool)", "d_rep", data, "deduction", `Parte extraída da receita de Juros para honrar a parcela dos Investidores Privados (Rentabilidade contratual).`);
+            tbody += bRow("(-) Sangramento Matemático NPL (Inadimplência Real)", "d_npl", data, "deduction", `Deduz Volume que deu Default/Calote Definitivo (Escrito aos Prejuízos). Rito OBRIGATÓRIO do banco.`);
+            tbody += bRow("= Margem Final da Atividade de Crédito", "sp2p", data, "result", "Mostra se o empréstimo puro e duro produz dinheiro (Verde) com o risco ou produz rombo insolvente (Vermelho).");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("II. RESULTADO DE CARTÕES (AUTO-FINANCIAMENTO)", "", data, "section");
+            tbody += bRow("(+) Caixa Entrante em Recorrencia Parcelada", "r_car", data, "normal", `Mensalidades de 1,25 retidas da conta do usuário mensalmente amortizando em 12x os cartões de Plástico.`);
+            tbody += bRow("(-) Dispensa Exata do Caixa p/ Impressão Gráfica", "c_emis", data, "deduction", `Pagamento cru da Dock/Impressora do total dos novos cartões emitidos no MÊS exato! A vista.`);
+            tbody += bRow("= Balanço Autônomo da Produção de Cartões", "fluxo_car", data, "result", `Se for verde (>0): A máquina atinge independência. O que cai na conta das anuidades hoje PAGA integralmente os plásticos expedidos sem retirar fundos ou equity.`);
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("III. SPREAD DE INTERCÂMBIO ACQUIRER (MDR)", "", data, "section");
+            tbody += bRow("(+) MDR Mastercard/Visa Interbancário Retido", "r_mdr", data, "normal", "Interchange rate pago diariamente na esteira liquidada. Não corre nenhum risco sistêmico de NPL.");
+            tbody += bRow("(-) Comissão Dividida na Hierarquia MDR(RH Partner)", "c_hr", data, "deduction", "Esta é a sacada da V3: Retiramos a despesa bruta salarial do balanço e a submetemos unicamente como PARCEIRAGEM (% Share de Comissionamento) em cima do valor Limpo do Interchange MDR. A equipe morde um grande pedaço, sem falir o resto do spread.");
+            tbody += bRow("= O Lucro Operacional Intangível Banco/Nexus", "mdr_liquido", data, "result", "Ganho final após pulverizar comissões de Interchange. Dinheiro no cofre!");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("IV. OBRIGAÇÕES EXTRAS DE CAPEX/SISTEMA", "", data, "section");
+            tbody += bRow("(-) Tarifas Unitárias (Licenças Software BaaS)", "c_baas", data, "deduction", "Custo cru da Tabela BÁSICA para segurar a conta rodando, expurgado a emissão do físico e Recursos Humanos.");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            let eht = `<tr class="bg-[#D1FAE5] border-t border-emerald-600 link-row h-[50px]" onclick="showAlert('Geração Final de Riqueza', 'EBITDA (Fluxo livre pós operação).\\nAqui medimos se, cobrindo o RH milionário dentro do MDR, Custo DOCK e Defaults... nós sobrevivemos e nadamos no lucro da Companhia como um todo.')">
+                <td class="p-3 text-emerald-950 font-black text-[13px] uppercase tracking-wide border-r border-[#6EE7B7] bg-[#D1FAE5] z-10 sticky left-0 hover:bg-[#A7F3D0] transition flex flex-row items-center justify-between">V. EBITDA SOCIEDADE (Caixa Absoluto) <span class="text-emerald-700 text-[16px] cursor-pointer" title="Ver Composição">🔍</span></td>`;
+            data.forEach(m => {
+                let v = m["ebitda"];
+                eht += `<td class="p-3 text-right font-black ${v < 0 ? 'text-red-700' : 'text-emerald-800 text-[17px]'} bg-[#ECFDF5] border-b border-white">${formatBRL(v)}</td>`;
+            });
+            tbody += eht + `</tr>`;
+
+            document.getElementById('dre-tbody').innerHTML = tbody;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('input').forEach(e => e.addEventListener('change', recalcHRSimSamples));
+            runSimulation();
+        });
+    </script>
+</body>
+</html>

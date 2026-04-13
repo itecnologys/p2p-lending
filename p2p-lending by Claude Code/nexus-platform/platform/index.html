@@ -1,0 +1,110 @@
+<\!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NEXUS Platform — Demo Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="shared/design-tokens.css"/>
+<style>
+body{background:var(--navy);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+.hub-title{font-family:var(--font-display);font-size:3rem;font-weight:800;color:#fff;text-align:center;margin-bottom:8px;}
+.hub-sub{color:rgba(255,255,255,0.6);text-align:center;margin-bottom:48px;font-size:1rem;}
+.screens-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;max-width:1000px;width:100%;}
+.screen-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:block;}
+.screen-card:hover{background:rgba(255,255,255,0.15);transform:translateY(-4px);border-color:rgba(255,255,255,0.35);}
+.screen-icon{font-size:2.2rem;margin-bottom:12px;}
+.screen-name{color:#fff;font-weight:600;font-size:0.9rem;}
+.screen-desc{color:rgba(255,255,255,0.5);font-size:0.75rem;margin-top:4px;}
+.section-label{color:rgba(255,255,255,0.4);font-size:0.7rem;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;max-width:1000px;width:100%;margin:32px 0 12px;}
+.version-tag{color:rgba(255,255,255,0.25);font-size:0.75rem;margin-top:40px;}
+</style>
+</head>
+<body>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+  <div class="logo-mark" style="width:52px;height:52px;font-size:18px;border-radius:14px;">NX</div>
+  <div>
+    <div class="hub-title" style="margin-bottom:0;font-size:2rem;">NEXUS Platform</div>
+    <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Demo Screens · Camada 3</div>
+  </div>
+</div>
+<div class="hub-sub">Selecione uma tela para visualizar o protótipo</div>
+
+<div class="section-label">🔐 Autenticação & Onboarding</div>
+<div class="screens-grid">
+  <a href="screens/onboarding/register.html" class="screen-card">
+    <div class="screen-icon">📝</div>
+    <div class="screen-name">Cadastro</div>
+    <div class="screen-desc">Registro de Aplicante ou Usuário</div>
+  </a>
+  <a href="screens/onboarding/kyc.html" class="screen-card">
+    <div class="screen-icon">🪪</div>
+    <div class="screen-name">KYC</div>
+    <div class="screen-desc">Verificação de identidade (3 níveis)</div>
+  </a>
+  <a href="screens/score/nexus-score.html" class="screen-card">
+    <div class="screen-icon">📊</div>
+    <div class="screen-name">NEXUS Score</div>
+    <div class="screen-desc">Score proprietário detalhado</div>
+  </a>
+</div>
+
+<div class="section-label">💼 Aplicante (Investidor)</div>
+<div class="screens-grid">
+  <a href="screens/dashboard-aplicante/index.html" class="screen-card">
+    <div class="screen-icon">🏠</div>
+    <div class="screen-name">Dashboard</div>
+    <div class="screen-desc">Hub central do Aplicante</div>
+  </a>
+  <a href="screens/portfolios/index.html" class="screen-card">
+    <div class="screen-icon">📈</div>
+    <div class="screen-name">Portfólios</div>
+    <div class="screen-desc">Marketplace A/B/C + simulador</div>
+  </a>
+  <a href="screens/portfolios/invest.html" class="screen-card">
+    <div class="screen-icon">💰</div>
+    <div class="screen-name">Investir</div>
+    <div class="screen-desc">Fluxo de aporte + PIX</div>
+  </a>
+  <a href="screens/dashboard-aplicante/retornos.html" class="screen-card">
+    <div class="screen-icon">💸</div>
+    <div class="screen-name">Retornos</div>
+    <div class="screen-desc">Histórico de PIX recebidos</div>
+  </a>
+</div>
+
+<div class="section-label">👤 Usuário (Tomador)</div>
+<div class="screens-grid">
+  <a href="screens/dashboard-usuario/index.html" class="screen-card">
+    <div class="screen-icon">🏠</div>
+    <div class="screen-name">Dashboard</div>
+    <div class="screen-desc">Hub central do Usuário</div>
+  </a>
+  <a href="screens/credito/solicitar.html" class="screen-card">
+    <div class="screen-icon">🪙</div>
+    <div class="screen-name">Solicitar Crédito</div>
+    <div class="screen-desc">Blocos FIFO + verticais</div>
+  </a>
+  <a href="screens/cartao/index.html" class="screen-card">
+    <div class="screen-icon">💳</div>
+    <div class="screen-name">Cartão Visa</div>
+    <div class="screen-desc">Saldo, extrato, bloqueio</div>
+  </a>
+  <a href="screens/credito/parcelas.html" class="screen-card">
+    <div class="screen-icon">📅</div>
+    <div class="screen-name">Parcelas</div>
+    <div class="screen-desc">Calendário de amortização</div>
+  </a>
+</div>
+
+<div class="section-label">🔗 Tecnologia NEXUS</div>
+<div class="screens-grid">
+  <a href="screens/macro-hash/index.html" class="screen-card">
+    <div class="screen-icon">🔐</div>
+    <div class="screen-name">MACRO HASH</div>
+    <div class="screen-desc">Ledger SHA-256 L1→L5</div>
+  </a>
+</div>
+
+<div class="version-tag">NEXUS DEF v1.0 · Camada 0 ✅ → Camada 3 🔄 · Abril 2026</div>
+</body>
+</html>

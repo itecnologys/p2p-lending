@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - DRE e DFC Controladoria Oficial v7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .header-bg { background-color: #0F172A; }
+        .kpi-card { border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;}
+        
+        /* Contas Style */
+        .dre-header { background-color: #1E293B; color: white; }
+        .dre-group { background-color: #E2E8F0; font-weight: bold; color: #1E293B; text-transform: uppercase;}
+        .dre-result { background-color: #CBD5E1; font-weight: bold; color: #0F172A; }
+        .link-row { transition: background-color 0.2s; border-left: 3px solid transparent; }
+        .link-row:hover { background-color: #DBEAFE !important; border-left: 3px solid #3B82F6; }
+        
+        .conta-code { font-family: monospace; font-size: 11px; margin-right: 8px; color: #64748B; font-weight: bold;}
+        .conta-main { font-weight: bold; color: #1E293B; }
+        .conta-sub { padding-left: 24px; color: #475569; }
+        .conta-pos { color: #059669; }
+        .conta-neg { color: #DC2626; }
+        .table-container::-webkit-scrollbar { height: 10px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+        .tab-btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .tab-active { background: #E2E8F0; color: #0F172A; }
+        .tab-inactive { background: transparent; color: #94A3B8; }
+        .tab-inactive:hover { color: #E2E8F0; }
+    </style>
+</head>
+<body class="bg-slate-50 flex flex-col h-screen">
+
+    <nav class="header-bg text-white p-4 flex justify-between items-center shadow-lg shrink-0">
+        <div class="flex items-center space-x-6">
+            <h1 class="text-2xl font-bold tracking-tight">NEXUS <span class="text-blue-400">BOARD v7</span><span class="text-xs ml-2 text-slate-400 uppercase tracking-widest hidden md:inline">Auditoria Contábil</span></h1>
+            <div class="flex space-x-2 bg-slate-800 p-1 rounded-lg">
+                <button id="tab-geral" class="tab-btn tab-active text-sm" onclick="switchTab('geral')">📚 Contabilidade Geral (DRE/DFC)</button>
+                <button id="tab-foco" class="tab-btn tab-inactive text-sm" onclick="switchTab('foco')">🔍 Cockpit Gerencial (Isolado)</button>
+            </div>
+        </div>
+        <div class="flex space-x-3 text-sm font-medium items-center">
+            <button onclick="toggleModal('corpModal')" class="bg-indigo-600 px-4 py-2 rounded shadow hover:bg-indigo-500">🏢 Estrutura Corporate & Impostos</button>
+            <button onclick="toggleModal('settingsModal')" class="bg-blue-600 px-4 py-2 rounded shadow hover:bg-blue-500">⚙️ Mercado/Base</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 overflow-hidden flex flex-col p-6 space-y-4 relative">
+        <div id="kpi-container" class="grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0"></div>
+
+        <div class="flex justify-between items-center bg-white p-3 rounded shadow shrink-0 border border-gray-200">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-semibold text-gray-700">Período Fiscal:</span>
+                <select id="sel-period" class="border border-gray-300 rounded p-1 text-sm outline-none" onchange="runSimulation()">
+                    <option value="12">Exercício 1 Ano</option>
+                    <option value="24" selected>Exercício 2 Anos</option>
+                    <option value="60">Exercício 5 Anos</option>
+                </select>
+            </div>
+
+            <div id="foco-controls" class="hidden flex items-center space-x-3 bg-blue-50 px-4 py-1 rounded border border-blue-200">
+                <button class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold" onclick="navMonth(-1)">◀ Anterior</button>
+                <span class="font-black text-lg text-blue-900 w-24 text-center" id="foco-month-display">Mês 1</span>
+                <button class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold" onclick="navMonth(1)">Próximo ▶</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded shadow flex-1 overflow-auto table-container border border-gray-200" id="container-geral">
+            <table class="w-full text-sm text-left whitespace-nowrap min-w-max" id="dre-table">
+                <thead id="dre-thead" class="sticky top-0 z-20 shadow-md"></thead>
+                <tbody id="dre-tbody" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+
+        <div class="bg-white rounded shadow flex-1 overflow-auto p-8 border border-gray-200 hidden" id="container-foco">
+            <div id="foco-content" class="max-w-4xl mx-auto"></div>
+        </div>
+
+    </main>
+
+    <!-- Modal Corporate/Impostos -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50" id="corpModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('corpModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-3xl mx-auto rounded-lg shadow-2xl z-50">
+            <div class="py-4 px-6">
+                <div class="flex justify-between border-b pb-3"><p class="text-xl font-bold text-indigo-900">🏢 Custo Estrutural Matriz e Tributos (Lucro Presumido)</p><div class="cursor-pointer font-bold" onclick="toggleModal('corpModal')">✖</div></div>
+                
+                <div class="grid grid-cols-2 gap-6 mt-4">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded">
+                        <label class="font-bold text-slate-800 text-sm">Alíquota Lucro Presumido (%)</label>
+                        <p class="text-[11px] text-slate-600 mb-2">Imposto de Serviços Financeiros sobre a Receita Bruta (PIS, COFINS, ISS, IRPJ e CSLL presumidos).</p>
+                        <input type="number" id="p-taxa-imposto" value="16.33" step="0.01" class="w-full border p-2 font-bold text-lg text-slate-900">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded">
+                        <label class="font-bold text-slate-800 text-sm">Budget de Marketing e Conversão</label>
+                        <p class="text-[11px] text-slate-600 mb-2">Custo de Aquisição por Cliente Físico (CAC). Quanto custa em Marketing trazer cada 1 usuário novo?</p>
+                        <input type="number" id="p-cac" value="12.00" step="1.00" class="w-full border p-2 font-bold text-lg text-slate-900">
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded shadow-inner">
+                    <label class="font-bold text-indigo-900 text-sm block border-b border-indigo-200 pb-1 mb-2">Despesas de Folha Corporativa Interna Fixa (Mês)</label>
+                    <p class="text-xs text-indigo-800 mb-3">Custos imutáveis com desenvolvedores, jurídico interno e staff C-Level. Não confunda com a Rede que vive só de Comissão/MDR.</p>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 font-bold text-indigo-400">R$</span>
+                        <input type="number" id="p-folha-matriz" value="95000" step="1000" class="w-full pl-8 border p-2 font-black text-xl text-indigo-900 rounded">
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-5"><button class="px-5 py-2 bg-indigo-700 font-bold text-white rounded hover:bg-indigo-800" onclick="saveAndSimulate('corpModal')">Aplicar Quadro Contábil</button></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 z-0" id="settingsModal" style="display:none;"></div>
+
+    <script>
+        const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
+        const formatNum = (v) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(v);
+        
+        let P = {
+            // Simulated generic setup parameters hidden from UI but used mathematically unless changed
+            fee: 0.06, npl: 0.045, poolrep: 0.025, mdr: 0.015, maint: 1.5, issue: 15,
+            users: 25000, growth: 0.07, ticket: 2500, chargeback: 0.15, rec_rate: 0.25, rec_bonus: 0.30,
+            hr_ass: 0.15, hr_exe: 0.05, hr_ger: 0.03, hr_dir: 0.01
+        };
+        let G_DATA = [];
+        let viewM = 1;
+        let cTab = 'geral';
+
+        function toggleModal(id){ const el = document.getElementById(id); el.classList.toggle('opacity-0'); el.classList.toggle('pointer-events-none'); }
+        function saveAndSimulate(id) { if(id) toggleModal(id); runSimulation(); }
+
+        function switchTab(tab) {
+            cTab = tab;
+            if(tab === 'geral') {
+                document.getElementById('tab-geral').className = "tab-btn tab-active text-sm";
+                document.getElementById('tab-foco').className = "tab-btn tab-inactive text-sm";
+                document.getElementById('container-geral').classList.remove('hidden');
+                document.getElementById('container-foco').classList.add('hidden');
+                document.getElementById('foco-controls').classList.add('hidden');
+                document.getElementById('sel-period').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-foco').className = "tab-btn tab-active text-sm";
+                document.getElementById('tab-geral').className = "tab-btn tab-inactive text-sm";
+                document.getElementById('container-foco').classList.remove('hidden');
+                document.getElementById('container-geral').classList.add('hidden');
+                document.getElementById('foco-controls').classList.remove('hidden');
+                document.getElementById('sel-period').classList.add('hidden');
+                renderFoco();
+            }
+        }
+
+        function navMonth(dir) {
+            viewM += dir;
+            if(viewM < 1) viewM = 1;
+            if(viewM > P.mth) viewM = P.mth;
+            document.getElementById('foco-month-display').innerText = "Mês " + viewM;
+            renderFoco();
+        }
+
+        function runSimulation() {
+            P.mth = parseInt(document.getElementById('sel-period').value) || 24;
+            let valTaxa = document.getElementById('p-taxa-imposto').value || "16.33";
+            let valCac = document.getElementById('p-cac').value || "12.00";
+            let valFolha = document.getElementById('p-folha-matriz').value || "95000";
+            
+            P.taxa = parseFloat(valTaxa.toString().replace(',','.')) / 100;
+            P.cac = parseFloat(valCac.toString().replace(',','.'));
+            P.folhaMatriz = parseFloat(valFolha.toString().replace(',','.'));
+
+            if(viewM > P.mth) viewM = P.mth;
+
+            const data = [];
+            let cUsers = P.users;
+            let actFinList = {}; 
+            
+            let T = { fcf: 0, rob:0, impostos:0, rol:0, mkt:0, corp:0, shr:0, ebitda:0 }; 
+            let previous_dNPL = 0;
+            let fundoRestrito = 0; 
+
+            for (let m = 1; m <= P.mth; m++) {
+                const prevU = m === 1 ? P.users : data[m - 2].usuarios_totais;
+                const newU = m === 1 ? P.users : (cUsers - prevU);
+                const cap = cUsers * P.ticket;
+                
+                // Revenue P2P + MDR
+                const rJur = cap * P.fee;
+                const dNpl = cap * P.npl;
+                const dRep = cap * P.poolrep;
+                const rMdr = cap * P.mdr;
+
+                // Cartoes
+                let rCar = 0;
+                actFinList[m] = newU;
+                for(let k = Math.max(1, m - 11); k <= m; k++) {
+                    if(actFinList[k]) rCar += (actFinList[k] * (P.issue / 12));
+                }
+                const cEmis = newU * P.issue; 
+                const fluxoCar = rCar - cEmis; 
+
+                // Reserva Cartão Fluxo (Contábil x Fluxo Caixa)
+                let provisaoReserva = 0;
+                let consumoReserva = 0;
+                if (fluxoCar > 0) {
+                    provisaoReserva = fluxoCar;
+                    fundoRestrito += fluxoCar;
+                } else if (fluxoCar < 0) {
+                    const deficit = Math.abs(fluxoCar);
+                    if (fundoRestrito >= deficit) { fundoRestrito -= deficit; consumoReserva = deficit; } 
+                    else { const st = fundoRestrito; fundoRestrito=0; consumoReserva = st; }
+                }
+
+                // HR Recovery
+                const totalHRBruto = (rMdr * P.hr_ass) + (rMdr * P.hr_exe) + (rMdr * P.hr_ger) + (rMdr * P.hr_dir);
+                const penaltyReq = previous_dNPL * P.chargeback;
+                
+                const recVal = previous_dNPL * P.rec_rate;
+                const bonusComissao = recVal * P.rec_bonus;
+
+                let effectivePenalty = 0;
+                if(penaltyReq > 0) { effectivePenalty = (penaltyReq > totalHRBruto) ? totalHRBruto : penaltyReq; }
+                const hr_liquido_pago_time = (totalHRBruto - effectivePenalty) + bonusComissao;
+                const cBaaS = cUsers * P.maint;
+
+                // --- CONTABILIDADE (DRE OFICIAL) ---
+                const rob = rJur + rMdr + rCar; // Receita Operacional Bruta Total
+                
+                // Impostos (Base = Juros + MDR + Emissão) - No Brasil dependendo da estrutura a Anuidade entra na Receita de Serviço.
+                const impostos = rob * P.taxa;
+                const rol = rob - impostos - dRep; // Receita Op Líquida
+                
+                const cogs = dNpl - recVal + cEmis + cBaaS; // Custo do Serviço (Menos dinhero recuperado)
+                const lucro_bruto = rol - cogs;
+                
+                const mkt = newU * P.cac;
+                const rede_parceiros = hr_liquido_pago_time;
+                const matriz_hr = P.folhaMatriz;
+                
+                const ebitda = lucro_bruto - rede_parceiros - mkt - matriz_hr;
+                
+                // DEMONSTRATIVO DE FLUXO DE CAIXA (DFC)
+                let fc_livre = ebitda;
+                // Ajustes no DFC de Fundo Reserva! 
+                // Se o EBITDA contemplou a 'Receita Cartões - Custo Cartão' (Isso sobrou), no DFC a gente remove esse lucro pra caixinha:
+                if(provisaoReserva > 0) {
+                    fc_livre -= provisaoReserva; // O lucro não vira dividendo, fica preso na reserva.
+                }
+                if(consumoReserva > 0) {
+                    fc_livre += consumoReserva; // Se a empresa teve déficit DRE contábil nos cartões, o fluxo de caixa devolve porque usamos o potinho restrito para pagar!
+                }
+
+                data.push({
+                    mes: m, usuarios_totais: cUsers, novos_usuarios: newU,
+                    rob: rob, r_jur: rJur, r_mdr: rMdr, r_car: rCar,
+                    imposto: impostos, d_rep: dRep, rol: rol,
+                    d_npl: dNpl, vol_recuperado: recVal, c_emis: cEmis, c_baas: cBaaS, 
+                    lucro_bruto: lucro_bruto,
+                    hr_liquido: hr_liquido_pago_time, mkt: mkt, hr_matriz: matriz_hr,
+                    ebitda: ebitda, provisao: provisaoReserva, consumo: consumoReserva, fundoR: fundoRestrito, fc_livre: fc_livre
+                });
+
+                T.rob += rob; T.impostos += impostos; T.rol += rol; 
+                T.shr += hr_liquido_pago_time; T.mkt += mkt; T.corp += matriz_hr; T.ebitda += ebitda; T.fcf += fc_livre;
+                
+                previous_dNPL = dNpl; cUsers *= (1 + P.growth);
+            }
+            G_DATA = data;
+            renderKPIs(T);
+            if(cTab === 'geral') renderTable(data, P.mth); else renderFoco();
+        }
+
+        function renderKPIs(T) {
+            document.getElementById('kpi-container').innerHTML = `
+                <div class="kpi-card p-4 bg-slate-900 border-l-4 border-slate-600 text-white"><span class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">1. Rec. Op Bruta (R.O.B) Acumulada</span><span class="text-xl font-extrabold mt-1 text-slate-100">${formatBRL(T.rob)}</span></div>
+                <div class="kpi-card p-4 bg-red-900 border-l-4 border-red-500 text-white"><span class="text-red-300 text-[10px] font-bold tracking-widest uppercase">2. Impostos Recolhidos / Estado (IR)</span><span class="text-xl font-extrabold mt-1">-${formatBRL(T.impostos)}</span></div>
+                <div class="kpi-card p-4 bg-[#1E3A8A] border-l-4 border-blue-500 text-white"><span class="text-blue-300 text-[10px] font-bold tracking-widest uppercase">3. Investimento Matriz: Crescimento & MKT</span><span class="text-xl font-extrabold text-[#93C5FD] mt-1">-${formatBRL(T.mkt)}</span></div>
+                <div class="kpi-card p-4 bg-amber-900 border-l-4 border-amber-500 text-white"><span class="text-amber-200 text-[10px] font-bold tracking-widest uppercase">4. OPEX HR: Folha Matriz + Comissões</span><span class="text-xl font-extrabold mt-1">-${formatBRL(T.shr + T.corp)}</span></div>
+                <div class="kpi-card p-4 bg-slate-700 border-l-4 border-slate-500 text-white"><span class="text-emerald-300 text-[10px] font-bold tracking-widest uppercase">5. Resultados Financeiros (EBITDA Acum)</span><span class="text-xl font-extrabold mt-1">${formatBRL(T.ebitda)}</span></div>
+                <div class="kpi-card p-4 bg-[#064E3B] border-l-4 border-emerald-400 text-white"><span class="text-emerald-300 text-[10px] font-bold tracking-widest uppercase mt-0 border-b border-emerald-600">6. Fluxo Libre para Sócios (FCF Pós Caixa Cartões)</span><span class="text-2xl font-black mt-2 text-white block">${formatBRL(T.fcf)}</span></div>
+            `;
+        }
+
+        function bRow(title, prop, pData, type="normal") {
+            let trClass = "link-row bg-white border-b border-slate-100"; 
+            let vClass = "text-slate-700"; let tdClass="pl-8";
+            let cFunc = ``;
+
+            if (type === "section") { trClass = "dre-group border-b-2 border-slate-400 bg-slate-200"; vClass = "text-slate-900"; tdClass="pl-3 text-[11px] font-black"; }
+            else if (type === "result") { trClass = "dre-result bg-slate-300 border-y border-slate-400"; vClass = "text-slate-900 font-bold tracking-wide"; tdClass="pl-4 text-[11px] uppercase"; }
+            else if (type === "fcf") { trClass = "bg-[#D1FAE5] border-y-2 border-emerald-600 h-[50px]"; vClass = "text-emerald-900 font-black text-lg bg-[#ECFDF5]"; tdClass="pl-3 text-emerald-900 font-black text-[13px] uppercase tracking-widest"; }
+            
+            // Sub contagens DRE
+            let isBold = title.includes("(=)");
+            if (isBold) { tdClass = "pl-6 text-[11px] font-bold text-slate-800 uppercase"; }
+
+            let html = `<tr class="${trClass}"><td class="p-2.5 text-xs z-10 sticky left-0 border-r border-slate-300 bg-inherit ${tdClass}">${title}</td>`;
+            
+            pData.forEach(m => {
+                let v = prop ? m[prop] : "";
+                let txt = (typeof v === 'number') ? formatBRL(v) : v;
+                let finalClass = vClass;
+
+                if (type === "normal" && v !== "") {
+                    if (title.includes("(-)")) { finalClass="text-red-700"; txt = "- " + txt;}
+                    else if (title.includes("(+)")) { finalClass="text-emerald-700 font-semibold"; }
+                }
+                if (type === "fcf" && v < 0) { finalClass="text-red-700 font-black text-lg bg-[#FEF2F2]"; }
+
+                html += `<td class="p-2.5 text-right font-medium ${finalClass}">${txt}</td>`;
+            }); return html + `</tr>`;
+        }
+
+        function renderTable(data, months) {
+            let thead = `<tr><th class="p-3 bg-slate-900 text-slate-100 sticky left-0 z-20 text-[11px] uppercase border-r border-slate-600">Demonstrativo de Resultado & Caixa (BACEN/CVM)</th>`;
+            for(let i=1; i<=months; i++) { thead += `<th class="p-2 bg-slate-900 text-[11px] text-slate-200 uppercase text-right min-w-[130px] border-l border-slate-700">Mês ${i}</th>`; }
+            thead += `</tr>`; document.getElementById('dre-thead').innerHTML = thead;
+            
+            let tbody = "";
+            tbody += bRow("I. RECEITAS OPERACIONAIS BRUTAS (R.O.B)", "", data, "section");
+            tbody += bRow("<span class='conta-code'>1.01</span> (+) Ticket Intercâmbio Adquirência (MDR Retido)", "r_mdr", data, "normal");
+            tbody += bRow("<span class='conta-code'>1.02</span> (+) Rendimentos Financeiros Base (Luvas & Crédito)", "r_jur", data, "normal");
+            tbody += bRow("<span class='conta-code'>1.03</span> (+) Mensalidades Cartões Expedidos (Yields Físicos)", "r_car", data, "normal");
+            tbody += bRow("(=) TOTAL EMOLUMENTOS OPERACIONAIS (RECEITA BRUTA)", "rob", data, "result");
+
+            tbody += bRow("II. IMPOSTOS E DEDUÇÕES DA PRESTAÇÃO (P2P + ESTADO)", "", data, "section");
+            tbody += bRow("<span class='conta-code'>2.01</span> (-) Impostos Incidentes s/ Serviço (Simulação Presumida)", "imposto", data, "normal");
+            tbody += bRow("<span class='conta-code'>2.02</span> (-) Dividendos Acordados de Custódia Base Aplicante", "d_rep", data, "normal");
+            tbody += bRow("(=) RECEITA OPERACIONAL LÍQUIDA (R.O.L)", "rol", data, "result");
+
+            tbody += bRow("III. CUSTO DO SERVIÇO PRESTADO (COGS) & RISCO", "", data, "section");
+            tbody += bRow("<span class='conta-code'>3.01</span> (-) Perdas com Crédito Irrecuperado (NPL)", "d_npl", data, "normal");
+            tbody += bRow("<span class='conta-code'>3.02</span> (+) Dinheiro Regressado por Recuperadores Físicos", "vol_recuperado", data, "normal");
+            tbody += bRow("<span class='conta-code'>3.03</span> (-) Compras e Emissão Física Unitária Cartões Dock", "c_emis", data, "normal");
+            tbody += bRow("<span class='conta-code'>3.04</span> (-) Licenças Variáveis de Custódia Unitária BaaS", "c_baas", data, "normal");
+            tbody += bRow("(=) LUCRO BRUTO GERENCIAL DA OPERADORA", "lucro_bruto", data, "result");
+
+            tbody += bRow("IV. DESPESAS OPERACIONAIS GERAIS (OPEX E VENDAS)", "", data, "section");
+            tbody += bRow("<span class='conta-code'>4.01</span> (-) Comissionamento Físico de Parceiros Autônomos", "hr_liquido", data, "normal");
+            tbody += bRow("<span class='conta-code'>4.02</span> (-) Custo de Atração e Engajamento Base Atual (CAC/Marketing)", "mkt", data, "normal");
+            tbody += bRow("<span class='conta-code'>4.03</span> (-) Folha e Passivos Imutáveis Matriz Operação (C-Level/Legal)", "hr_matriz", data, "normal");
+            tbody += bRow("(=) RESULTADO ANTES DE JUROS E TAXAS EXTRAS (EBITDA CONTÁBIL)", "ebitda", data, "result");
+
+            tbody += `<tr class="h-4 bg-slate-100 border-y border-slate-300"><td colspan="${months+1}"></td></tr>`;
+            
+            tbody += bRow("V. DEMONSTRATIVO AUTÔNOMO DOS FLUXOS DE CAIXA (DFC)", "", data, "section");
+            tbody += bRow("<span class='conta-code'>D.01</span> (=) ABERTURA DE CAIXA PELO LÚCRO MENSAL GERADO NESTE MÊS", "ebitda", data, "normal");
+            tbody += bRow("<span class='conta-code'>D.02</span> (-) Destinação (Guarda) Obrigatória para Aportes Fundo de Cartões", "provisao", data, "normal");
+            tbody += bRow("<span class='conta-code'>D.03</span> (+) Socorro Extraído do Fundo de Cartões (Cash Inflow)", "consumo", data, "normal");
+            tbody += bRow("<span class='font-bold text-[#065F46]'>💰 FLUXO DE CAIXA SOBERANO (DISTRIBUIÇÃO A SÓCIOS / FREE CASH)</span>", "fc_livre", data, "fcf");
+            
+            tbody += bRow("", "", data, "section");
+            tbody += bRow("💳 Acompanhamento Analítico: Saldo Real no Fundo Restrito Físico Acumulado:", "fundoR", data, "result");
+
+            document.getElementById('dre-tbody').innerHTML = tbody;
+        }
+
+        function renderFoco() {
+            let m = G_DATA[viewM - 1]; 
+            if(!m) return;
+            document.getElementById('foco-content').innerHTML = `
+                <div class="border-b-4 border-indigo-800 pb-4 mb-6">
+                    <h2 class="text-3xl font-black text-slate-800">Cockpit Analítico Isolado <span class="text-indigo-600 ml-2">MÊS ${m.mes}</span></h2>
+                </div>
+                <div class="grid grid-cols-2 gap-8">
+                    <!-- Esquerda -->
+                    <div class="space-y-4">
+                        <div class="bg-indigo-50 rounded p-5 border border-indigo-200">
+                            <h3 class="font-bold text-indigo-900 border-b border-indigo-200 pb-2 mb-2">Tamanho Base & Top Line</h3>
+                            <div class="flex justify-between items-center"><span class="text-sm">Usuários Ativos / Cobrados</span><span class="font-bold">${formatNum(m.usuarios_totais)}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm">Novos Clientes Atraídos</span><span class="font-bold">${formatNum(m.novos_usuarios)}</span></div>
+                            <div class="flex justify-between items-center mt-3"><span class="font-black text-indigo-800 text-lg">Receita Operacional Bruta:</span><span class="font-black text-xl">${formatBRL(m.rob)}</span></div>
+                        </div>
+                        <div class="bg-red-50 rounded p-5 border border-red-200">
+                            <h3 class="font-bold text-red-900 border-b border-red-200 pb-2 mb-2">Custos Contábeis do Mês</h3>
+                            <div class="flex justify-between items-center"><span class="text-sm">Impostos Evadidos Governo</span><span class="font-bold text-red-700">-${formatBRL(m.imposto)}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm">Calote NPL Sofrido na Carne</span><span class="font-bold text-red-700">-${formatBRL(m.d_npl)}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm">Sistemas / Dock / API Plástico</span><span class="font-bold text-red-700">-${formatBRL(m.c_emis + m.c_baas)}</span></div>
+                        </div>
+                    </div>
+                    <!-- Direita -->
+                    <div class="space-y-4">
+                        <div class="bg-slate-100 rounded p-5 border border-slate-300">
+                            <h3 class="font-bold text-slate-800 border-b border-slate-300 pb-2 mb-2">OPEX Matriz e Marketing</h3>
+                            <div class="flex justify-between items-center"><span class="text-sm">Engajamento Mídias (CAC Custo)</span><span class="font-bold">-${formatBRL(m.mkt)}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm">Folha Interna Headquarters C-Level</span><span class="font-bold">-${formatBRL(m.hr_matriz)}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm">Pagamento Autônomos Comerciais</span><span class="font-bold">-${formatBRL(m.hr_liquido)}</span></div>
+                        </div>
+                        <div class="bg-[#ECFDF5] rounded p-5 border-2 border-[#059669] shadow-lg mt-5">
+                            <h3 class="font-black text-[#064E3B] text-center text-sm tracking-widest uppercase mb-1 border-b border-emerald-300 pb-2">Cashflow Operacional Master (F.C.F)</h3>
+                            <div class="flex justify-between items-end mt-4"><span class="text-xs font-semibold text-[#047857]">Dinheiro Vivo Final Após Proteções</span><span class="font-black text-3xl ${m.fc_livre < 0 ? 'text-red-600' : 'text-emerald-700'}">${formatBRL(m.fc_livre)}</span></div>
+                            <div class="text-center mt-3 text-xs text-slate-500 font-bold border-t pt-2">Saldo Estático na Caixinha: ${formatBRL(m.fundoR)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener("DOMContentLoaded", runSimulation);
+    </script>
+</body>
+</html>
