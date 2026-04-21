@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solicitar Crédito — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* BLOCK SELECTOR */
+.block-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.block-btn{padding:12px 8px;border-radius:10px;border:2px solid var(--border);background:var(--white);cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
+.block-btn:hover{border-color:var(--primary);background:var(--primary-50)}
+.block-btn.sel{border-color:var(--primary);background:var(--primary);color:#fff}
+.block-btn .bb-num{font-size:22px;font-weight:800;line-height:1}
+.block-btn .bb-val{font-size:11px;font-weight:500;opacity:.7;margin-top:4px}
+.block-btn.sel .bb-val{opacity:.8}
+
+/* VERTICAL GRID */
+.vtx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.vtx-pill{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:9px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:.12s;font-size:12.5px;font-weight:500;color:var(--t1)}
+.vtx-pill:hover{border-color:var(--primary);background:var(--primary-50)}
+.vtx-pill.sel{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.vtx-pill .vp-emoji{font-size:18px;line-height:1}
+
+/* AMORTIZATION TABLE */
+.amt-table{width:100%;border-collapse:collapse}
+.amt-table th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg)}
+.amt-table td{padding:9px 10px;border-bottom:1px solid var(--border-light);font-size:12px;font-variant-numeric:tabular-nums;color:var(--t1)}
+.amt-table tr:last-child td{border-bottom:none}
+.amt-table tr.current td{background:#EFF3FF;font-weight:600}
+.amt-table td.paid{color:var(--green)}
+.amt-table td.pending{color:var(--primary)}
+
+/* QUEUE STATUS */
+.queue-card{background:linear-gradient(135deg,var(--primary-50),#EFF3FF);border:1px solid #BFDBFE;border-radius:12px;padding:20px;margin-bottom:16px}
+.qc-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.qc-icon{width:44px;height:44px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center}
+.qc-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qc-title{font-size:15px;font-weight:700;color:var(--t1)}
+.qc-sub{font-size:12px;color:var(--t2)}
+.queue-steps{display:flex;align-items:center;gap:0}
+.qs{flex:1;text-align:center}
+.qs-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 6px}
+.qs-dot.done{background:var(--green);color:#fff}
+.qs-dot.active{background:var(--primary);color:#fff;box-shadow:0 0 0 4px rgba(22,64,214,.2)}
+.qs-dot.wait{background:var(--bg);border:2px solid var(--border);color:var(--t3)}
+.qs-lbl{font-size:10.5px;color:var(--t2);font-weight:500}
+.qs-line{height:2px;width:100%;background:var(--border);margin-top:-20px;z-index:0}
+.qs-line.done-line{background:var(--green)}
+
+/* SUMMARY PANEL */
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.sum-row:last-child{border-bottom:none}
+.sum-lbl{font-size:12.5px;color:var(--t2)}
+.sum-val{font-size:13px;font-weight:600;color:var(--t1)}
+.sum-total{background:var(--primary);border-radius:10px;padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.sum-total-lbl{font-size:13px;color:rgba(255,255,255,.8);font-weight:500}
+.sum-total-val{font-size:22px;font-weight:800;color:#fff}
+
+/* PRAZO TABS */
+.prazo-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ptab{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:12.5px;font-weight:600;cursor:pointer;transition:.12s;color:var(--t2);font-family:inherit}
+.ptab.sel{border-color:var(--primary);background:var(--primary-50);color:var(--primary)}
+
+/* FORMULA BOX */
+.formula-box{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border)}
+.formula-title{font-size:11.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.formula-eq{font-family:'Courier New',monospace;font-size:12px;color:var(--purple);background:var(--purple-light);padding:8px 12px;border-radius:7px;line-height:1.7}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+.pix-code{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;font-family:'Courier New',monospace;font-size:11px;color:var(--t2);word-break:break-all;margin-bottom:16px}
+.qr-placeholder{width:140px;height:140px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:11px;color:var(--t3);text-align:center}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon" style="background:var(--green)">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-05-dashboard-usuario.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="ni" href="tela-08-extrato-cartao.html">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Meu Cartão
+      </a>
+      <a class="ni" href="tela-07-nexus-score.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Crédito</div>
+      <a class="ni active" href="tela-06-solicitar-credito.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Solicitar Crédito
+      </a>
+      <a class="ni" href="tela-09-parcelas.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Parcelas
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Conta</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </a>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        MACRO HASH
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+      <div>
+        <div class="u-name">Maria Ramos</div>
+        <div class="u-role"><span class="role-badge rb-u">Usuário</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">Solicitar Crédito</div>
+    <div class="pg-sub">Sistema FIFO · Blocos de R$40 · Score 720 pts</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div style="display:flex;align-items:center;gap:8px;background:var(--green-light);border:1px solid var(--green-50);border-radius:8px;padding:7px 13px">
+    <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--green)" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span style="font-size:12.5px;color:var(--green);font-weight:600">NEXUS Score: 720 — Elegível para até 10 blocos</span>
+  </div>
+  <button class="ib" title="Notificações">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+</header>
+
+<main class="main">
+
+  <!-- FILA FIFO STATUS -->
+  <div class="queue-card">
+    <div class="qc-top">
+      <div class="qc-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="qc-title">Sistema FIFO — Fila de Crédito</div>
+        <div class="qc-sub">Sua posição atual: <b style="color:var(--primary)">#3 na fila</b> · Estimativa: ~4 min para aprovação</div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div style="display:flex;align-items:center;position:relative;z-index:1">
+        <div class="qs" style="flex:none;width:28px">
+          <div class="qs-dot done">✓</div>
+          <div class="qs-lbl">Score</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--green);margin-bottom:14px"></div>
+        <div class="qs" style="flex:none;width:28px">
+          <div class="qs-dot done">✓</div>
+          <div class="qs-lbl">KYC</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--green);margin-bottom:14px"></div>
+        <div class="qs" style="flex:none;width:28px">
+          <div class="qs-dot active">3</div>
+          <div class="qs-lbl">Análise IA</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--border);margin-bottom:14px"></div>
+        <div class="qs" style="flex:none;width:28px">
+          <div class="qs-dot wait">4</div>
+          <div class="qs-lbl">Aprovação</div>
+        </div>
+        <div style="flex:1;height:2px;background:var(--border);margin-bottom:14px"></div>
+        <div class="qs" style="flex:none;width:28px">
+          <div class="qs-dot wait">5</div>
+          <div class="qs-lbl">Cartão</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRID 3 COLUNAS: Blocos | Detalhes | Resumo -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:16px;align-items:start">
+
+    <!-- COL 1: Seleção de blocos + Vertical -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- BLOCOS -->
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">Quantidade de Blocos</div><div class="cs">1 bloco = R$ 40,00 · máx. 10 blocos</div></div>
+        </div>
+        <div class="cb">
+          <div class="block-selector" id="blockSelector">
+            <button class="block-btn" onclick="selectBlock(1)"><div class="bb-num">1</div><div class="bb-val">R$40</div></button>
+            <button class="block-btn" onclick="selectBlock(2)"><div class="bb-num">2</div><div class="bb-val">R$80</div></button>
+            <button class="block-btn" onclick="selectBlock(3)"><div class="bb-num">3</div><div class="bb-val">R$120</div></button>
+            <button class="block-btn" onclick="selectBlock(4)"><div class="bb-num">4</div><div class="bb-val">R$160</div></button>
+            <button class="block-btn" onclick="selectBlock(5)"><div class="bb-num">5</div><div class="bb-val">R$200</div></button>
+            <button class="block-btn sel" onclick="selectBlock(6)"><div class="bb-num">6</div><div class="bb-val">R$240</div></button>
+            <button class="block-btn" onclick="selectBlock(7)"><div class="bb-num">7</div><div class="bb-val">R$280</div></button>
+            <button class="block-btn" onclick="selectBlock(8)"><div class="bb-num">8</div><div class="bb-val">R$320</div></button>
+            <button class="block-btn" onclick="selectBlock(9)"><div class="bb-num">9</div><div class="bb-val">R$360</div></button>
+            <button class="block-btn" onclick="selectBlock(10)"><div class="bb-num">10</div><div class="bb-val">R$400</div></button>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:12px;color:var(--t3)">Valor selecionado</div>
+              <div style="font-size:26px;font-weight:800;color:var(--primary);letter-spacing:-.5px" id="valorDisplay">R$ 240,00</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:12px;color:var(--t3)">Blocos</div>
+              <div style="font-size:26px;font-weight:800;color:var(--t1)" id="blocosDisplay">6</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRAZO -->
+      <div class="card">
+        <div class="ch"><div class="ct">Prazo de Pagamento</div><div class="cs">Sistema Price — parcelas fixas</div></div>
+        <div class="cb">
+          <div class="prazo-tabs" id="prazoTabs">
+            <button class="ptab" onclick="selectPrazo(3)">3× parcelas</button>
+            <button class="ptab sel" onclick="selectPrazo(6)">6× parcelas</button>
+            <button class="ptab" onclick="selectPrazo(9)">9× parcelas</button>
+            <button class="ptab" onclick="selectPrazo(12)">12× parcelas</button>
+          </div>
+          <div class="formula-box">
+            <div class="formula-title">Fórmula Sistema Price</div>
+            <div class="formula-eq">PMT = PV × [i × (1+i)^n] / [(1+i)^n - 1]<br><br>PV = R$240 · i = 5,9% a.m. · n = 6<br>PMT = <b style="color:var(--primary)">R$ 46,87 / parcela</b></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div style="background:var(--bg);border-radius:9px;padding:12px;text-align:center">
+              <div style="font-size:11px;color:var(--t3)">Parcela</div>
+              <div style="font-size:20px;font-weight:800;color:var(--t1)" id="pmtDisplay">R$46,87</div>
+            </div>
+            <div style="background:var(--bg);border-radius:9px;padding:12px;text-align:center">
+              <div style="font-size:11px;color:var(--t3)">Taxa a.m.</div>
+              <div style="font-size:20px;font-weight:800;color:var(--gold)">5,9%</div>
+            </div>
+            <div style="background:var(--bg);border-radius:9px;padding:12px;text-align:center">
+              <div style="font-size:11px;color:var(--t3)">CET total</div>
+              <div style="font-size:20px;font-weight:800;color:var(--red)" id="cetDisplay">41,2%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Vertical + Tabela Price -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- VERTICAL -->
+      <div class="card">
+        <div class="ch"><div class="ct">Vertical de Consumo</div><div class="cs">141 categorias disponíveis · Selecione uma</div></div>
+        <div class="cb">
+          <div class="vtx-grid" id="vtxGrid">
+            <div class="vtx-pill sel" onclick="selectVtx(this)"><span class="vp-emoji">🏥</span>Saúde</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">📚</span>Educação</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">🛒</span>Supermercado</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">🚌</span>Transporte</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">🍽️</span>Alimentação</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">💊</span>Farmácia</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">⚡</span>Energia</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">💧</span>Água/Saneam.</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">🏠</span>Habitação</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">👕</span>Vestuário</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">📱</span>Telecom</div>
+            <div class="vtx-pill" onclick="selectVtx(this)"><span class="vp-emoji">⚙️</span>Outros</div>
+          </div>
+          <div style="text-align:center;margin-top:4px">
+            <a href="#" style="font-size:12px;color:var(--primary);font-weight:500">Ver todas as 141 categorias →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA PRICE -->
+      <div class="card">
+        <div class="ch"><div class="ct">Tabela de Amortização</div><div class="cs">Sistema Price · 6 parcelas</div></div>
+        <div class="cb" style="padding:0">
+          <table class="amt-table" id="amtTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Vencimento</th>
+                <th>Parcela</th>
+                <th>Amortiz.</th>
+                <th>Juros</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+            <tbody id="amtBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: Resumo + Confirmar -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="ch"><div class="ct">Resumo da Solicitação</div></div>
+        <div class="cb">
+          <div class="sum-row">
+            <div class="sum-lbl">Blocos solicitados</div>
+            <div class="sum-val" id="s-blocos">6 blocos</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Valor do crédito</div>
+            <div class="sum-val" id="s-valor">R$ 240,00</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Vertical</div>
+            <div class="sum-val" id="s-vertical">🏥 Saúde</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Prazo</div>
+            <div class="sum-val" id="s-prazo">6 parcelas</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Taxa a.m.</div>
+            <div class="sum-val">5,9%</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Parcela mensal</div>
+            <div class="sum-val" id="s-pmt">R$ 46,87</div>
+          </div>
+          <div class="sum-row">
+            <div class="sum-lbl">Total a pagar</div>
+            <div class="sum-val" id="s-total">R$ 281,22</div>
+          </div>
+          <div class="sum-total">
+            <div class="sum-total-lbl">Recebe no cartão</div>
+            <div class="sum-total-val" id="s-recebe">R$240</div>
+          </div>
+          <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:14px;padding:13px;font-size:14px" onclick="openModal()">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirmar Solicitação
+          </button>
+          <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px;line-height:1.5">
+            Ao confirmar, você concorda com os<br>Termos de Crédito NEXUS v2.1 e CMN 5050/2022
+          </div>
+        </div>
+      </div>
+
+      <!-- NEXUS Score elegibilidade -->
+      <div class="card">
+        <div class="ch"><div class="ct">Elegibilidade</div></div>
+        <div class="cb" style="padding:12px 16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--green);flex-shrink:0">720</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--t1)">Score NEXUS: 720</div>
+              <div style="font-size:11.5px;color:var(--green)">Tier: Bom — elegível</div>
+            </div>
+          </div>
+          <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px">
+            <div style="width:72%;height:100%;background:linear-gradient(90deg,#FCA5A5 0%,#FCD34D 40%,#86EFAC 70%);border-radius:3px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--t3)">
+            <span>0 — Ruim</span><span>400 — Regular</span><span>700 — Bom</span><span>1000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title">Solicitação enviada!</div>
+    <div class="modal-sub">Seu crédito foi aprovado e enviado para o cartão</div>
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--green)" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="font-size:28px;font-weight:800;color:var(--t1)">R$ 240,00</div>
+      <div style="font-size:13px;color:var(--t2)">creditado no Cartão Visa •••• 4821</div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:12px;margin-bottom:16px;font-size:11.5px;color:var(--t2)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Contrato</span><span style="font-weight:600;color:var(--t1)">#CRT-2026-1204</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>MACRO HASH L4</span><span style="font-family:'Courier New';font-size:10px;color:var(--purple)">a3f8c1e2...</span></div>
+      <div style="display:flex;justify-content:space-between"><span>1ª parcela</span><span style="font-weight:600;color:var(--t1)">05/mai/2026 · R$46,87</span></div>
+    </div>
+    <button class="btn btn-g" style="width:100%;justify-content:center;padding:12px" onclick="closeModal()">Fechar</button>
+  </div>
+</div>
+
+<script>
+let blocos = 6, prazo = 6;
+const taxa = 0.059;
+
+function pmt(pv, i, n){ return pv * (i * Math.pow(1+i,n)) / (Math.pow(1+i,n) - 1); }
+
+function calcular(){
+  const pv = blocos * 40;
+  const p = pmt(pv, taxa, prazo);
+  const total = p * prazo;
+  const cet = ((total/pv - 1) * 100);
+  document.getElementById('valorDisplay').textContent = 'R$ ' + pv.toFixed(2).replace('.',',');
+  document.getElementById('blocosDisplay').textContent = blocos;
+  document.getElementById('pmtDisplay').textContent = 'R$' + p.toFixed(2).replace('.',',');
+  document.getElementById('cetDisplay').textContent = cet.toFixed(1) + '%';
+  document.getElementById('s-blocos').textContent = blocos + ' blocos';
+  document.getElementById('s-valor').textContent = 'R$ ' + pv.toFixed(2).replace('.',',');
+  document.getElementById('s-prazo').textContent = prazo + ' parcelas';
+  document.getElementById('s-pmt').textContent = 'R$ ' + p.toFixed(2).replace('.',',');
+  document.getElementById('s-total').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  document.getElementById('s-recebe').textContent = 'R$' + pv;
+  buildTable(pv, p);
+}
+
+function buildTable(pv, p){
+  let saldo = pv;
+  let html = '';
+  const hoje = new Date(2026,3,12);
+  for(let k=1; k<=prazo; k++){
+    const j = saldo * taxa;
+    const am = p - j;
+    saldo -= am;
+    const dt = new Date(hoje);
+    dt.setMonth(dt.getMonth() + k - 0);
+    dt.setDate(5);
+    const dstr = dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    html += `<tr>
+      <td><b>${k}</b></td>
+      <td>${dstr}</td>
+      <td style="font-weight:600">R$${p.toFixed(2).replace('.',',')}</td>
+      <td>R$${am.toFixed(2).replace('.',',')}</td>
+      <td style="color:var(--red)">R$${j.toFixed(2).replace('.',',')}</td>
+      <td>R$${Math.max(0,saldo).toFixed(2).replace('.',',')}</td>
+    </tr>`;
+  }
+  document.getElementById('amtBody').innerHTML = html;
+}
+
+function selectBlock(n){
+  blocos = n;
+  document.querySelectorAll('.block-btn').forEach((b,i)=>{
+    b.className = 'block-btn' + (i+1===n?' sel':'');
+  });
+  calcular();
+}
+
+function selectPrazo(n){
+  prazo = n;
+  document.querySelectorAll('.ptab').forEach(b=>{
+    b.className = 'ptab' + (parseInt(b.textContent)===n?' sel':'');
+  });
+  calcular();
+}
+
+function selectVtx(el){
+  document.querySelectorAll('.vtx-pill').forEach(p=>p.className='vtx-pill');
+  el.className = 'vtx-pill sel';
+  document.getElementById('s-vertical').textContent = el.textContent.trim();
+}
+
+function openModal(){ document.getElementById('confirmModal').className='modal-bg open'; }
+function closeModal(){
+  document.getElementById('confirmModal').className='modal-bg';
+  window.location.href = 'tela-05-dashboard-usuario.html';
+}
+
+calcular();
+</script>
+</body>
+</html>

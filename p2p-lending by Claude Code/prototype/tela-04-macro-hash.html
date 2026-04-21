@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MACRO HASH Ledger — NEXUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.chain-layout{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.level-tabs{display:flex;gap:4px;margin-bottom:16px}
+.ltab{padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--t2);transition:.12s}
+.ltab.on{background:var(--purple);border-color:var(--purple);color:#fff}
+.block-card{border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--white);position:relative;cursor:pointer;transition:.15s}
+.block-card:hover{border-color:#CBD5E1;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.block-card.selected{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.block-level{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.l1{background:#EFF3FF;color:var(--primary)}.l2{background:var(--green-light);color:var(--green)}.l3{background:var(--gold-light);color:var(--gold)}.l4{background:var(--purple-light);color:var(--purple)}.l5{background:var(--red-light);color:var(--red)}
+.block-hash{font-family:'Courier New',monospace;font-size:11.5px;color:var(--purple);word-break:break-all;background:var(--purple-light);padding:8px 12px;border-radius:6px;margin-bottom:10px;line-height:1.5}
+.block-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bm-item{font-size:11.5px}
+.bm-key{color:var(--t3);margin-bottom:2px}
+.bm-val{font-weight:600;color:var(--t1)}
+.chain-arrow{text-align:center;font-size:18px;color:var(--t3);margin:-4px 0;padding:2px}
+.status-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600}
+.s-deployed{background:#EFF3FF;color:var(--primary)}.s-active{background:var(--green-light);color:var(--green)}.s-repaid{background:#F8FAFC;color:#475569}.s-default{background:var(--red-light);color:var(--red)}.s-idle{background:var(--gold-light);color:var(--gold)}
+.verify-box{padding:20px;background:var(--primary-50);border-radius:10px;border:1px solid #BFDBFE;margin-bottom:16px}
+.verify-title{font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:10px}
+.verify-input{width:100%;padding:9px 12px;border:1px solid #BFDBFE;border-radius:7px;font-family:'Courier New',monospace;font-size:11px;color:var(--t1);background:var(--white);outline:none;margin-bottom:10px}
+.verify-result{padding:10px 12px;border-radius:7px;font-size:12.5px;font-weight:600;display:none}
+.vr-ok{background:var(--green-light);color:var(--green);border:1px solid #A7F3D0;display:flex}
+.vr-fail{background:var(--red-light);color:var(--red);border:1px solid #FECACA;display:flex}
+.root-box{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.root-hash{font-family:'Courier New',monospace;font-size:10px;color:var(--purple);word-break:break-all;margin-top:6px;line-height:1.5}
+.heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.hcell{height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:pointer;transition:.1s}
+.hcell:hover{opacity:.8}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="s-logo"><div class="logo-icon">NX</div><div class="logo-text">NEX<em>US</em></div></div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-02-dashboard-aplicante.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a class="ni" href="#"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Meu Portfólio</a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Rastreabilidade</div>
+      <a class="ni active" href="tela-04-macro-hash.html"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><line x1="5" y1="9" x2="5" y2="12"/><line x1="12" y1="9" x2="12" y2="12"/></svg>MACRO HASH</a>
+      <a class="ni" href="#"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>NEXUS Score</a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Investimentos</div>
+      <a class="ni" href="tela-03-composer-portfolio.html"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Aportar</a>
+    </div>
+  </nav>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar">JC</div>
+      <div><div class="u-name">João Carlos Silva</div><div class="u-role"><span class="role-badge rb-a">Aplicante</span></div></div>
+    </div>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div><div class="pg-title">MACRO HASH — Ledger Explorer</div><div class="pg-sub">Cadeia SHA-256 auditável · L1→L5 · Verificação pública</div></div>
+  <div class="tb-sep"></div>
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Buscar hash SHA-256...">
+  </div>
+  <div class="chips">
+    <div class="chip on">Meu Portfólio</div>
+    <div class="chip">Todos</div>
+    <div class="chip">Público</div>
+  </div>
+  <div class="ib"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+  <div class="tb-avatar">JC</div>
+</header>
+
+<main class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Total de Blocos</div><div class="kc-icon icon-v"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/></svg></div></div>
+      <div class="kc-val">48.721</div>
+      <div class="kc-bot"><div class="trend up">+312 hoje</div><div class="kc-sec">L1–L5</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Contratos Ativos</div><div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      <div class="kc-val">18.420</div>
+      <div class="kc-bot"><div class="trend up">ACTIVE_USE</div><div class="kc-sec">R$ 120M</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Integridade</div><div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
+      <div class="kc-val">100%</div>
+      <div class="kc-bot"><div class="trend up">Chain válida</div><div class="kc-sec">SHA-256 ✓</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Hash Raiz L1</div><div class="kc-icon icon-p"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div></div>
+      <div class="kc-val" style="font-size:12px;font-family:'Courier New',monospace;font-weight:700;color:var(--purple)">b7e2c4a1...</div>
+      <div class="kc-bot"><div class="trend nu">abr/2026</div><div class="kc-sec">Publicado 01/abr</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Blocos Pagos</div><div class="kc-icon icon-o"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+      <div class="kc-val">27.140</div>
+      <div class="kc-bot"><div class="trend nu">REPAID</div><div class="kc-sec">R$ 48M liquidados</div></div>
+    </div>
+  </div>
+
+  <div class="chain-layout">
+    <!-- CADEIA DE BLOCOS -->
+    <div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:13.5px;font-weight:700;color:var(--t1);margin-bottom:4px">Cadeia MACRO HASH — L1 → L5</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Clique em um bloco para inspecionar a cadeia completa</div>
+        <div class="level-tabs">
+          <div class="ltab on" onclick="filterLevel(this,'all')">Todos</div>
+          <div class="ltab" onclick="filterLevel(this,'L1')">L1 Platform</div>
+          <div class="ltab" onclick="filterLevel(this,'L2')">L2 Investor</div>
+          <div class="ltab" onclick="filterLevel(this,'L3')">L3 Portfolio</div>
+          <div class="ltab" onclick="filterLevel(this,'L4')">L4 Contract</div>
+          <div class="ltab" onclick="filterLevel(this,'L5')">L5 Block</div>
+        </div>
+      </div>
+
+      <!-- L1 -->
+      <div class="block-card selected" onclick="selectBlock(this,'L1')">
+        <div class="block-level l1">🔷 L1 — Platform State</div>
+        <div class="block-hash">b7e2c4a1d8f3059e6b1a2c7d4f8e3a9b5c2d7f4e1a6b3c8d5e2f7a4b9c1d6e3f8a0b2c4d6e8f1a3</div>
+        <div class="block-meta">
+          <div class="bm-item"><div class="bm-key">Composição</div><div class="bm-val">H(platform_id ∥ timestamp ∥ config_hash)</div></div>
+          <div class="bm-item"><div class="bm-key">Criado em</div><div class="bm-val">01/abr/2026 00:00:01</div></div>
+          <div class="bm-item"><div class="bm-key">Parent Hash</div><div class="bm-val" style="color:var(--t3)">— (raiz)</div></div>
+          <div class="bm-item"><div class="bm-key">Status</div><div><span class="status-chip s-active">● Válido</span></div></div>
+        </div>
+      </div>
+
+      <div class="chain-arrow">↓</div>
+
+      <!-- L2 -->
+      <div class="block-card" onclick="selectBlock(this,'L2')">
+        <div class="block-level l2">🟢 L2 — Investor Block</div>
+        <div class="block-hash">a3f8c1d9e4b27053f1c8a97e621bb4d03e5a1f82c7d94b06e3f2a8c5b91d740e2c6f8a0b4d2e6a8f0</div>
+        <div class="block-meta">
+          <div class="bm-item"><div class="bm-key">Composição</div><div class="bm-val">H(investor_id ∥ portfolio_id ∥ amount ∥ L1)</div></div>
+          <div class="bm-item"><div class="bm-key">Investidor</div><div class="bm-val">INV-a1b2c3d4</div></div>
+          <div class="bm-item"><div class="bm-key">Valor aportado</div><div class="bm-val">R$ 28.500,00</div></div>
+          <div class="bm-item"><div class="bm-key">Status</div><div><span class="status-chip s-active">● ACTIVE</span></div></div>
+        </div>
+      </div>
+
+      <div class="chain-arrow">↓</div>
+
+      <!-- L3 -->
+      <div class="block-card" onclick="selectBlock(this,'L3')">
+        <div class="block-level l3">🟡 L3 — Portfolio Block</div>
+        <div class="block-hash">c9d1e5f2a6b8047cd3e7f1a5b9c3d7e1f5a9b3c7d1e5f9a3b7c1d5e9f3a7b1c5d9e3f7a1b5c9d3e7</div>
+        <div class="block-meta">
+          <div class="bm-item"><div class="bm-key">Composição</div><div class="bm-val">H(portfolio_params ∥ allocation ∥ L2)</div></div>
+          <div class="bm-item"><div class="bm-key">Portfólio</div><div class="bm-val">Mix A/B · Saúde+Educação+Supermercado</div></div>
+          <div class="bm-item"><div class="bm-key">Taxa média</div><div class="bm-val">4,1% a.m.</div></div>
+          <div class="bm-item"><div class="bm-key">Status</div><div><span class="status-chip s-active">● DEPLOYED</span></div></div>
+        </div>
+      </div>
+
+      <div class="chain-arrow">↓</div>
+
+      <!-- L4 -->
+      <div class="block-card" onclick="selectBlock(this,'L4')">
+        <div class="block-level l4">🟣 L4 — Contract Block</div>
+        <div class="block-hash">d4f6a8b2c0e2f4a6b8d0f2a4c6e8b0d2f4a6c8e0b2d4f6a8c0e2b4d6f8a0c2e4b6d8f0a2c4e6b8d0</div>
+        <div class="block-meta">
+          <div class="bm-item"><div class="bm-key">Composição</div><div class="bm-val">H(contract_id ∥ user_id ∥ terms ∥ L3)</div></div>
+          <div class="bm-item"><div class="bm-key">Contrato</div><div class="bm-val">CTR-78ab2190</div></div>
+          <div class="bm-item"><div class="bm-key">Usuário</div><div class="bm-val">USR-#4521 (anon.)</div></div>
+          <div class="bm-item"><div class="bm-key">Status</div><div><span class="status-chip s-active">● ACTIVE</span></div></div>
+        </div>
+      </div>
+
+      <div class="chain-arrow">↓</div>
+
+      <!-- L5 -->
+      <div class="block-card" onclick="selectBlock(this,'L5')">
+        <div class="block-level l5" style="background:var(--red-light);color:var(--red)">🔴 L5 — Block State</div>
+        <div class="block-hash">e2a4c6e8a0b2c4e6a8b0c2e4a6b8c0e2a4c6e8b0d2f4a6b8c0e2d4f6b8a0c2d4f6a8b0c2e4d6f8a0</div>
+        <div class="block-meta">
+          <div class="bm-item"><div class="bm-key">Composição</div><div class="bm-val">H(block_id ∥ amount_40 ∥ card_token ∥ L4)</div></div>
+          <div class="bm-item"><div class="bm-key">Bloco</div><div class="bm-val">R$ 40,00 · Vertical: Saúde</div></div>
+          <div class="bm-item"><div class="bm-key">Cartão</div><div class="bm-val">**** 4521 (tokenizado)</div></div>
+          <div class="bm-item"><div class="bm-key">Estado</div><div><span class="status-chip s-active">● ACTIVE_USE</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL LATERAL -->
+    <div>
+      <!-- VERIFICAR HASH -->
+      <div class="card" style="padding:0;margin-bottom:16px">
+        <div class="ch"><div><div class="ct">Verificar Integridade</div><div class="cs">Verificação pública — sem login</div></div></div>
+        <div class="cb">
+          <div class="verify-box" style="margin-bottom:0;background:var(--bg);border:none;padding:0">
+            <input class="verify-input" id="verify-input" type="text" placeholder="Cole um hash SHA-256 (64 chars hex)" oninput="resetVerify()">
+            <button class="btn btn-p" style="width:100%;justify-content:center" onclick="verifyHash()">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Verificar cadeia
+            </button>
+            <div class="verify-result vr-ok" id="vr-ok" style="margin-top:10px">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;margin-right:8px;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>
+              Hash válido · Cadeia íntegra L1→L5 · Verificado em <span id="vr-time"></span>
+            </div>
+            <div class="verify-result vr-fail" id="vr-fail" style="margin-top:10px">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;margin-right:8px;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Hash não encontrado no ledger ou cadeia comprometida
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HASH RAIZ PÚBLICO -->
+      <div class="card" style="padding:0;margin-bottom:16px">
+        <div class="ch"><div><div class="ct">Hash Raiz L1 Público</div><div class="cs">Publicado mensalmente</div></div><span class="ca">Copiar</span></div>
+        <div class="cb">
+          <div style="font-size:11.5px;color:var(--t2);margin-bottom:8px">Período: <strong>Abril 2026</strong> · Publicado em 01/abr/2026</div>
+          <div class="root-hash">b7e2c4a1d8f3059e6b1a2c7d4f8e3a9b5c2d7f4e1a6b3c8d5e2f7a4b9c1d6e3f</div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <div style="flex:1;background:var(--green-light);border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:600;color:var(--green)">48.721 blocos</div>
+            <div style="flex:1;background:var(--primary-50);border-radius:6px;padding:8px;text-align:center;font-size:11px;font-weight:600;color:var(--primary)">Chain: ÍNTEGRA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADOS DOS BLOCOS -->
+      <div class="card" style="padding:0;margin-bottom:16px">
+        <div class="ch"><div><div class="ct">Distribuição de Estados</div><div class="cs">Todos os blocos L5</div></div></div>
+        <div class="cb" style="padding-bottom:8px">
+          <canvas id="statesChart" height="150"></canvas>
+        </div>
+        <div style="padding:0 20px 16px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#1640D6">● DEPLOYED</span><span style="font-weight:600">3.161 (6,5%)</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#059669">● ACTIVE_USE</span><span style="font-weight:600">18.420 (37,8%)</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#D97706">● IDLE</span><span style="font-weight:600">0 (0%)</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#475569">● REPAID</span><span style="font-weight:600">27.140 (55,7%)</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#DC2626">● DEFAULT</span><span style="font-weight:600">— (0%)</span></div>
+        </div>
+      </div>
+
+      <!-- HEATMAP MENSAL -->
+      <div class="card" style="padding:0">
+        <div class="ch"><div><div class="ct">Atividade de Blocos</div><div class="cs">Últimas 5 semanas</div></div></div>
+        <div class="cb">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">
+            <div style="font-size:10px;color:var(--t3);text-align:center">D</div><div style="font-size:10px;color:var(--t3);text-align:center">S</div><div style="font-size:10px;color:var(--t3);text-align:center">T</div><div style="font-size:10px;color:var(--t3);text-align:center">Q</div><div style="font-size:10px;color:var(--t3);text-align:center">Q</div><div style="font-size:10px;color:var(--t3);text-align:center">S</div><div style="font-size:10px;color:var(--t3);text-align:center">S</div>
+          </div>
+          <div class="heat-grid" id="heatmap"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--t3)">
+            <span>Menos</span>
+            <div style="width:12px;height:12px;border-radius:2px;background:#ECFDF5"></div>
+            <div style="width:12px;height:12px;border-radius:2px;background:#6EE7B7"></div>
+            <div style="width:12px;height:12px;border-radius:2px;background:#10B981"></div>
+            <div style="width:12px;height:12px;border-radius:2px;background:#059669"></div>
+            <div style="width:12px;height:12px;border-radius:2px;background:#047857"></div>
+            <span>Mais</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// States chart
+const sctx=document.getElementById('statesChart').getContext('2d');
+new Chart(sctx,{type:'doughnut',data:{labels:['DEPLOYED','ACTIVE_USE','REPAID','DEFAULT'],datasets:[{data:[3161,18420,27140,0],backgroundColor:['#1640D6','#059669','#94A3B8','#DC2626'],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{cutout:'60%',plugins:{legend:{display:false}}}});
+
+// Heatmap
+const hm=document.getElementById('heatmap');
+const colors=['#ECFDF5','#6EE7B7','#10B981','#059669','#047857'];
+const vals=[0,1,2,3,4,3,2,1,2,3,4,4,3,2,4,4,3,4,4,3,2,3,2,4,4,3,2,1,0,0,2,3,2,0,0];
+vals.forEach(v=>{
+  const cell=document.createElement('div');
+  cell.className='hcell';
+  cell.style.background=v===0?'#F1F5F9':colors[v-1];
+  if(v>0){cell.style.color=v>2?'#fff':'#064E3B';cell.textContent=v+'k';}
+  hm.appendChild(cell);
+});
+
+function verifyHash(){
+  const h=document.getElementById('verify-input').value.trim();
+  if(h.length===0)return;
+  const ok=document.getElementById('vr-ok');
+  const fail=document.getElementById('vr-fail');
+  const valid=/^[a-f0-9]{64}$/.test(h);
+  document.getElementById('vr-time').textContent=new Date().toLocaleTimeString('pt-BR');
+  if(valid){ok.style.display='flex';fail.style.display='none';}
+  else{ok.style.display='none';fail.style.display='flex';}
+}
+function resetVerify(){document.getElementById('vr-ok').style.display='none';document.getElementById('vr-fail').style.display='none';}
+function selectBlock(el,level){document.querySelectorAll('.block-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function filterLevel(el,level){document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Aplicante — NEXUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.cr{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px}
+.br{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.vbar-wrap{display:flex;flex-direction:column;gap:10px;padding:20px}
+.vr{display:flex;align-items:center;gap:10px}
+.vl{width:100px;font-size:12px;color:var(--t2);font-weight:500;flex-shrink:0;text-align:right}
+.vtrack{flex:1;height:24px;background:var(--bg);border-radius:6px;overflow:hidden}
+.vfill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:600;color:#fff;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.vval{width:70px;font-size:12.5px;font-weight:600;color:var(--t1);text-align:right;font-variant-numeric:tabular-nums}
+.vpct{width:35px;font-size:11.5px;color:var(--t3);text-align:right}
+.hash{font-family:'Courier New',monospace;font-size:10px;color:var(--purple);background:var(--purple-light);padding:2px 6px;border-radius:4px;cursor:pointer}
+.hash:hover{opacity:.8}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.sd-g{background:var(--green)}.sd-o{background:var(--gold)}.sd-r{background:var(--red)}.sd-p{background:var(--primary)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni active" href="tela-02-dashboard-aplicante.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Meu Portfólio
+        <span class="ni-dot green"></span>
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg>
+        Marketplace
+      </a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Investimentos</div>
+      <a class="ni" href="tela-03-composer-portfolio.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Aportar
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+        Retornos PIX
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Relatório IR
+      </a>
+    </div>
+    <div class="s-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Rastreabilidade</div>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><line x1="5" y1="9" x2="5" y2="12"/><line x1="12" y1="9" x2="12" y2="12"/></svg>
+        MACRO HASH
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+  </nav>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar">JC</div>
+      <div>
+        <div class="u-name">João Carlos Silva</div>
+        <div class="u-role"><span class="role-badge rb-a">Aplicante</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">Dashboard do Investidor</div>
+    <div class="pg-sub">Portfólio ativo · Atualizado há 2 min</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Buscar contrato, hash...">
+  </div>
+  <div class="chips">
+    <div class="chip on">30D</div>
+    <div class="chip">90D</div>
+    <div class="chip">1A</div>
+  </div>
+  <div class="ib" title="Filtros"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
+  <div class="ib" title="Notificações" style="position:relative">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid white"></div>
+  </div>
+  <div class="tb-avatar">JC</div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kcard">
+      <div class="kc-top">
+        <div class="kc-label">Capital Aplicado</div>
+        <div class="kc-icon icon-p"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+      </div>
+      <div class="kc-val">R$ 28.500</div>
+      <div class="kc-bot">
+        <div class="trend up"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+R$ 3.500 este mês</div>
+        <div class="kc-sec">4 portfólios ativos</div>
+      </div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top">
+        <div class="kc-label">Rendimento do Mês</div>
+        <div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+      </div>
+      <div class="kc-val">R$ 1.197</div>
+      <div class="kc-bot">
+        <div class="trend up">+4,2% a.m. · Meta 4,0%</div>
+        <div class="kc-sec">PIX em 01/mai</div>
+      </div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top">
+        <div class="kc-label">Capital em Uso</div>
+        <div class="kc-icon icon-o"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      </div>
+      <div class="kc-val">R$ 24.225</div>
+      <div class="kc-bot">
+        <div class="trend nu">85% do portfólio</div>
+        <div class="kc-sec">312 contratos</div>
+      </div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top">
+        <div class="kc-label">Taxa de Adimplência</div>
+        <div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="kc-val">98,2%</div>
+      <div class="kc-bot">
+        <div class="trend up">Carteira saudável</div>
+        <div class="kc-sec">Default: 1,8%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="cr">
+    <!-- RETORNOS CHART -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Evolução do Portfólio</div><div class="cs">Capital aplicado vs retornos acumulados</div></div>
+        <span class="ca">Ver histórico →</span>
+      </div>
+      <div class="cb" style="padding-bottom:16px">
+        <canvas id="retornosChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- VERTICAIS -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Distribuição por Vertical</div><div class="cs">Alocação atual do portfólio</div></div>
+        <span class="ca">Rebalancear →</span>
+      </div>
+      <div class="vbar-wrap">
+        <div class="vr"><div class="vl">Saúde</div><div class="vtrack"><div class="vfill" id="v1" style="width:0;background:linear-gradient(90deg,#059669,#34D399)">25%</div></div><div class="vval">R$ 7.125</div><div class="vpct">25%</div></div>
+        <div class="vr"><div class="vl">Educação</div><div class="vtrack"><div class="vfill" id="v2" style="width:0;background:linear-gradient(90deg,#1640D6,#60A5FA)">20%</div></div><div class="vval">R$ 5.700</div><div class="vpct">20%</div></div>
+        <div class="vr"><div class="vl">Supermercado</div><div class="vtrack"><div class="vfill" id="v3" style="width:0;background:linear-gradient(90deg,#D97706,#FBBF24)">18%</div></div><div class="vval">R$ 5.130</div><div class="vpct">18%</div></div>
+        <div class="vr"><div class="vl">Transporte</div><div class="vtrack"><div class="vfill" id="v4" style="width:0;background:linear-gradient(90deg,#7C3AED,#A78BFA)">15%</div></div><div class="vval">R$ 4.275</div><div class="vpct">15%</div></div>
+        <div class="vr"><div class="vl">Alimentação</div><div class="vtrack"><div class="vfill" id="v5" style="width:0;background:linear-gradient(90deg,#0F766E,#2DD4BF)">12%</div></div><div class="vval">R$ 3.420</div><div class="vpct">12%</div></div>
+        <div class="vr"><div class="vl">Outros</div><div class="vtrack"><div class="vfill" id="v6" style="width:0;background:linear-gradient(90deg,#475569,#94A3B8)">10%</div></div><div class="vval">R$ 2.850</div><div class="vpct">10%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRATOS TABLE -->
+  <div class="br">
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Contratos Recentes</div><div class="cs">Últimas alocações com MACRO HASH</div></div>
+        <button class="btn btn-s" style="font-size:12px;padding:6px 12px">Ver todos →</button>
+      </div>
+      <div class="cb" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th>Hash L4</th><th>Vertical</th><th>Usuário</th><th>Valor</th><th>Taxa</th><th>Status</th><th>Vencimento</th></tr></thead>
+          <tbody>
+            <tr><td><span class="hash" title="a3f8c1d9e4b27053...">a3f8c1d9...b740e</span></td><td>Saúde</td><td>USR-#4521</td><td>R$ 120,00</td><td>3,5%</td><td><span class="badge b-g"><span class="status-dot sd-g"></span>Ativo</span></td><td>05/mai</td></tr>
+            <tr><td><span class="hash" title="b7e2c4a1d8f3059e...">b7e2c4a1...e3f8</span></td><td>Educação</td><td>USR-#3810</td><td>R$ 80,00</td><td>3,8%</td><td><span class="badge b-g"><span class="status-dot sd-g"></span>Ativo</span></td><td>05/mai</td></tr>
+            <tr><td><span class="hash" title="c9d1e5f2a6b8047c...">c9d1e5f2...a12b</span></td><td>Supermercado</td><td>USR-#2207</td><td>R$ 40,00</td><td>4,0%</td><td><span class="badge b-o"><span class="status-dot sd-o"></span>Parcela aberta</span></td><td>02/mai</td></tr>
+            <tr><td><span class="hash" title="d4f6a8b2c1e3079d...">d4f6a8b2...f45c</span></td><td>Transporte</td><td>USR-#1994</td><td>R$ 160,00</td><td>4,0%</td><td><span class="badge b-g"><span class="status-dot sd-g"></span>Ativo</span></td><td>07/mai</td></tr>
+            <tr><td><span class="hash" title="e2a4c6d8f0b1253e...">e2a4c6d8...c891</span></td><td>Alimentação</td><td>USR-#5502</td><td>R$ 40,00</td><td>4,2%</td><td><span class="badge b-r"><span class="status-dot sd-r"></span>Atraso 3d</span></td><td>28/abr</td></tr>
+            <tr><td><span class="hash" title="f1b3d5e7a9c2046f...">f1b3d5e7...d230</span></td><td>Saúde</td><td>USR-#6631</td><td>R$ 280,00</td><td>3,5%</td><td><span class="badge b-g"><span class="status-dot sd-g"></span>Ativo</span></td><td>10/mai</td></tr>
+            <tr><td><span class="hash" title="g8c0e2f4a6b1357g...">g8c0e2f4...b567</span></td><td>Moradia</td><td>USR-#7714</td><td>R$ 120,00</td><td>3,5%</td><td><span class="badge b-p"><span class="status-dot sd-p"></span>Em fila</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Alertas do Portfólio</div><div class="cs">Requer atenção</div></div>
+        <span class="ca">Ver todos</span>
+      </div>
+      <div class="cb">
+        <div class="aitem warn">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><div class="at">1 contrato em atraso (3 dias)</div><div class="as">USR-#5502 · R$ 40,00 · Alimentação</div></div>
+        </div>
+        <div class="aitem info">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><div class="at">PIX em 01/mai — R$ 1.187,50</div><div class="as">Retorno mensal de 4 portfólios</div></div>
+        </div>
+        <div class="aitem ok">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><div class="at">Portfólio Saúde superou meta</div><div class="as">3,5% a.m. · adimplência 100%</div></div>
+        </div>
+        <div class="aitem info">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div><div class="at">MACRO HASH L1 publicado</div><div class="as">Hash raiz abr/2026 disponível para verificação pública</div></div>
+        </div>
+
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Próximo PIX</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span style="font-size:13px;color:var(--t2)">Data</span>
+            <span style="font-size:13px;font-weight:600;color:var(--t1)">01/mai/2026</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <span style="font-size:13px;color:var(--t2)">Valor líquido</span>
+            <span style="font-size:18px;font-weight:700;color:var(--green)">R$ 1.187,50</span>
+          </div>
+          <button class="btn btn-p" style="width:100%;justify-content:center">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Acessar Portfólio
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// Retornos chart
+const ctx = document.getElementById('retornosChart').getContext('2d');
+const months = ['Nov','Dez','Jan','Fev','Mar','Abr'];
+new Chart(ctx,{type:'line',data:{labels:months,datasets:[
+  {label:'Capital aplicado',data:[12000,15000,18500,22000,25000,28500],borderColor:'#1640D6',backgroundColor:'rgba(22,64,214,.08)',fill:true,tension:.4,pointBackgroundColor:'#1640D6',pointRadius:4,pointHoverRadius:6},
+  {label:'Retorno acumulado',data:[0,420,1100,2050,3180,4732],borderColor:'#059669',backgroundColor:'rgba(5,150,105,.06)',fill:true,tension:.4,pointBackgroundColor:'#059669',pointRadius:4,pointHoverRadius:6}
+]},options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{family:'Inter',size:12},boxWidth:12}}},scales:{y:{ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR'),font:{family:'Inter',size:11}},grid:{color:'rgba(0,0,0,.04)'}},x:{ticks:{font:{family:'Inter',size:11}},grid:{display:false}}}}});
+
+// Barras de verticais (animadas)
+const widths = [25,20,18,15,12,10];
+['v1','v2','v3','v4','v5','v6'].forEach((id,i)=>{
+  setTimeout(()=>{ document.getElementById(id).style.width = widths[i]+'%' }, 200+i*80);
+});
+</script>
+</body>
+</html>

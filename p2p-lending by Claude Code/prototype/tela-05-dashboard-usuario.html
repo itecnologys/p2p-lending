@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Tomador — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* CARD VISA VIRTUAL */
+.visa-card{background:linear-gradient(135deg,#0B2447 0%,#1640D6 60%,#0F766E 100%);border-radius:16px;padding:24px;color:#fff;position:relative;overflow:hidden;min-height:180px;display:flex;flex-direction:column;justify-content:space-between}
+.visa-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06)}
+.visa-card::after{content:'';position:absolute;bottom:-30px;left:-30px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.04)}
+.vc-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2}
+.vc-name{font-size:12px;opacity:.7;letter-spacing:.5px;text-transform:uppercase}
+.vc-label{font-size:13px;font-weight:600;margin-top:2px}
+.vc-chip{width:36px;height:28px;background:linear-gradient(135deg,#FCD34D,#D97706);border-radius:5px;opacity:.9}
+.vc-mid{position:relative;z-index:2}
+.vc-saldo-lbl{font-size:11px;opacity:.6;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.vc-saldo{font-size:32px;font-weight:800;letter-spacing:-.5px}
+.vc-saldo span{font-size:16px;font-weight:600;opacity:.7;margin-right:4px}
+.vc-limit-bar{margin-top:10px}
+.vc-limit-track{height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
+.vc-limit-fill{height:100%;background:#86EFAC;border-radius:3px;width:57%}
+.vc-limit-lbl{font-size:11px;opacity:.6;margin-top:4px;display:flex;justify-content:space-between}
+.vc-bot{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.vc-pan{font-size:14px;font-weight:600;letter-spacing:2px;opacity:.8}
+.vc-brand{font-size:18px;font-weight:800;font-style:italic;opacity:.9}
+
+/* SCORE GAUGE */
+.score-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0 0}
+.score-gauge-svg{width:180px;height:100px;overflow:visible}
+.score-val{text-align:center;margin-top:-10px}
+.score-num{font-size:36px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.score-lbl{font-size:12px;color:var(--t3);margin-top:2px}
+.score-tier{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;margin-top:6px;background:var(--green-light);color:var(--green)}
+.score-bars{padding:16px 20px;border-top:1px solid var(--border-light)}
+.sb-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sb-label{font-size:11.5px;color:var(--t2);width:90px;flex-shrink:0}
+.sb-track{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.sb-fill{height:100%;border-radius:3px}
+.sb-pct{font-size:11px;color:var(--t3);width:32px;text-align:right;flex-shrink:0}
+
+/* PARCELA CARD */
+.parcela-next{background:linear-gradient(135deg,var(--primary-50),#EFF3FF);border:1px solid #BFDBFE;border-radius:12px;padding:18px}
+.pn-lbl{font-size:11.5px;font-weight:600;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.pn-val{font-size:28px;font-weight:800;color:var(--t1);letter-spacing:-.5px}
+.pn-date{font-size:12.5px;color:var(--t2);margin-top:4px}
+.pn-countdown{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:var(--primary-dark);font-weight:500}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 10px;border-radius:10px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:.12s;text-decoration:none;color:var(--t1)}
+.qa-btn:hover{background:var(--bg);border-color:var(--primary)}
+.qa-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.qa-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qa-lbl{font-size:11.5px;font-weight:600;color:var(--t1);text-align:center}
+
+/* VERTICAL HISTORY */
+.vtx-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.vtx-row:last-child{border-bottom:none}
+.vtx-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.vtx-info{flex:1}
+.vtx-name{font-size:13px;font-weight:600;color:var(--t1)}
+.vtx-desc{font-size:11.5px;color:var(--t3);margin-top:1px}
+.vtx-val{text-align:right}
+.vtx-amt{font-size:13px;font-weight:700;color:var(--t1)}
+.vtx-date{font-size:11px;color:var(--t3)}
+
+/* INSTALLMENT MINI */
+.inst-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-light)}
+.inst-row:last-child{border-bottom:none}
+.inst-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.inst-num.paid{background:var(--green-light);color:var(--green)}
+.inst-num.open{background:var(--primary-50);color:var(--primary)}
+.inst-num.due{background:var(--red-light);color:var(--red)}
+.inst-info{flex:1;padding:0 10px}
+.inst-date{font-size:12.5px;color:var(--t1)}
+.inst-val{font-size:12px;color:var(--t3)}
+.inst-status{font-size:11px;font-weight:600}
+
+/* NOTIFICATION */
+.notif-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light)}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.notif-text{font-size:12.5px;color:var(--t1);line-height:1.5}
+.notif-time{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* LAYOUT HELPERS */
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-left-wide{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon" style="background:var(--green)">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni active" href="tela-05-dashboard-usuario.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="ni" href="tela-08-extrato-cartao.html">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Meu Cartão
+        <span class="ni-dot green"></span>
+      </a>
+      <a class="ni" href="tela-07-nexus-score.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Crédito</div>
+      <a class="ni" href="tela-06-solicitar-credito.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Solicitar Crédito
+      </a>
+      <a class="ni" href="tela-09-parcelas.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Parcelas
+        <span class="ni-badge">1</span>
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Histórico
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Conta</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </a>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        MACRO HASH
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+      <div>
+        <div class="u-name">Maria Ramos</div>
+        <div class="u-role"><span class="role-badge rb-u">Usuário</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">Olá, Maria! 👋</div>
+    <div class="pg-sub">Seu painel financeiro · Atualizado agora</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="chips">
+    <div class="chip on">Hoje</div>
+    <div class="chip">7 dias</div>
+    <div class="chip">30 dias</div>
+  </div>
+  <button class="ib" title="Notificações">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--green),#0F766E)" onclick="window.location.href='tela-01-login.html'">MR</div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ROW 1: Cartão + Score + Parcela + Alerta -->
+  <div style="display:grid;grid-template-columns:300px 1fr 220px;gap:16px;margin-bottom:16px;align-items:start">
+
+    <!-- CARTÃO VISA VIRTUAL -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Cartão Visa Pré-pago</div><div class="cs">Ativo · Dock / BS2</div></div>
+        <span class="badge b-g">● Ativo</span>
+      </div>
+      <div class="cb" style="padding:16px">
+        <div class="visa-card">
+          <div class="vc-top">
+            <div>
+              <div class="vc-name">NEXUS Platform</div>
+              <div class="vc-label">Cartão Pré-pago</div>
+            </div>
+            <div class="vc-chip"></div>
+          </div>
+          <div class="vc-mid">
+            <div class="vc-saldo-lbl">Saldo disponível</div>
+            <div class="vc-saldo"><span>R$</span>160,00</div>
+            <div class="vc-limit-bar">
+              <div class="vc-limit-track"><div class="vc-limit-fill"></div></div>
+              <div class="vc-limit-lbl"><span>R$160 disponível</span><span>Limite R$280</span></div>
+            </div>
+          </div>
+          <div class="vc-bot">
+            <div class="vc-pan">•••• •••• •••• 4821</div>
+            <div class="vc-brand">VISA</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button class="btn btn-s" style="justify-content:center;font-size:12px">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Carregar
+          </button>
+          <button class="btn btn-s" style="justify-content:center;font-size:12px">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Extrato
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTRO: KPIs + Gráfico -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div class="kcard">
+          <div class="kc-top">
+            <div>
+              <div class="kc-label">Crédito Ativo</div>
+            </div>
+            <div class="kc-icon icon-p">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="kc-val">R$ 280</div>
+          <div class="kc-bot">
+            <div class="trend up">
+              <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              7 blocos × R$40
+            </div>
+          </div>
+        </div>
+        <div class="kcard">
+          <div class="kc-top">
+            <div>
+              <div class="kc-label">Total Pago</div>
+            </div>
+            <div class="kc-icon icon-g">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div class="kc-val">R$ 203</div>
+          <div class="kc-bot">
+            <div class="trend up" style="color:var(--green)">3 parcelas pagas</div>
+          </div>
+        </div>
+        <div class="kcard">
+          <div class="kc-top">
+            <div>
+              <div class="kc-label">Próx. Vencimento</div>
+            </div>
+            <div class="kc-icon icon-o">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+          </div>
+          <div class="kc-val">R$ 67,80</div>
+          <div class="kc-bot">
+            <div class="trend" style="color:var(--gold)">05 maio · 23 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de uso -->
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">Histórico de Uso do Crédito</div><div class="cs">Últimos 6 meses · Sistema Price</div></div>
+          <span class="ca">Ver extrato completo →</span>
+        </div>
+        <div class="cb">
+          <canvas id="usageChart" height="130"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIREITA: Próxima parcela + Notificações -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="parcela-next">
+        <div class="pn-lbl">Próxima Parcela</div>
+        <div class="pn-val">R$ 67,80</div>
+        <div class="pn-date">Vence em 05/05/2026</div>
+        <div class="pn-countdown">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          23 dias restantes
+        </div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:12px;font-size:13px">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Pagar via PIX
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="ch"><div class="ct">Notificações</div></div>
+        <div class="cb" style="padding:12px 16px">
+          <div class="notif-item">
+            <div class="notif-dot" style="background:var(--green)"></div>
+            <div>
+              <div class="notif-text">Crédito de R$40 aprovado — Vertical: Saúde</div>
+              <div class="notif-time">Hoje, 09:14</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot" style="background:var(--primary)"></div>
+            <div>
+              <div class="notif-text">Parcela 3/7 confirmada via PIX</div>
+              <div class="notif-time">12/abr, 10:02</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot" style="background:var(--gold)"></div>
+            <div>
+              <div class="notif-text">NEXUS Score subiu 15 pts → 720</div>
+              <div class="notif-time">10/abr, 14:30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: NEXUS Score + Parcelas + Gastos por Vertical -->
+  <div style="display:grid;grid-template-columns:280px 300px 1fr;gap:16px;align-items:start">
+
+    <!-- NEXUS Score Gauge -->
+    <div class="card">
+      <div class="ch"><div class="ct">NEXUS Score</div><div class="cs">Score proprietário 0–1000</div></div>
+      <div class="score-wrap">
+        <svg class="score-gauge-svg" viewBox="0 0 200 110">
+          <!-- Trilha fundo -->
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E2E8F0" stroke-width="14" stroke-linecap="round"/>
+          <!-- Arco vermelho 0-400 -->
+          <path d="M 20 100 A 80 80 0 0 1 100 20" fill="none" stroke="#FCA5A5" stroke-width="14" stroke-linecap="round"/>
+          <!-- Arco amarelo 400-700 -->
+          <path d="M 100 20 A 80 80 0 0 1 161 39" fill="none" stroke="#FCD34D" stroke-width="14" stroke-linecap="round"/>
+          <!-- Arco verde 700-1000 -->
+          <path d="M 161 39 A 80 80 0 0 1 180 100" fill="none" stroke="#86EFAC" stroke-width="14" stroke-linecap="round"/>
+          <!-- Ponteiro 720/1000 = 72% do arco -->
+          <line x1="100" y1="100" x2="162" y2="38" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="5" fill="#0F172A"/>
+        </svg>
+        <div class="score-val">
+          <div class="score-num">720</div>
+          <div class="score-lbl">de 1.000 pontos</div>
+          <div><span class="score-tier">● Bom</span></div>
+        </div>
+      </div>
+      <div class="score-bars">
+        <div class="sb-row">
+          <div class="sb-label">Bloco A — Pgto</div>
+          <div class="sb-track"><div class="sb-fill" style="width:82%;background:var(--green)"></div></div>
+          <div class="sb-pct">82%</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Bloco B — Cartão</div>
+          <div class="sb-track"><div class="sb-fill" style="width:70%;background:var(--primary)"></div></div>
+          <div class="sb-pct">70%</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Bloco C — Alt. Data</div>
+          <div class="sb-track"><div class="sb-fill" style="width:65%;background:var(--purple)"></div></div>
+          <div class="sb-pct">65%</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Bloco D — Rel.</div>
+          <div class="sb-track"><div class="sb-fill" style="width:78%;background:var(--gold)"></div></div>
+          <div class="sb-pct">78%</div>
+        </div>
+        <div class="sb-row" style="margin-bottom:0">
+          <div class="sb-label">Bloco E — Bureau</div>
+          <div class="sb-track"><div class="sb-fill" style="width:60%;background:var(--t3)"></div></div>
+          <div class="sb-pct">60%</div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid var(--border-light)">
+        <a href="tela-07-nexus-score.html" class="btn btn-s" style="width:100%;justify-content:center;font-size:12.5px">Ver análise completa →</a>
+      </div>
+    </div>
+
+    <!-- Parcelas ativas -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Parcelas Ativas</div><div class="cs">Contrato #CRT-2024-0842 · 7× R$40</div></div>
+        <a href="tela-09-parcelas.html" class="ca">Ver todas →</a>
+      </div>
+      <div class="cb" style="padding:8px 16px">
+        <div class="inst-row">
+          <div class="inst-num paid">1</div>
+          <div class="inst-info"><div class="inst-date">05 fev 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--green)">Paga</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num paid">2</div>
+          <div class="inst-info"><div class="inst-date">05 mar 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--green)">Paga</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num paid">3</div>
+          <div class="inst-info"><div class="inst-date">05 abr 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--green)">Paga</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num open">4</div>
+          <div class="inst-info"><div class="inst-date">05 mai 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--primary)">Em aberto</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num open">5</div>
+          <div class="inst-info"><div class="inst-date">05 jun 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--t3)">Pendente</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num open">6</div>
+          <div class="inst-info"><div class="inst-date">05 jul 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--t3)">Pendente</div>
+        </div>
+        <div class="inst-row">
+          <div class="inst-num open">7</div>
+          <div class="inst-info"><div class="inst-date">05 ago 2026</div><div class="inst-val">R$ 67,80</div></div>
+          <div class="inst-status" style="color:var(--t3)">Pendente</div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;background:var(--bg);border-top:1px solid var(--border-light);border-radius:0 0 12px 12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2)">
+          <span>Total pago: <b style="color:var(--green)">R$ 203,40</b></span>
+          <span>Restante: <b style="color:var(--primary)">R$ 271,20</b></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gastos por vertical -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Gastos por Vertical</div><div class="cs">141 categorias disponíveis · Últimos 30 dias</div></div>
+        <a href="tela-08-extrato-cartao.html" class="ca">Ver extrato →</a>
+      </div>
+      <div class="cb" style="padding:12px 16px">
+        <div class="vtx-row">
+          <div class="vtx-icon" style="background:#FEF3C7">🏥</div>
+          <div class="vtx-info">
+            <div class="vtx-name">Saúde</div>
+            <div class="vtx-desc">Farmácia · 3 compras</div>
+          </div>
+          <div class="vtx-val">
+            <div class="vtx-amt">R$ 87,50</div>
+            <div class="vtx-date">Última: 10/abr</div>
+          </div>
+        </div>
+        <div class="vtx-row">
+          <div class="vtx-icon" style="background:#DCFCE7">🛒</div>
+          <div class="vtx-info">
+            <div class="vtx-name">Supermercado</div>
+            <div class="vtx-desc">Varejo · 5 compras</div>
+          </div>
+          <div class="vtx-val">
+            <div class="vtx-amt">R$ 62,30</div>
+            <div class="vtx-date">Última: 11/abr</div>
+          </div>
+        </div>
+        <div class="vtx-row">
+          <div class="vtx-icon" style="background:#EDE9FE">📚</div>
+          <div class="vtx-info">
+            <div class="vtx-name">Educação</div>
+            <div class="vtx-desc">Curso online · 1 compra</div>
+          </div>
+          <div class="vtx-val">
+            <div class="vtx-amt">R$ 49,90</div>
+            <div class="vtx-date">Última: 08/abr</div>
+          </div>
+        </div>
+        <div class="vtx-row">
+          <div class="vtx-icon" style="background:#FEE2E2">🍽️</div>
+          <div class="vtx-info">
+            <div class="vtx-name">Alimentação</div>
+            <div class="vtx-desc">Restaurante · 4 compras</div>
+          </div>
+          <div class="vtx-val">
+            <div class="vtx-amt">R$ 38,20</div>
+            <div class="vtx-date">Última: 12/abr</div>
+          </div>
+        </div>
+        <div class="vtx-row">
+          <div class="vtx-icon" style="background:#EFF3FF">🚌</div>
+          <div class="vtx-info">
+            <div class="vtx-name">Transporte</div>
+            <div class="vtx-desc">App mobilidade · 6 viagens</div>
+          </div>
+          <div class="vtx-val">
+            <div class="vtx-amt">R$ 28,40</div>
+            <div class="vtx-date">Última: 12/abr</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini donut chart -->
+      <div style="padding:0 16px 16px;display:flex;align-items:center;gap:20px">
+        <canvas id="verticalDonut" width="100" height="100"></canvas>
+        <div style="flex:1">
+          <div style="font-size:11.5px;font-weight:600;color:var(--t1);margin-bottom:8px">Distribuição de gastos</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#D97706;display:inline-block"></span>Saúde 33%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#059669;display:inline-block"></span>Supermercado 23%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#7C3AED;display:inline-block"></span>Educação 19%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#DC2626;display:inline-block"></span>Alimentação 14%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)"><span style="width:10px;height:10px;border-radius:2px;background:#1640D6;display:inline-block"></span>Transporte 11%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Quick Actions + Acoes Rapidas -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="ch"><div class="ct">Ações Rápidas</div></div>
+    <div class="qa-grid">
+      <a class="qa-btn" href="tela-06-solicitar-credito.html">
+        <div class="qa-icon icon-p"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="qa-lbl">Solicitar Crédito</div>
+      </a>
+      <a class="qa-btn" href="tela-09-parcelas.html">
+        <div class="qa-icon icon-o"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="qa-lbl">Pagar Parcela</div>
+      </a>
+      <a class="qa-btn" href="tela-08-extrato-cartao.html">
+        <div class="qa-icon icon-g"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="qa-lbl">Ver Extrato</div>
+      </a>
+      <a class="qa-btn" href="tela-07-nexus-score.html">
+        <div class="qa-icon icon-v"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="qa-lbl">Meu Score</div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Usage Chart
+const uCtx = document.getElementById('usageChart').getContext('2d');
+new Chart(uCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+    datasets: [
+      {
+        label: 'Crédito utilizado (R$)',
+        data: [0, 0, 280, 280, 280, 280],
+        backgroundColor: 'rgba(22,64,214,.15)',
+        borderColor: '#1640D6',
+        borderWidth: 2,
+        borderRadius: 5
+      },
+      {
+        label: 'Total pago (R$)',
+        data: [0, 0, 0, 67.8, 135.6, 203.4],
+        backgroundColor: 'rgba(5,150,105,.15)',
+        borderColor: '#059669',
+        borderWidth: 2,
+        borderRadius: 5
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, boxWidth: 12 } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+      y: { grid: { color: '#F1F5F9' }, ticks: { font: { family: 'Inter', size: 11 }, callback: v => 'R$' + v } }
+    }
+  }
+});
+
+// Vertical Donut
+const vCtx = document.getElementById('verticalDonut').getContext('2d');
+new Chart(vCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Saúde','Supermercado','Educação','Alimentação','Transporte'],
+    datasets: [{
+      data: [33, 23, 19, 14, 11],
+      backgroundColor: ['#D97706','#059669','#7C3AED','#DC2626','#1640D6'],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: false,
+    plugins: { legend: { display: false } },
+    cutout: '65%'
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/platform",
+  "html.format.indentInnerHtml": true,
+  "emmet.includeLanguages": { "javascript": "javascriptreact" },
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}

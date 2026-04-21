@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>360° Board — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ADMIN SIDEBAR accent */
+.sidebar{ border-right-color:var(--gold); }
+.logo-icon.adm{ background:var(--gold); }
+
+/* BACEN CHIP */
+.bacen-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.bacen-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid}
+.bc-ok{background:var(--green-light);border-color:var(--green-50);color:var(--green)}
+.bc-warn{background:var(--gold-light);border-color:#FDE68A;color:var(--gold)}
+.bc-err{background:var(--red-light);border-color:#FECACA;color:var(--red)}
+.bc-info{background:var(--primary-50);border-color:#BFDBFE;color:var(--primary-dark)}
+.bacen-chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+
+/* HEAT MAP INADIMPLÊNCIA */
+.hm-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.hm-cell{aspect-ratio:1;border-radius:3px;cursor:pointer;transition:.12s}
+.hm-cell:hover{transform:scale(1.2)}
+
+/* FIELD EXEC TABLE */
+.exec-row{display:grid;grid-template-columns:32px 1fr 80px 80px 80px 80px;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border-light)}
+.exec-row:hover{background:#FAFBFC}
+.exec-row.header{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);background:var(--bg);border-bottom:1px solid var(--border)}
+.exec-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* RISK MATRIX */
+.risk-matrix{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:3px;aspect-ratio:1}
+.rm-cell{border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer}
+.rm-low{background:#DCFCE7;color:var(--green)}
+.rm-med{background:#FEF9C3;color:var(--gold)}
+.rm-high{background:#FEE2E2;color:var(--red)}
+.rm-label{font-size:10px;color:var(--t3);text-align:center;padding:4px 0}
+
+/* COMPLIANCE TABLE */
+.comp-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border-light)}
+.comp-row:last-child{border-bottom:none}
+.comp-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.comp-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.comp-name{flex:1;font-size:12.5px;color:var(--t1);font-weight:500}
+.comp-val{font-size:12.5px;font-weight:700}
+.comp-track{width:80px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.comp-fill{height:100%;border-radius:3px}
+
+/* VERTICAL INADIMPLÊNCIA */
+.viadim-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)}
+.viadim-row:last-child{border-bottom:none}
+.vi-emoji{font-size:17px;width:26px;text-align:center;flex-shrink:0}
+.vi-name{flex:1;font-size:12px;color:var(--t1)}
+.vi-track{width:100px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.vi-fill{height:100%;border-radius:3px}
+.vi-pct{font-size:11.5px;font-weight:600;width:38px;text-align:right}
+
+/* LIVE INDICATOR */
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;margin-right:5px}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR (ADMIN) -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon adm">NX</div>
+    <div class="logo-text">NEX<em>US</em> <span style="font-size:10px;color:var(--gold);font-weight:700">ADM</span></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Visão Geral</div>
+      <a class="ni active" href="tela-10-360-board.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        360° Board
+      </a>
+      <a class="ni" href="tela-02-dashboard-aplicante.html">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dashboard Aplicante
+      </a>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        MACRO HASH Ledger
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Operações</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Usuários
+        <span class="ni-badge">3</span>
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Contratos
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Scoring IA
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Compliance</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Bacen · CMN 5050
+        <span class="ni-dot green"></span>
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Relatórios SCR
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--gold),#B45309)">CA</div>
+      <div>
+        <div class="u-name">Carlos Admin</div>
+        <div class="u-role"><span class="role-badge rb-adm">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">360° Board — Visão Executiva</div>
+    <div class="pg-sub"><span class="live-dot"></span>Dados em tempo real · 12/04/2026 14:38:07</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="chips">
+    <div class="chip on">Hoje</div>
+    <div class="chip">7 dias</div>
+    <div class="chip">Mês</div>
+    <div class="chip">Acum.</div>
+  </div>
+  <button class="btn btn-s" style="font-size:12.5px">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Exportar
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--gold),#B45309)">CA</div>
+</header>
+
+<main class="main">
+
+  <!-- BACEN COMPLIANCE BAR -->
+  <div class="bacen-bar">
+    <div class="bacen-chip bc-ok">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Bacen CMN 5050/2022 — Compliant
+    </div>
+    <div class="bacen-chip bc-ok">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      SCD Licença Ativa
+    </div>
+    <div class="bacen-chip bc-ok">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      LGPD by Design
+    </div>
+    <div class="bacen-chip bc-warn">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      SCR Report: 3 dias para envio
+    </div>
+    <div class="bacen-chip bc-info">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      PLD/FT — Monitoramento OK
+    </div>
+  </div>
+
+  <!-- ROW 1: KPIs PRINCIPAIS -->
+  <div class="kpi-row" style="grid-template-columns:repeat(6,1fr);margin-bottom:16px">
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Carteira Ativa</div><div class="kc-icon icon-p"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px">R$120M</div>
+      <div class="kc-bot"><div class="trend up"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+18%</div><div class="kc-sec">este mês</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Cartões Ativos</div><div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px">80.400</div>
+      <div class="kc-bot"><div class="trend up">+3.200 semana</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Inadimplência</div><div class="kc-icon icon-r"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px;color:var(--red)">3,2%</div>
+      <div class="kc-bot"><div class="trend dn">▲ +0.3pp mês</div><div class="kc-sec">alvo ≤ 5%</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Retorno médio</div><div class="kc-icon icon-o"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px">4,2%</div>
+      <div class="kc-bot"><div class="trend up">ao mês</div><div class="kc-sec">vs 0,8% poupança</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Blocos emitidos</div><div class="kc-icon icon-v"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px">3,01M</div>
+      <div class="kc-bot"><div class="trend up">hoje</div><div class="kc-sec">+12.400 novos</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">MACRO HASH</div><div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div>
+      <div class="kc-val" style="font-size:22px">48.721</div>
+      <div class="kc-bot"><div class="trend up">100% íntegros</div></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Charts principais -->
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:16px">
+
+    <!-- Carteira + Inadimplência time series -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Carteira vs Inadimplência</div><div class="cs">12 meses · Evolução da plataforma</div></div>
+        <span class="badge b-g">SCD</span>
+      </div>
+      <div class="cb"><canvas id="carteiraChart" height="160"></canvas></div>
+    </div>
+
+    <!-- Distribuição por portfólio -->
+    <div class="card">
+      <div class="ch"><div class="ct">Portfólios A/B/C</div><div class="cs">Distribuição da carteira</div></div>
+      <div class="cb" style="display:flex;flex-direction:column;align-items:center">
+        <canvas id="portfolioDonut" width="160" height="160"></canvas>
+        <div style="width:100%;margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light)">
+            <div style="display:flex;align-items:center;gap:7px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#059669;display:inline-block"></span>Portfólio A</div>
+            <div style="font-size:12px;font-weight:700">R$48M · 40%</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light)">
+            <div style="display:flex;align-items:center;gap:7px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#1640D6;display:inline-block"></span>Portfólio B</div>
+            <div style="font-size:12px;font-weight:700">R$42M · 35%</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
+            <div style="display:flex;align-items:center;gap:7px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#D97706;display:inline-block"></span>Portfólio C</div>
+            <div style="font-size:12px;font-weight:700">R$30M · 25%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Distribution -->
+    <div class="card">
+      <div class="ch"><div class="ct">Distribuição Score</div><div class="cs">NEXUS Score dos usuários</div></div>
+      <div class="cb"><canvas id="scoreDistChart" height="160"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Inadimplência por Vertical + Field Exec + Risk Matrix + Compliance -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 280px 240px;gap:16px;margin-bottom:16px;align-items:start">
+
+    <!-- Inadimplência por vertical -->
+    <div class="card">
+      <div class="ch">
+        <div><div class="ct">Inadimplência por Vertical</div><div class="cs">Top 10 · Meta ≤ 5%</div></div>
+        <a href="tela-04-macro-hash.html" class="ca">Ver ledger →</a>
+      </div>
+      <div class="cb" style="padding:8px 16px">
+        <div class="viadim-row">
+          <div class="vi-emoji">🏥</div>
+          <div class="vi-name">Saúde</div>
+          <div class="vi-track"><div class="vi-fill" style="width:28%;background:var(--green)"></div></div>
+          <div class="vi-pct" style="color:var(--green)">1,4%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">📚</div>
+          <div class="vi-name">Educação</div>
+          <div class="vi-track"><div class="vi-fill" style="width:30%;background:var(--green)"></div></div>
+          <div class="vi-pct" style="color:var(--green)">1,5%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">🛒</div>
+          <div class="vi-name">Supermercado</div>
+          <div class="vi-track"><div class="vi-fill" style="width:44%;background:var(--green)"></div></div>
+          <div class="vi-pct" style="color:var(--green)">2,2%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">🍽️</div>
+          <div class="vi-name">Alimentação</div>
+          <div class="vi-track"><div class="vi-fill" style="width:60%;background:var(--gold)"></div></div>
+          <div class="vi-pct" style="color:var(--gold)">3,0%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">🚌</div>
+          <div class="vi-name">Transporte</div>
+          <div class="vi-track"><div class="vi-fill" style="width:70%;background:var(--gold)"></div></div>
+          <div class="vi-pct" style="color:var(--gold)">3,5%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">💊</div>
+          <div class="vi-name">Farmácia</div>
+          <div class="vi-track"><div class="vi-fill" style="width:74%;background:var(--gold)"></div></div>
+          <div class="vi-pct" style="color:var(--gold)">3,7%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">👕</div>
+          <div class="vi-name">Vestuário</div>
+          <div class="vi-track"><div class="vi-fill" style="width:84%;background:var(--red)"></div></div>
+          <div class="vi-pct" style="color:var(--red)">4,2%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">🎮</div>
+          <div class="vi-name">Entretenimento</div>
+          <div class="vi-track"><div class="vi-fill" style="width:90%;background:var(--red)"></div></div>
+          <div class="vi-pct" style="color:var(--red)">4,5%</div>
+        </div>
+        <div class="viadim-row">
+          <div class="vi-emoji">⚙️</div>
+          <div class="vi-name">Outros</div>
+          <div class="vi-track"><div class="vi-fill" style="width:96%;background:var(--red)"></div></div>
+          <div class="vi-pct" style="color:var(--red)">4,8%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Field Executives -->
+    <div class="card">
+      <div class="ch"><div class="ct">Executivos de Campo</div><div class="cs">Performance mensal</div></div>
+      <div class="exec-row header">
+        <div></div><div>Executivo</div><div>Carteira</div><div>Captados</div><div>Inadimp.</div><div>Score</div>
+      </div>
+      <div class="exec-row">
+        <div><div class="exec-avatar" style="background:linear-gradient(135deg,#1640D6,#7C3AED)">RC</div></div>
+        <div><div style="font-size:13px;font-weight:600">Rafael Costa</div><div style="font-size:11px;color:var(--t3)">São Paulo Sul</div></div>
+        <div style="font-size:12.5px;font-weight:600">R$4,2M</div>
+        <div style="font-size:12.5px;color:var(--green);font-weight:600">+842</div>
+        <div><span class="badge b-g" style="font-size:11px">1,8%</span></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--green)">98</div>
+      </div>
+      <div class="exec-row">
+        <div><div class="exec-avatar" style="background:linear-gradient(135deg,#059669,#0F766E)">AP</div></div>
+        <div><div style="font-size:13px;font-weight:600">Ana Paula</div><div style="font-size:11px;color:var(--t3)">Rio de Janeiro</div></div>
+        <div style="font-size:12.5px;font-weight:600">R$3,8M</div>
+        <div style="font-size:12.5px;color:var(--green);font-weight:600">+720</div>
+        <div><span class="badge b-g" style="font-size:11px">2,1%</span></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--green)">94</div>
+      </div>
+      <div class="exec-row">
+        <div><div class="exec-avatar" style="background:linear-gradient(135deg,#D97706,#B45309)">ML</div></div>
+        <div><div style="font-size:13px;font-weight:600">Marcos Lima</div><div style="font-size:11px;color:var(--t3)">Nordeste</div></div>
+        <div style="font-size:12.5px;font-weight:600">R$3,1M</div>
+        <div style="font-size:12.5px;color:var(--primary);font-weight:600">+541</div>
+        <div><span class="badge b-o" style="font-size:11px">3,4%</span></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--gold)">81</div>
+      </div>
+      <div class="exec-row">
+        <div><div class="exec-avatar" style="background:linear-gradient(135deg,#7C3AED,#5B21B6)">JS</div></div>
+        <div><div style="font-size:13px;font-weight:600">Juliana Silva</div><div style="font-size:11px;color:var(--t3)">Sudeste Interior</div></div>
+        <div style="font-size:12.5px;font-weight:600">R$2,9M</div>
+        <div style="font-size:12.5px;color:var(--primary);font-weight:600">+398</div>
+        <div><span class="badge b-o" style="font-size:11px">3,8%</span></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--gold)">76</div>
+      </div>
+      <div class="exec-row" style="border-bottom:none">
+        <div><div class="exec-avatar" style="background:linear-gradient(135deg,#DC2626,#B91C1C)">TO</div></div>
+        <div><div style="font-size:13px;font-weight:600">Thiago Oliveira</div><div style="font-size:11px;color:var(--t3)">Norte/Centro-Oeste</div></div>
+        <div style="font-size:12.5px;font-weight:600">R$1,8M</div>
+        <div style="font-size:12.5px;color:var(--red);font-weight:600">+210</div>
+        <div><span class="badge b-r" style="font-size:11px">4,9%</span></div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--red)">58</div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix -->
+    <div class="card">
+      <div class="ch"><div class="ct">Matriz de Risco</div><div class="cs">Probabilidade × Impacto</div></div>
+      <div class="cb" style="padding:12px 16px">
+        <div style="display:flex;gap:4px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--t3);writing-mode:vertical-rl;transform:rotate(180deg);padding-right:4px;align-self:center">PROBABILIDADE →</div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--t3);text-align:center;margin-bottom:4px">IMPACTO →</div>
+            <div class="risk-matrix">
+              <div class="rm-cell rm-low">1</div><div class="rm-cell rm-low">2</div><div class="rm-cell rm-med">3</div><div class="rm-cell rm-med">4</div><div class="rm-cell rm-high">5</div>
+              <div class="rm-cell rm-low">2</div><div class="rm-cell rm-med">4</div><div class="rm-cell rm-med">6</div><div class="rm-cell rm-high" title="Inadimplência alta vestuário">8★</div><div class="rm-cell rm-high">10</div>
+              <div class="rm-cell rm-med">3</div><div class="rm-cell rm-med">6</div><div class="rm-cell rm-high">9</div><div class="rm-cell rm-high">12</div><div class="rm-cell rm-high">15</div>
+              <div class="rm-cell rm-med">4</div><div class="rm-cell rm-high">8</div><div class="rm-cell rm-high">12</div><div class="rm-cell rm-high">16</div><div class="rm-cell rm-high">20</div>
+              <div class="rm-cell rm-high">5</div><div class="rm-cell rm-high">10</div><div class="rm-cell rm-high">15</div><div class="rm-cell rm-high">20</div><div class="rm-cell rm-high">25</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:10.5px"><span style="width:10px;height:10px;border-radius:2px;background:#DCFCE7;display:inline-block"></span>Baixo</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10.5px"><span style="width:10px;height:10px;border-radius:2px;background:#FEF9C3;display:inline-block"></span>Médio</div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10.5px"><span style="width:10px;height:10px;border-radius:2px;background:#FEE2E2;display:inline-block"></span>Alto</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance Bacen -->
+    <div class="card">
+      <div class="ch"><div class="ct">Compliance Bacen</div><div class="cs">Limites regulatórios</div></div>
+      <div class="cb" style="padding:8px 16px">
+        <div class="comp-row">
+          <div class="comp-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comp-name">Limite por mutuário</div>
+          <div class="comp-track"><div class="comp-fill" style="width:28%;background:var(--green)"></div></div>
+          <div class="comp-val" style="color:var(--green)">R$400</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comp-name">Capital mínimo SCD</div>
+          <div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="comp-val" style="color:var(--green)">R$1M ✓</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-icon icon-o"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="comp-name">Índice Basileia</div>
+          <div class="comp-track"><div class="comp-fill" style="width:78%;background:var(--gold)"></div></div>
+          <div class="comp-val" style="color:var(--gold)">15,6%</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comp-name">SCR — Envio BACEN</div>
+          <div class="comp-track"><div class="comp-fill" style="width:0%;background:var(--gold)"></div></div>
+          <div class="comp-val" style="color:var(--gold)">3 dias</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comp-name">PLD/FT monitoramento</div>
+          <div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="comp-val" style="color:var(--green)">Ativo</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comp-name">LGPD — DPO</div>
+          <div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="comp-val" style="color:var(--green)">OK</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Alertas operacionais -->
+  <div class="card">
+    <div class="ch"><div class="ct">Alertas Operacionais</div><div class="cs">Eventos críticos das últimas 24h</div></div>
+    <div class="cb" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div class="aitem danger">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div><div class="at">Inadimplência Vestuário 4,2%</div><div class="as">Acima da média histórica. Revisão de scoring sugerida para vertical.</div></div>
+      </div>
+      <div class="aitem warn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div><div class="at">SCR — Prazo de 3 dias</div><div class="as">Relatório mensal para o Bacen vence em 15/04/2026. Preparar exportação.</div></div>
+      </div>
+      <div class="aitem info">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div><div class="at">Thiago Oliveira — Performance</div><div class="as">Inadimplência da carteira Norte/CO em 4,9%. Limite crítico = 5%.</div></div>
+      </div>
+      <div class="aitem ok">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <div><div class="at">MACRO HASH — Integridade 100%</div><div class="as">48.721 blocos verificados. Nenhuma inconsistência detectada.</div></div>
+      </div>
+      <div class="aitem ok">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <div><div class="at">PIX D+1 — 412 resgates processados</div><div class="as">R$ 1,72M enviados aos aplicantes hoje. Zero falhas.</div></div>
+      </div>
+      <div class="aitem ok">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <div><div class="at">IA Scoring — 3.204 avaliações hoje</div><div class="as">Tempo médio de análise: 2,3 segundos. Modelos v4.1 em produção.</div></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Carteira chart
+const cCtx = document.getElementById('carteiraChart').getContext('2d');
+new Chart(cCtx, {
+  type: 'line',
+  data: {
+    labels: ['Mai','Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr'],
+    datasets: [
+      {
+        label: 'Carteira (R$M)',
+        data: [62,68,74,78,83,88,92,96,102,108,116,120],
+        borderColor: '#1640D6',
+        backgroundColor: 'rgba(22,64,214,.08)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Inadimplência (%)',
+        data: [2.1,2.3,2.4,2.6,2.5,2.7,2.8,2.9,3.0,3.0,3.1,3.2],
+        borderColor: '#DC2626',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [4,3],
+        tension: 0.4,
+        yAxisID: 'y2'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, boxWidth: 12 } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+      y: {
+        position: 'left',
+        grid: { color: '#F1F5F9' },
+        ticks: { font: { family: 'Inter', size: 10 }, callback: v => 'R$'+v+'M' }
+      },
+      y2: {
+        position: 'right',
+        grid: { display: false },
+        ticks: { font: { family: 'Inter', size: 10 }, callback: v => v+'%' }
+      }
+    }
+  }
+});
+
+// Portfolio donut
+const pCtx = document.getElementById('portfolioDonut').getContext('2d');
+new Chart(pCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Portfólio A','Portfólio B','Portfólio C'],
+    datasets: [{
+      data: [40, 35, 25],
+      backgroundColor: ['#059669','#1640D6','#D97706'],
+      borderWidth: 3, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: false,
+    plugins: { legend: { display: false } },
+    cutout: '60%'
+  }
+});
+
+// Score dist chart
+const sCtx = document.getElementById('scoreDistChart').getContext('2d');
+new Chart(sCtx, {
+  type: 'bar',
+  data: {
+    labels: ['0–200','200–400','400–600','600–700','700–850','850+'],
+    datasets: [{
+      label: 'Usuários',
+      data: [820, 4200, 18400, 22100, 28900, 5980],
+      backgroundColor: ['#FECACA','#FCA5A5','#FDE68A','#86EFAC','#4ADE80','#1640D6'],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 } } },
+      y: { grid: { color: '#F1F5F9' }, ticks: { font: { family: 'Inter', size: 10 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>

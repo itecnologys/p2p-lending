@@ -1,0 +1,19 @@
+{
+  "folders": [
+    { "name": "🌐 Website Institucional", "path": "./website" },
+    { "name": "🖥️ Plataforma (Demo Screens)", "path": "./platform" },
+    { "name": "📚 Documentação", "path": "./docs" }
+  ],
+  "settings": {
+    "editor.fontSize": 14,
+    "editor.tabSize": 2,
+    "files.autoSave": "afterDelay"
+  },
+  "extensions": {
+    "recommendations": [
+      "ritwickdey.LiveServer",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss"
+    ]
+  }
+}

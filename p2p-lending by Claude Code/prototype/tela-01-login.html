@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1640D6;--primary-dark:#1235B4;--primary-50:#EFF3FF;--green:#059669;--green-light:#ECFDF5;--gold:#D97706;--bg:#F1F5F9;--white:#fff;--border:#E2E8F0;--t1:#0F172A;--t2:#64748B;--t3:#94A3B8;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--t1);height:100vh;display:flex;overflow:hidden}
+
+/* HERO LADO ESQUERDO */
+.hero{flex:0 0 55%;background:linear-gradient(145deg,#0B2447 0%,#1640D6 60%,#0F766E 100%);display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.04)}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03)}
+.hero-logo{display:flex;align-items:center;gap:12px;margin-bottom:60px;position:relative;z-index:2}
+.hero-logo-icon{width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;border:1px solid rgba(255,255,255,.2)}
+.hero-logo-text{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.hero-logo-text span{opacity:.6}
+.hero-tagline{position:relative;z-index:2}
+.hero-tagline h1{font-size:38px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:16px;letter-spacing:-.5px}
+.hero-tagline h1 em{color:#FCD34D;font-style:normal}
+.hero-tagline p{font-size:15px;color:rgba(255,255,255,.7);line-height:1.7;max-width:380px}
+.hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;position:relative;z-index:2}
+.hm{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:16px;backdrop-filter:blur(8px)}
+.hm-val{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.hm-label{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:4px}
+.hm-delta{font-size:11px;font-weight:600;color:#86EFAC;margin-top:6px;display:flex;align-items:center;gap:3px}
+.hero-reg{display:flex;gap:10px;position:relative;z-index:2}
+.reg-badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 12px;font-size:11.5px;color:rgba(255,255,255,.8);font-weight:500;display:flex;align-items:center;gap:6px}
+.reg-badge svg{width:14px;height:14px;stroke:rgba(255,255,255,.6);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* FORM LADO DIREITO */
+.form-side{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px;overflow-y:auto}
+.form-card{width:100%;max-width:400px}
+.form-title{font-size:24px;font-weight:800;color:var(--t1);margin-bottom:8px;letter-spacing:-.3px}
+.form-sub{font-size:14px;color:var(--t2);margin-bottom:32px}
+
+/* ROLE SWITCHER */
+.role-switch{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px;margin-bottom:28px;border:1px solid var(--border)}
+.role-btn{flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--t2);font-family:inherit;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.role-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.role-btn.active-a{background:var(--white);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.role-btn.active-u{background:var(--white);color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+/* FORM FIELDS */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.field input,.field select{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:9px;font-size:14px;color:var(--t1);font-family:inherit;outline:none;transition:.15s;background:var(--white)}
+.field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,64,214,.1)}
+.field .hint{font-size:11.5px;color:var(--t3);margin-top:5px}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--t3)}
+.pw-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+.btn-primary{width:100%;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;margin-bottom:16px}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-primary.green{background:var(--green)}.btn-primary.green:hover{background:#047857}
+.divider-text{text-align:center;font-size:12.5px;color:var(--t3);margin-bottom:16px;position:relative}
+.divider-text::before,.divider-text::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+.divider-text::before{left:0}.divider-text::after{right:0}
+
+.link-btn{width:100%;padding:11px;background:var(--white);color:var(--t1);border:1px solid var(--border);border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.link-btn:hover{background:var(--bg)}
+.link-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+.forgot{text-align:right;margin-top:-12px;margin-bottom:20px}
+.forgot a{font-size:12.5px;color:var(--primary);font-weight:500;text-decoration:none}
+
+.switch-mode{text-align:center;font-size:13px;color:var(--t2);margin-top:24px}
+.switch-mode a{color:var(--primary);font-weight:600;text-decoration:none}
+
+/* ROLE INFO */
+.role-info{background:var(--primary-50);border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:12.5px;color:var(--primary-dark);display:flex;align-items:flex-start;gap:8px}
+.role-info svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+.role-info.green-info{background:var(--green-light);border-color:var(--green-50);color:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo">
+    <div class="hero-logo-icon">NX</div>
+    <div class="hero-logo-text">NEX<span>US</span></div>
+  </div>
+  <div class="hero-tagline">
+    <h1>Crédito P2P <em>inteligente</em> para o Brasil</h1>
+    <p>Conectamos investidores e tomadores com rastreabilidade total via MACRO HASH SHA-256 e IA Agentic. Retornos de 3% a 5% ao mês.</p>
+  </div>
+  <div class="hero-metrics">
+    <div class="hm">
+      <div class="hm-val">R$ 120M</div>
+      <div class="hm-label">Carteira ativa</div>
+      <div class="hm-delta">▲ +18% este mês</div>
+    </div>
+    <div class="hm">
+      <div class="hm-val">80.400</div>
+      <div class="hm-label">Cartões ativos</div>
+      <div class="hm-delta">▲ +3.200 semana</div>
+    </div>
+    <div class="hm">
+      <div class="hm-val">4,2%</div>
+      <div class="hm-label">Retorno médio/mês</div>
+      <div class="hm-delta">▲ vs 0,8% poupança</div>
+    </div>
+  </div>
+  <div class="hero-reg">
+    <div class="reg-badge"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Regulado Bacen · CMN 5050/2022</div>
+    <div class="reg-badge"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>SCD/SEP Licenciada</div>
+    <div class="reg-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>LGPD by Design</div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-side">
+  <div class="form-card">
+    <div class="form-title">Bem-vindo ao NEXUS</div>
+    <div class="form-sub">Acesse sua conta ou cadastre-se para começar</div>
+
+    <div class="role-switch">
+      <button class="role-btn active-a" id="btn-aplicante" onclick="setRole('aplicante')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Aplicante
+      </button>
+      <button class="role-btn" id="btn-usuario" onclick="setRole('usuario')">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Usuário
+      </button>
+    </div>
+
+    <div class="role-info" id="role-info">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="role-info-text"><b>Aplicante (Investidor):</b> Aporte a partir de R$ 500 · Retorno 3–5% a.m. via PIX D+1 · Portfólios A/B/C</span>
+    </div>
+
+    <form onsubmit="return false">
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" placeholder="seu@email.com" value="joao.silva@email.com">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <div class="pw-wrap">
+          <input type="password" id="pw" placeholder="••••••••" value="12345678">
+          <div class="pw-toggle" onclick="togglePw()"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        </div>
+      </div>
+      <div class="forgot"><a href="#">Esqueci minha senha</a></div>
+
+      <button class="btn-primary" id="btn-login" onclick="goToDashboard()">Entrar na plataforma</button>
+      <div class="divider-text">ou</div>
+      <a class="link-btn" href="#">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Autenticar via biometria
+      </a>
+    </form>
+
+    <div class="switch-mode">
+      Não tem conta? <a href="#" onclick="toggleCadastro()">Cadastre-se agora</a>
+    </div>
+  </div>
+</div>
+
+<script>
+let role = 'aplicante';
+function setRole(r){
+  role = r;
+  document.getElementById('btn-aplicante').className = 'role-btn' + (r==='aplicante'?' active-a':'');
+  document.getElementById('btn-usuario').className = 'role-btn' + (r==='usuario'?' active-u':'');
+  const info = document.getElementById('role-info');
+  const txt = document.getElementById('role-info-text');
+  const btn = document.getElementById('btn-login');
+  if(r==='aplicante'){
+    info.className='role-info';
+    txt.innerHTML='<b>Aplicante (Investidor):</b> Aporte a partir de R$ 500 · Retorno 3–5% a.m. via PIX D+1 · Portfólios A/B/C';
+    btn.className='btn-primary';
+  } else {
+    info.className='role-info green-info';
+    txt.innerHTML='<b>Usuário (Tomador):</b> Crédito pré-aprovado em blocos de R$40 · Cartão Visa pré-pago · NEXUS Score ≥ 400';
+    btn.className='btn-primary green';
+  }
+}
+function togglePw(){
+  const pw = document.getElementById('pw');
+  pw.type = pw.type==='password'?'text':'password';
+}
+function goToDashboard(){
+  window.location.href = role==='aplicante'?'tela-02-dashboard-aplicante.html':'tela-05-dashboard-usuario.html';
+}
+function toggleCadastro(){ alert('Tela de cadastro — em construção'); }
+</script>
+</body>
+</html>

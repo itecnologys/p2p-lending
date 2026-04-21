@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - DRE Corporate Dashboard v2 (Sinfonia de Spreads)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F7F6; color: #333; }
+        .header-bg { background-color: #0F172A; } /* Darker corporate slate */
+        
+        /* KPI Cards with distinctive gradients */
+        .kpi-card-1 { background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%); color: white; }
+        .kpi-card-2 { background: linear-gradient(180deg, #166534 0%, #14532D 100%); color: white; } /* Green for P2P Yield */
+        .kpi-card-3 { background: linear-gradient(180deg, #1E3A8A 0%, #1E40AF 100%); color: white; } /* Blue for Tech Spread */
+        .kpi-card-4 { background: linear-gradient(180deg, #7F1D1D 0%, #991B1B 100%); color: white; } /* Red for OPEX */
+        .kpi-card-5 { background: linear-gradient(180deg, #065F46 0%, #047857 100%); color: white; } /* Emerald EBITDA */
+        
+        .kpi-card { border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .table-row-hover:hover { background-color: #E2E8F0; }
+        .dre-header { background-color: #1E293B; color: white; }
+        .dre-section { background-color: #F1F5F9; font-weight: bold; color: #1E293B; text-transform: uppercase;}
+        .dre-result { background-color: #E2E8F0; font-weight: bold; color: #0F172A; }
+        
+        .table-container::-webkit-scrollbar { height: 10px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+
+    <!-- Navbar -->
+    <nav class="header-bg text-white p-4 flex justify-between items-center shadow-lg shrink-0">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-2xl font-bold tracking-tight">NEXUS <span class="text-blue-400">FINANCIAL ENGINE</span></h1>
+        </div>
+        <div class="flex space-x-6 text-sm font-medium items-center">
+            <button onclick="toggleModal('settingsModal')" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-500 transition">⚙️ Ajustar Setup / Spreads</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden flex flex-col p-6 space-y-4">
+        
+        <!-- KPI Cards (The Symphony of Spreads) -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 shrink-0" id="kpi-container">
+            <!-- Filled by JS -->
+        </div>
+
+        <!-- Toolbar -->
+        <div class="flex justify-between items-center bg-white p-3 rounded shadow shrink-0 border border-gray-200">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-semibold text-gray-700">Visão da Modelagem:</span>
+                <select id="sel-period" class="border border-gray-300 rounded p-1 text-sm bg-gray-50 outline-none" onchange="runSimulation()">
+                    <option value="12">Acumulado 12 Meses</option>
+                    <option value="24" selected>Acumulado 24 Meses</option>
+                </select>
+                <span class="ml-4 text-xs text-gray-500 font-medium italic">A tabela abaixo reflete a decomposição do "Spread Duplo" para aprovação do Conselho.</span>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded shadow flex-1 overflow-auto table-container border border-gray-200">
+            <table class="w-full text-sm text-left whitespace-nowrap min-w-max" id="dre-table">
+                <thead id="dre-thead" class="sticky top-0 z-20 shadow-md">
+                </thead>
+                <tbody id="dre-tbody" class="divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition-opacity" id="settingsModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('settingsModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-3xl mx-auto rounded-lg shadow-2xl z-50 overflow-y-auto max-h-[90vh]">
+            <div class="py-4 text-left px-6">
+                <!--Title-->
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <p class="text-xl font-bold text-slate-800">Setup de Variáveis e Motor de Crédito</p>
+                    <div class="cursor-pointer z-50 text-gray-400 hover:text-red-500" onclick="toggleModal('settingsModal')">
+                        <svg class="fill-current" width="24" height="24" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>
+                    </div>
+                </div>
+
+                <!--Body-->
+                <div class="grid grid-cols-3 gap-6 mt-5 bg-slate-50 p-4 rounded border border-slate-200">
+                    
+                    <!-- Col 1: Credit -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm border-b pb-1 border-slate-300">1. Risco e Crédito P2P</h3>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Juros da Fatura / Luva (%)</label>
+                            <input type="number" id="p-fee" value="6.0" step="0.1" class="w-full border border-gray-300 rounded p-1.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Inadimplência NPL (%)</label>
+                            <input type="number" id="p-npl" value="3.5" step="0.1" class="w-full border border-gray-300 rounded p-1.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Repasse do Fundo a Aplicantes (%)</label>
+                            <input type="number" id="p-poolreturn" value="2.5" step="0.1" class="w-full border border-gray-300 rounded p-1.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Col 2: Tech & Scale -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm border-b pb-1 border-slate-300">2. Spread Tecnológico (MDR)</h3>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Líquido de Interchange MDR (%)</label>
+                            <input type="number" id="p-mdr" value="1.5" step="0.1" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Custo Manutenção BaaS/Mês (R$)</label>
+                            <input type="number" id="p-maint" value="1.50" step="0.1" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Custo Impressão Físico (R$)</label>
+                            <input type="number" id="p-issue" value="15.00" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                    </div>
+
+                    <!-- Col 3: Volume & HR -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-slate-700 text-sm border-b pb-1 border-slate-300">3. Escala Base</h3>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Usuários/Cartões Mês 01</label>
+                            <input type="number" id="p-users" value="25000" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Crescimento Mensal (%)</label>
+                            <input type="number" id="p-growth" value="7.0" step="0.1" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 block">Limite Usado p/ Usuário (R$)</label>
+                            <input type="number" id="p-ticket" value="2500" class="w-full border border-gray-300 rounded p-1.5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center space-x-2 bg-blue-50 p-3 rounded border border-blue-200">
+                    <input type="checkbox" id="p-finance" checked class="w-4 h-4 text-blue-600 rounded">
+                    <label class="text-sm text-blue-900 font-medium">Financiar Custo do Plástico (Retém R$ 1,25 do tomador em 12x via Fatura) <br><span class="text-xs font-normal text-blue-700">Gera "Receita de Tarifas" na coluna Tecnológica.</span></label>
+                </div>
+
+                <!--Footer-->
+                <div class="flex justify-end pt-4 space-x-3 mt-2">
+                    <button class="px-5 py-2 bg-gray-200 rounded text-gray-800 font-medium hover:bg-gray-300 transition" onclick="toggleModal('settingsModal')">Cancelar</button>
+                    <button class="px-5 py-2 bg-blue-600 rounded text-white font-medium hover:bg-blue-700 shadow transition" onclick="saveAndSimulate()">Recalcular DRE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
+        const formatNum = (v) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(v);
+        
+        function toggleModal(modalID){
+            document.getElementById(modalID).classList.toggle('opacity-0');
+            document.getElementById(modalID).classList.toggle('pointer-events-none');
+            document.body.classList.toggle('modal-active');
+        }
+
+        function saveAndSimulate() {
+            toggleModal('settingsModal');
+            runSimulation();
+        }
+
+        function runSimulation() {
+            // Get Params
+            const p = {
+                fee: parseFloat(document.getElementById('p-fee').value) / 100, // 6%
+                npl: parseFloat(document.getElementById('p-npl').value) / 100, // 3.5%
+                poolreturn: parseFloat(document.getElementById('p-poolreturn').value) / 100, // 2.5%
+                mdr: parseFloat(document.getElementById('p-mdr').value) / 100, // 1.5%
+                maint: parseFloat(document.getElementById('p-maint').value),
+                issue: parseFloat(document.getElementById('p-issue').value),
+                users: parseFloat(document.getElementById('p-users').value),
+                growth: parseFloat(document.getElementById('p-growth').value) / 100,
+                ticket: parseFloat(document.getElementById('p-ticket').value),
+                finance: document.getElementById('p-finance').checked,
+                months: parseInt(document.getElementById('sel-period').value)
+            };
+
+            const data = [];
+            let currentUsers = p.users;
+            let activeInstallments = {}; 
+            
+            // Accumulated totals for KPIs
+            let T_Giro = 0;
+            let T_Spread_P2P = 0;
+            let T_Spread_Tec = 0;
+            let T_Opex = 0;
+            let T_Ebitda = 0;
+
+            for (let m = 1; m <= p.months; m++) {
+                const prevUsers = m === 1 ? p.users : data[m - 2].usuarios_totais;
+                const novosUsuarios = m === 1 ? p.users : (currentUsers - prevUsers);
+                
+                // Volume
+                const capitalGiroMes = currentUsers * p.ticket;
+                
+                // --- A. Spread Financeiro P2P ---
+                const recJuros = capitalGiroMes * p.fee;
+                const dedNpl = capitalGiroMes * p.npl;
+                const dedRepasse = capitalGiroMes * p.poolreturn;
+                const spreadP2P = recJuros - dedNpl - dedRepasse;
+
+                // --- B. Spread Tecnologico ---
+                const recMdr = capitalGiroMes * p.mdr;
+                let recCartao = 0;
+                if(p.finance) {
+                    activeInstallments[m] = novosUsuarios;
+                    for(let k = Math.max(1, m - 11); k <= m; k++) {
+                        if(activeInstallments[k]) recCartao += (activeInstallments[k] * (p.issue / 12));
+                    }
+                }
+                const spreadTec = recMdr + recCartao;
+
+                // --- C. OPEX ---
+                const custoBaaS = currentUsers * p.maint;
+                const custoEmissao = novosUsuarios * p.issue; 
+                
+                // HR rules
+                const qtyAss = Math.ceil(currentUsers / 500);
+                const qtyExc = Math.ceil(qtyAss / 5);
+                const custRH = (qtyAss * 4500) + (qtyExc * 9000) + (Math.ceil(qtyExc/5)*16000) + (Math.ceil(Math.ceil(qtyExc/5)/4)*35000);
+                
+                const opex = custoBaaS + custoEmissao + custRH;
+
+                // --- D. Resultado Final ---
+                const ebitda = spreadP2P + spreadTec - opex;
+
+                data.push({
+                    mes: m, usuarios_totais: currentUsers, novos_usuarios: novosUsuarios, capital: capitalGiroMes,
+                    rec_juros: recJuros, ded_npl: dedNpl, ded_repasse: dedRepasse, spread_p2p: spreadP2P,
+                    rec_mdr: recMdr, rec_cartao: recCartao, spread_tec: spreadTec,
+                    custo_baas: custoBaaS, custo_emissao: custoEmissao, custo_rh: custRH, opex: opex,
+                    ebitda: ebitda
+                });
+
+                T_Giro += capitalGiroMes;
+                T_Spread_P2P += spreadP2P;
+                T_Spread_Tec += spreadTec;
+                T_Opex += opex;
+                T_Ebitda += ebitda;
+
+                // Expand base for next month
+                currentUsers *= (1 + p.growth);
+            }
+
+            renderKPIs(T_Giro, T_Spread_P2P, T_Spread_Tec, T_Opex, T_Ebitda);
+            renderTable(data, p.months);
+        }
+
+        function renderKPIs(giro, sp2p, stec, opex, ebitda) {
+            const html = `
+                <div class="kpi-card kpi-card-1">
+                    <span class="text-slate-400 text-[11px] font-bold tracking-widest uppercase">Volume de Crédito (Giro Acumulado)</span>
+                    <span class="text-3xl font-extrabold mt-1 text-white">${formatBRL(giro)}</span>
+                    <span class="text-xs text-slate-300 mt-2">Soma de faturas no período total</span>
+                </div>
+                <div class="kpi-card kpi-card-2">
+                    <span class="text-green-300 text-[11px] font-bold tracking-widest uppercase">Lucro: Spread P2P Financeiro</span>
+                    <span class="text-3xl font-extrabold mt-1 text-white">${formatBRL(sp2p)}</span>
+                    <span class="text-xs text-green-200 mt-2 opacity-90">(Juros - NPL - Repasse Aplicante)</span>
+                </div>
+                <div class="kpi-card kpi-card-3">
+                    <span class="text-blue-300 text-[11px] font-bold tracking-widest uppercase">Lucro: Spread Tecnológico/MDR</span>
+                    <span class="text-3xl font-extrabold mt-1 text-white">${formatBRL(stec)}</span>
+                    <span class="text-xs text-blue-200 mt-2 opacity-90">(Interchange + Tarifas Cartão)</span>
+                </div>
+                <div class="kpi-card kpi-card-4">
+                    <span class="text-red-300 text-[11px] font-bold tracking-widest uppercase">OPEX Total (RH + Infra BaaS)</span>
+                    <span class="text-3xl font-extrabold mt-1 text-white">-${formatBRL(opex)}</span>
+                    <span class="text-xs text-red-200 mt-2 opacity-90">Salários, Impressão e Manutenção</span>
+                </div>
+                <div class="kpi-card kpi-card-5">
+                    <span class="text-emerald-300 text-[11px] font-bold tracking-widest uppercase">EBITDA (Fluxo de Caixa Operacional)</span>
+                    <span class="text-3xl font-extrabold mt-1 text-white">${formatBRL(ebitda)}</span>
+                    <span class="text-xs text-emerald-200 mt-2 opacity-90">Spread Duplo Deduzido do OPEX</span>
+                </div>
+            `;
+            document.getElementById('kpi-container').innerHTML = html;
+        }
+
+        // Helper to draw table rows
+        function bRow(title, prop, pData, type="normal") {
+            let trClass = ""; let tdClass = ""; let vClass = "";
+            if (type === "section") { trClass = "dre-section"; vClass = "text-slate-900"; tdClass="pl-3 bg-slate-100"; }
+            else if (type === "result") { trClass = "dre-result"; vClass = "text-blue-900 font-extrabold"; tdClass="pl-6 bg-slate-200"; }
+            else if (type === "normal") { trClass = "table-row-hover border-b border-gray-100 bg-white"; vClass = "text-gray-700"; tdClass="pl-8 text-gray-600"; }
+            else if (type === "deduction") { trClass = "table-row-hover border-b border-gray-100 bg-white"; vClass = "text-red-600"; tdClass="pl-8 text-gray-600 italic"; }
+            
+            let html = `<tr class="${trClass}">
+                <td class="p-2.5 text-xs z-10 sticky left-0 border-r border-gray-200 ${tdClass}">${title}</td>`;
+            
+            pData.forEach(m => {
+                let v = prop ? m[prop] : "";
+                let txt = (typeof v === 'number') ? formatBRL(v) : v;
+                let sign = (type === "deduction" && v > 0) ? "- " : "";
+                html += `<td class="p-2.5 text-right font-medium ${vClass}">${sign}${txt}</td>`;
+            });
+            html += `</tr>`;
+            return html;
+        }
+
+        function renderTable(data, months) {
+            let thead = `<tr class="dre-header"><th class="p-3 text-left sticky left-0 z-20 dre-header border-r border-slate-600 uppercase text-xs tracking-wider">Conta Gerencial do DRE</th>`;
+            for(let i=1; i<=months; i++) { thead += `<th class="p-3 text-right bg-slate-800 text-xs min-w-[130px] font-semibold text-slate-200 uppercase tracking-wider border-l border-slate-700">Mês ${i}</th>`; }
+            thead += `</tr>`;
+            document.getElementById('dre-thead').innerHTML = thead;
+
+            let tbody = "";
+
+            /* Info */
+            tbody += bRow("💳 Base de Usuários Ativos (Faturando)", "usuarios_totais", data, "section");
+            tbody += bRow("Capital Cota Operado no Fundo", "capital", data, "normal");
+
+            /* A. Spread P2P */
+            tbody += `<tr><td colspan="${months+1}" class="bg-gray-50 h-3 border-y border-gray-200"></td></tr>`;
+            tbody += bRow("I. Formação do SPREAD FINANCEIRO (P2P)", "", data, "section");
+            tbody += bRow("(+) Faturamento Fatura c/ Luva", "rec_juros", data, "normal");
+            tbody += bRow("(-) Rateio Contratual p/ Aplicante (Cota)", "ded_repasse", data, "deduction");
+            tbody += bRow("(-) Volume Impagável NPL (Inadimplência)", "ded_npl", data, "deduction");
+            tbody += bRow("= Lucro do Spread de Crédito Puro", "spread_p2p", data, "result");
+            
+            /* B. Spread Tecnologico */
+            tbody += `<tr><td colspan="${months+1}" class="bg-gray-50 h-3 border-y border-gray-200"></td></tr>`;
+            tbody += bRow("II. Formação do SPREAD TECNOLÓGICO", "", data, "section");
+            tbody += bRow("(+) Interchange Bancário (Pool Visa/MDR)", "rec_mdr", data, "normal");
+            tbody += bRow("(+) Anuidades / Amortização Parcelada de Cartões", "rec_cartao", data, "normal");
+            tbody += bRow("= Lucro do Spread Institucional", "spread_tec", data, "result");
+
+            /* C. OPEX */
+            tbody += `<tr><td colspan="${months+1}" class="bg-gray-50 h-3 border-y border-gray-200"></td></tr>`;
+            tbody += bRow("III. CUSTOS OPERACIONAIS E ADMIN (OPEX)", "", data, "section");
+            tbody += bRow("(-) Manutenção Tech Contas Dock/BaaS", "custo_baas", data, "deduction");
+            tbody += bRow("(-) Emissão / Impressão Cartão Físico", "custo_emissao", data, "deduction");
+            tbody += bRow("(-) Folha Salarial RH Administrativo", "custo_rh", data, "deduction");
+            tbody += bRow("= Total OPEX", "opex", data, "result");
+
+            /* D. EBITDA */
+            tbody += `<tr><td colspan="${months+1}" class="bg-gray-50 h-3 border-y border-gray-200"></td></tr>`;
+            let eht = `<tr class="bg-[#D1FAE5] border-t-2 border-emerald-600">
+                <td class="p-3 text-emerald-900 sticky left-0 z-10 bg-[#D1FAE5] border-r border-emerald-300 font-extrabold text-[13px] uppercase tracking-wide">IV. EBITDA ACUMULADO (A + B - C)</td>`;
+            data.forEach(m => {
+                let v = m["ebitda"];
+                eht += `<td class="p-3 text-right font-extrabold ${v < 0 ? 'text-red-700' : 'text-emerald-800 text-lg'}">${formatBRL(v)}</td>`;
+            });
+            eht += `</tr>`;
+            tbody += eht;
+
+            document.getElementById('dre-tbody').innerHTML = tbody;
+        }
+
+        // Init
+        document.addEventListener("DOMContentLoaded", () => {
+            runSimulation();
+        });
+    </script>
+</body>
+</html>

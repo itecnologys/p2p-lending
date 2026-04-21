@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Extrato do Cartão — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* CARTÃO MINI */
+.card-mini{background:linear-gradient(135deg,#0B2447 0%,#1640D6 60%,#0F766E 100%);border-radius:14px;padding:20px;color:#fff;position:relative;overflow:hidden}
+.card-mini::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cm-saldo{font-size:28px;font-weight:800;letter-spacing:-.5px;position:relative;z-index:2}
+.cm-label{font-size:11px;opacity:.6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;position:relative;z-index:2}
+.cm-pan{font-size:13px;opacity:.7;letter-spacing:2px;margin-top:10px;position:relative;z-index:2;font-weight:600}
+.cm-brand{position:absolute;bottom:16px;right:18px;font-size:16px;font-weight:800;font-style:italic;opacity:.9;z-index:2}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-select{padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--t1);font-family:inherit;outline:none;background:var(--white);cursor:pointer}
+.filter-select:focus{border-color:var(--primary)}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:7px 12px;flex:1;max-width:260px}
+.search-box input{border:none;background:transparent;font-size:13px;color:var(--t1);outline:none;flex:1;font-family:inherit}
+.search-box svg{width:14px;height:14px;stroke:var(--t3);fill:none;stroke-width:2;flex-shrink:0}
+
+/* TRANSACTION ROW */
+.tx-group{margin-bottom:4px}
+.tx-date-header{font-size:11.5px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;padding:14px 20px 8px;background:var(--bg);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+.tx-row{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border-light);transition:.1s}
+.tx-row:hover{background:#FAFBFC}
+.tx-emoji{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.tx-info{flex:1}
+.tx-nome{font-size:13.5px;font-weight:600;color:var(--t1)}
+.tx-vertical{font-size:11.5px;color:var(--t3);margin-top:1px;display:flex;align-items:center;gap:5px}
+.tx-hash{font-family:'Courier New',monospace;font-size:10px;color:var(--purple);background:var(--purple-light);padding:2px 6px;border-radius:4px;cursor:pointer}
+.tx-amt{font-size:14px;font-weight:700;color:var(--red);text-align:right}
+.tx-amt.credit{color:var(--green)}
+.tx-time{font-size:11px;color:var(--t3);text-align:right;margin-top:2px}
+
+/* RESUMO MENSAL CARD */
+.month-chart{height:140px}
+
+/* VERTICAL BREAKDOWN */
+.vbd-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light)}
+.vbd-row:last-child{border-bottom:none}
+.vbd-emoji{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.vbd-name{flex:1;font-size:12.5px;color:var(--t1)}
+.vbd-track{width:80px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.vbd-fill{height:100%;border-radius:3px;background:var(--primary)}
+.vbd-val{font-size:12px;font-weight:600;color:var(--t1);width:60px;text-align:right}
+.vbd-pct{font-size:11px;color:var(--t3);width:32px;text-align:right}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon" style="background:var(--green)">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-05-dashboard-usuario.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="ni active" href="tela-08-extrato-cartao.html">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Meu Cartão
+        <span class="ni-dot green"></span>
+      </a>
+      <a class="ni" href="tela-07-nexus-score.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Crédito</div>
+      <a class="ni" href="tela-06-solicitar-credito.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Solicitar Crédito
+      </a>
+      <a class="ni" href="tela-09-parcelas.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Parcelas
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Conta</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </a>
+      <a class="ni" href="tela-04-macro-hash.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        MACRO HASH
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+      <div>
+        <div class="u-name">Maria Ramos</div>
+        <div class="u-role"><span class="role-badge rb-u">Usuário</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">Extrato do Cartão</div>
+    <div class="pg-sub">Cartão Visa •••• 4821 · Dock/BS2 · 141 verticais</div>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="btn btn-s" style="font-size:12.5px">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Exportar PDF
+  </button>
+  <button class="ib">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+</header>
+
+<main class="main">
+
+  <!-- TOP ROW: Cartão + KPIs + Gráfico mensal -->
+  <div style="display:grid;grid-template-columns:220px 1fr 280px;gap:16px;margin-bottom:16px;align-items:start">
+
+    <!-- CARTÃO MINI -->
+    <div>
+      <div class="card-mini">
+        <div class="cm-label">Saldo disponível</div>
+        <div class="cm-saldo">R$ 160,00</div>
+        <div class="cm-pan">•••• •••• •••• 4821</div>
+        <div class="cm-brand">VISA</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center">
+          <div style="font-size:10.5px;color:var(--t3)">Limite total</div>
+          <div style="font-size:18px;font-weight:800;color:var(--t1)">R$280</div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center">
+          <div style="font-size:10.5px;color:var(--t3)">Utilizado</div>
+          <div style="font-size:18px;font-weight:800;color:var(--primary)">R$120</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="kcard">
+          <div class="kc-top">
+            <div class="kc-label">Gastos Abril</div>
+            <div class="kc-icon icon-r"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          </div>
+          <div class="kc-val" style="font-size:22px">R$266</div>
+          <div class="kc-bot"><div class="trend dn"><svg viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>18 transações</div></div>
+        </div>
+        <div class="kcard">
+          <div class="kc-top">
+            <div class="kc-label">Média por compra</div>
+            <div class="kc-icon icon-o"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          </div>
+          <div class="kc-val" style="font-size:22px">R$14,80</div>
+          <div class="kc-bot"><div class="trend nu">por transação</div></div>
+        </div>
+        <div class="kcard">
+          <div class="kc-top">
+            <div class="kc-label">Verticais usadas</div>
+            <div class="kc-icon icon-v"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+          <div class="kc-val" style="font-size:22px">5</div>
+          <div class="kc-bot"><div class="trend nu">de 141 disponíveis</div></div>
+        </div>
+      </div>
+
+      <!-- Gastos por vertical breakdown -->
+      <div class="card">
+        <div class="ch"><div class="ct">Gastos por Vertical — Abril 2026</div></div>
+        <div class="cb" style="padding:10px 16px">
+          <div class="vbd-row">
+            <div class="vbd-emoji">🏥</div>
+            <div class="vbd-name">Saúde</div>
+            <div class="vbd-track"><div class="vbd-fill" style="width:100%;background:var(--gold)"></div></div>
+            <div class="vbd-val">R$ 87,50</div>
+            <div class="vbd-pct">33%</div>
+          </div>
+          <div class="vbd-row">
+            <div class="vbd-emoji">🛒</div>
+            <div class="vbd-name">Supermercado</div>
+            <div class="vbd-track"><div class="vbd-fill" style="width:70%;background:var(--green)"></div></div>
+            <div class="vbd-val">R$ 62,30</div>
+            <div class="vbd-pct">23%</div>
+          </div>
+          <div class="vbd-row">
+            <div class="vbd-emoji">📚</div>
+            <div class="vbd-name">Educação</div>
+            <div class="vbd-track"><div class="vbd-fill" style="width:57%;background:var(--purple)"></div></div>
+            <div class="vbd-val">R$ 49,90</div>
+            <div class="vbd-pct">19%</div>
+          </div>
+          <div class="vbd-row">
+            <div class="vbd-emoji">🍽️</div>
+            <div class="vbd-name">Alimentação</div>
+            <div class="vbd-track"><div class="vbd-fill" style="width:42%;background:var(--red)"></div></div>
+            <div class="vbd-val">R$ 38,20</div>
+            <div class="vbd-pct">14%</div>
+          </div>
+          <div class="vbd-row">
+            <div class="vbd-emoji">🚌</div>
+            <div class="vbd-name">Transporte</div>
+            <div class="vbd-track"><div class="vbd-fill" style="width:33%;background:var(--primary)"></div></div>
+            <div class="vbd-val">R$ 28,40</div>
+            <div class="vbd-pct">11%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART mensal -->
+    <div class="card">
+      <div class="ch"><div class="ct">Gastos mensais</div><div class="cs">Últimos 6 meses</div></div>
+      <div class="cb"><canvas id="monthChart" class="month-chart"></canvas></div>
+      <div style="padding:12px 16px;border-top:1px solid var(--border-light)">
+        <canvas id="pieChart" width="100" height="100" style="display:block;margin:0 auto"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EXTRATO LISTA -->
+  <div class="card">
+    <div class="ch">
+      <div><div class="ct">Transações</div><div class="cs">18 movimentações em Abril 2026</div></div>
+      <div style="display:flex;gap:8px">
+        <select class="filter-select" id="fPeriodo">
+          <option>Abril 2026</option>
+          <option>Março 2026</option>
+          <option>Fevereiro 2026</option>
+          <option>Janeiro 2026</option>
+        </select>
+        <select class="filter-select" id="fVertical">
+          <option value="">Todas as verticais</option>
+          <option>Saúde</option>
+          <option>Supermercado</option>
+          <option>Educação</option>
+          <option>Alimentação</option>
+          <option>Transporte</option>
+        </select>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar estabelecimento...">
+        </div>
+      </div>
+    </div>
+
+    <!-- 12/Abr -->
+    <div class="tx-date-header">Hoje · Domingo, 12 de Abril de 2026</div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#FEF3C7">🏥</div>
+      <div class="tx-info">
+        <div class="tx-nome">Drogasil — Farmácia</div>
+        <div class="tx-vertical">
+          <span class="badge b-o" style="font-size:10.5px">Saúde</span>
+          <span class="tx-hash" title="Bloco L5">L5: a3f8c1e2d4b6...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 32,90</div>
+        <div class="tx-time">14:23</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#DCFCE7">🛒</div>
+      <div class="tx-info">
+        <div class="tx-nome">Mercado Extra</div>
+        <div class="tx-vertical">
+          <span class="badge b-g" style="font-size:10.5px">Supermercado</span>
+          <span class="tx-hash">L5: 9c2a7f1e3d5b...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 18,40</div>
+        <div class="tx-time">10:07</div>
+      </div>
+    </div>
+
+    <!-- 11/Abr -->
+    <div class="tx-date-header">Sábado, 11 de Abril de 2026</div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#DCFCE7">🛒</div>
+      <div class="tx-info">
+        <div class="tx-nome">Carrefour Express</div>
+        <div class="tx-vertical">
+          <span class="badge b-g" style="font-size:10.5px">Supermercado</span>
+          <span class="tx-hash">L5: 7b1d4e8f2a3c...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 43,90</div>
+        <div class="tx-time">16:45</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#FEE2E2">🍽️</div>
+      <div class="tx-info">
+        <div class="tx-nome">iFood — Entrega</div>
+        <div class="tx-vertical">
+          <span class="badge b-r" style="font-size:10.5px">Alimentação</span>
+          <span class="tx-hash">L5: 5f9e2a1b8c7d...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 22,50</div>
+        <div class="tx-time">12:30</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#EFF3FF">🚌</div>
+      <div class="tx-info">
+        <div class="tx-nome">99 App — Viagem</div>
+        <div class="tx-vertical">
+          <span class="badge b-p" style="font-size:10.5px">Transporte</span>
+          <span class="tx-hash">L5: 2e8d5c4b9a1f...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 8,90</div>
+        <div class="tx-time">09:15</div>
+      </div>
+    </div>
+
+    <!-- 10/Abr -->
+    <div class="tx-date-header">Sexta-feira, 10 de Abril de 2026</div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#FEF3C7">🏥</div>
+      <div class="tx-info">
+        <div class="tx-nome">UPA — Consulta</div>
+        <div class="tx-vertical">
+          <span class="badge b-o" style="font-size:10.5px">Saúde</span>
+          <span class="tx-hash">L5: 1a5b3c8d2e9f...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 54,60</div>
+        <div class="tx-time">11:00</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#EDE9FE">📚</div>
+      <div class="tx-info">
+        <div class="tx-nome">Udemy — Curso Python</div>
+        <div class="tx-vertical">
+          <span class="badge b-v" style="font-size:10.5px">Educação</span>
+          <span class="tx-hash">L5: 6d9c1b4e7a2f...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 49,90</div>
+        <div class="tx-time">08:44</div>
+      </div>
+    </div>
+
+    <!-- 08/Abr — crédito -->
+    <div class="tx-date-header">Quarta-feira, 8 de Abril de 2026</div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:var(--green-light)">⬇️</div>
+      <div class="tx-info">
+        <div class="tx-nome">Crédito NEXUS — Carga de blocos</div>
+        <div class="tx-vertical">
+          <span class="badge b-g" style="font-size:10.5px">Crédito</span>
+          <span class="tx-hash">L4: a3f8c1e2d4b6... (Contrato CRT-2026-1204)</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt credit">+ R$ 240,00</div>
+        <div class="tx-time">09:01</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#FEE2E2">🍽️</div>
+      <div class="tx-info">
+        <div class="tx-nome">McDonald's — Lanche</div>
+        <div class="tx-vertical">
+          <span class="badge b-r" style="font-size:10.5px">Alimentação</span>
+          <span class="tx-hash">L5: 4f2a9c1e5b8d...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 15,70</div>
+        <div class="tx-time">13:22</div>
+      </div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-emoji" style="background:#EFF3FF">🚌</div>
+      <div class="tx-info">
+        <div class="tx-nome">SPTrans — Bilhete mensal</div>
+        <div class="tx-vertical">
+          <span class="badge b-p" style="font-size:10.5px">Transporte</span>
+          <span class="tx-hash">L5: 8e3f1d7b2c5a...</span>
+        </div>
+      </div>
+      <div>
+        <div class="tx-amt">− R$ 19,50</div>
+        <div class="tx-time">07:30</div>
+      </div>
+    </div>
+
+    <div style="padding:14px 20px;background:var(--bg);border-top:1px solid var(--border-light);border-radius:0 0 12px 12px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12.5px;color:var(--t2)">Exibindo 10 de 18 transações</span>
+      <button class="btn btn-s" style="font-size:12.5px">Carregar mais →</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Month chart
+const mCtx = document.getElementById('monthChart').getContext('2d');
+new Chart(mCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Nov','Dez','Jan','Fev','Mar','Abr'],
+    datasets: [{
+      label: 'Gastos (R$)',
+      data: [0, 0, 0, 58, 212, 266],
+      backgroundColor: ['#E2E8F0','#E2E8F0','#E2E8F0','rgba(22,64,214,.3)','rgba(22,64,214,.5)','#1640D6'],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+      y: { grid: { color: '#F1F5F9' }, ticks: { font: { family: 'Inter', size: 11 }, callback: v => 'R$'+v } }
+    }
+  }
+});
+
+// Pie chart
+const pCtx = document.getElementById('pieChart').getContext('2d');
+new Chart(pCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Saúde','Supermercado','Educação','Alimentação','Transporte'],
+    datasets: [{
+      data: [33, 23, 19, 14, 11],
+      backgroundColor: ['#D97706','#059669','#7C3AED','#DC2626','#1640D6'],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: false,
+    plugins: { legend: { display: false } },
+    cutout: '60%'
+  }
+});
+</script>
+</body>
+</html>

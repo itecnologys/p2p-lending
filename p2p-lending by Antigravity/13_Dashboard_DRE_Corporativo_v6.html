@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - DRE Corporate Dashboard v6 (Multi-Aba & NPL Recovery)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; }
+        .header-bg { background-color: #0F172A; }
+        
+        .kpi-card { border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;}
+        
+        .dre-header { background-color: #1E293B; color: white; }
+        .dre-section { background-color: #F1F5F9; font-weight: bold; color: #1E293B; text-transform: uppercase;}
+        .dre-result { background-color: #E2E8F0; font-weight: bold; color: #0F172A; }
+        .link-row { transition: background-color 0.2s; border-left: 3px solid transparent; }
+        .link-row:hover { background-color: #DBEAFE !important; border-left: 3px solid #3B82F6; }
+        
+        .table-container::-webkit-scrollbar { height: 10px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow: hidden; }
+
+        .tab-btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .tab-active { background: #E2E8F0; color: #0F172A; }
+        .tab-inactive { background: transparent; color: #94A3B8; }
+        .tab-inactive:hover { color: #E2E8F0; }
+    </style>
+</head>
+<body class="bg-slate-50 flex flex-col h-screen">
+
+    <!-- Navbar -->
+    <nav class="header-bg text-white p-4 flex justify-between items-center shadow-lg shrink-0">
+        <div class="flex items-center space-x-6">
+            <h1 class="text-2xl font-bold tracking-tight">NEXUS <span class="text-blue-400">BOARD v6</span></h1>
+            
+            <!-- TABS -->
+            <div class="flex space-x-2 bg-slate-800 p-1 rounded-lg">
+                <button id="tab-geral" class="tab-btn tab-active text-sm" onclick="switchTab('geral')">📊 Visão Geral (Timeline)</button>
+                <button id="tab-foco" class="tab-btn tab-inactive text-sm" onclick="switchTab('foco')">🔍 Foco Mês a Mês Isolado</button>
+            </div>
+        </div>
+        <div class="flex space-x-3 text-sm font-medium items-center">
+            <button onclick="toggleModal('hrModal')" class="bg-amber-600 px-4 py-2 rounded shadow hover:bg-amber-500">💼 Remuneração e Recuperação de Crédito</button>
+            <button onclick="toggleModal('settingsModal')" class="bg-blue-600 px-4 py-2 rounded shadow hover:bg-blue-500">⚙️ Setup Base</button>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-hidden flex flex-col p-6 space-y-4 relative">
+        <div id="kpi-container" class="grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0"></div>
+
+        <div class="flex justify-between items-center bg-white p-3 rounded shadow shrink-0 border border-gray-200">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm font-semibold text-gray-700">Período Modelado:</span>
+                <select id="sel-period" class="border border-gray-300 rounded p-1 text-sm outline-none" onchange="runSimulation()">
+                    <option value="12">12 Meses</option>
+                    <option value="24" selected>24 Meses</option>
+                    <option value="36">36 Meses</option>
+                    <option value="60">60 Meses</option>
+                </select>
+            </div>
+
+            <!-- Foco Isolado Controls (hidden by default) -->
+            <div id="foco-controls" class="hidden flex items-center space-x-3 bg-blue-50 px-4 py-1 rounded border border-blue-200">
+                <span class="text-sm font-bold text-blue-900">Navegar no Tempo:</span>
+                <button class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold" onclick="navMonth(-1)">◀ Anterior</button>
+                <span class="font-black text-lg text-blue-900 w-24 text-center" id="foco-month-display">Mês 1</span>
+                <button class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold" onclick="navMonth(1)">Próximo ▶</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded shadow flex-1 overflow-auto table-container border border-gray-200" id="container-geral">
+            <table class="w-full text-sm text-left whitespace-nowrap min-w-max" id="dre-table">
+                <thead id="dre-thead" class="sticky top-0 z-20 shadow-md"></thead>
+                <tbody id="dre-tbody" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+
+        <div class="bg-white rounded shadow flex-1 overflow-auto p-8 border border-gray-200 hidden" id="container-foco">
+            <!-- Renderizado via JS -->
+            <div id="foco-content" class="max-w-4xl mx-auto"></div>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50" id="settingsModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('settingsModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-lg shadow-2xl z-50">
+            <div class="py-4 px-6">
+                <div class="flex justify-between border-b pb-3"><p class="text-xl font-bold">Setup Modificado</p><div class="cursor-pointer font-bold" onclick="toggleModal('settingsModal')">✖</div></div>
+                <div class="grid grid-cols-2 gap-6 mt-4">
+                    <div class="space-y-2">
+                        <label class="text-xs">Juros / Luva P2P (%)</label><input type="number" id="p-fee" value="6.0" step="0.1" class="w-full border p-1 border-gray-300 rounded">
+                        <label class="text-xs">Inadimplência Bruta NPL (%)</label><input type="number" id="p-npl" value="4.5" step="0.1" class="w-full border p-1 border-gray-300 rounded">
+                        <label class="text-xs">Repasse Fixo aos Pool Aplicantes (%)</label><input type="number" id="p-poolreturn" value="2.5" step="0.1" class="w-full border p-1 border-gray-300 rounded">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs">Usuários Injetados na Matrix Mês 01</label><input type="number" id="p-users" value="25000" class="w-full border p-1 border-gray-300 border-l-4 border-l-blue-500 rounded">
+                        <label class="text-xs">Escala do Crescimento Mensal (%)</label><input type="number" id="p-growth" value="7.0" step="0.1" class="w-full border p-1 border-gray-300 rounded">
+                        <label class="text-xs">Ticket Médio Fatura / Limite (R$)</label><input type="number" id="p-ticket" value="2500" class="w-full border p-1 border-gray-300 rounded">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div><label class="text-xs">Licença BaaS Unit. (R$)</label><input type="number" id="p-maint" value="1.50" step="0.1" class="w-full border p-1"></div>
+                    <div><label class="text-xs">Custo Unitário Plástico (R$)</label><input type="number" id="p-issue" value="15.00" class="w-full border p-1"></div>
+                    <div><label class="text-xs font-bold text-blue-700">MDR VISA/MASTER (%)</label><input type="number" id="p-mdr" value="1.5" step="0.1" class="w-full border-2 border-blue-400 font-bold p-1"></div>
+                </div>
+                <div class="flex justify-end mt-6"><button class="px-5 py-2 bg-blue-600 font-bold text-white rounded" onclick="saveAndSimulate('settingsModal')">Gravar Definições</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HR Modal c/ Recuperação -->
+    <div class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50" id="hrModal">
+        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-60" onclick="toggleModal('hrModal')"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-4xl mx-auto rounded-lg shadow-2xl z-50">
+            <div class="py-4 px-6">
+                <div class="flex justify-between border-b pb-3"><p class="text-xl font-bold">💼 Motor de Churn e Recuperação de NPL Ativa (V6)</p><div class="cursor-pointer" onclick="toggleModal('hrModal')">✖</div></div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <label class="font-bold text-red-800 text-sm">Punição/Chargeback na Côm. (%)</label>
+                        <p class="text-[11px] text-red-700 mb-2">Penalidade deduzida da folha de pagamento pelo calote gerado. O valor volta e socorre o Fundo de Risco.</p>
+                        <input type="number" id="p-chargeback" value="15.0" class="w-full border p-2 font-bold text-lg text-red-900">
+                    </div>
+
+                    <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded">
+                        <label class="font-bold text-emerald-800 text-sm">Metrifição do Sucesso na Arrecadação/Recuperação Ativa</label>
+                        <p class="text-[11px] text-emerald-700 mb-2">Se seu Assistente reverter fisicamente a fatura de um cliente negativado, o NPL abaixa e pagamos UM PRÊMIO a ele pela performance direta!</p>
+                        <div class="flex space-x-2">
+                            <div class="w-1/2">
+                                <label class="text-[10px] uppercase font-bold text-emerald-600 block">NPL Recuperado Mês a Mês (%)</label>
+                                <input type="number" id="p-recovery-rate" value="25.0" step="1.0" class="w-full border p-1 text-emerald-900 font-bold bg-white">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="text-[10px] uppercase font-bold text-emerald-600 block">Comissão/Prêmio do Recup. (%)</label>
+                                <input type="number" id="p-recovery-bonus" value="30.0" step="1.0" class="w-full border p-1 text-emerald-900 font-bold bg-white">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mt-4">
+                    <div class="bg-slate-100 p-2 rounded border"><h3 class="font-bold text-xs">Assistente Share (%)</h3><input type="number" id="hr-ass-pct" value="15.0" class="w-full border p-1 mt-1 font-bold"></div>
+                    <div class="bg-slate-100 p-2 rounded border"><h3 class="font-bold text-xs">Executivo Share (%)</h3><input type="number" id="hr-exc-pct" value="5.0" class="w-full border p-1 mt-1 font-bold"></div>
+                    <div class="bg-slate-100 p-2 rounded border"><h3 class="font-bold text-xs">Gerente Share (%)</h3><input type="number" id="hr-ger-pct" value="3.0" class="w-full border p-1 mt-1 font-bold"></div>
+                    <div class="bg-slate-100 p-2 rounded border"><h3 class="font-bold text-xs">Diretor Share (%)</h3><input type="number" id="hr-dir-pct" value="1.0" class="w-full border p-1 mt-1 font-bold"></div>
+                </div>
+                <div class="flex justify-end mt-5"><button class="px-5 py-2 bg-amber-600 font-bold text-white rounded" onclick="saveAndSimulate('hrModal')">Gravar e Simular Reversão de Calote</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
+        const formatNum = (v) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(v);
+        
+        let P = {};
+        let G_DATA = [];
+        let viewM = 1;
+        let cTab = 'geral';
+
+        function toggleModal(id){ const el = document.getElementById(id); el.classList.toggle('opacity-0'); el.classList.toggle('pointer-events-none'); }
+        function saveAndSimulate(id) { if(id) toggleModal(id); runSimulation(); }
+
+        function switchTab(tab) {
+            cTab = tab;
+            if(tab === 'geral') {
+                document.getElementById('tab-geral').className = "tab-btn tab-active text-sm";
+                document.getElementById('tab-foco').className = "tab-btn tab-inactive text-sm";
+                document.getElementById('container-geral').classList.remove('hidden');
+                document.getElementById('container-foco').classList.add('hidden');
+                document.getElementById('foco-controls').classList.add('hidden');
+                document.getElementById('sel-period').classList.remove('hidden');
+            } else {
+                document.getElementById('tab-foco').className = "tab-btn tab-active text-sm";
+                document.getElementById('tab-geral').className = "tab-btn tab-inactive text-sm";
+                document.getElementById('container-foco').classList.remove('hidden');
+                document.getElementById('container-geral').classList.add('hidden');
+                document.getElementById('foco-controls').classList.remove('hidden');
+                document.getElementById('sel-period').classList.add('hidden');
+                renderFoco();
+            }
+        }
+
+        function navMonth(dir) {
+            viewM += dir;
+            if (viewM < 1) viewM = 1;
+            if (viewM > P.mth) viewM = P.mth;
+            document.getElementById('foco-month-display').innerText = "Mês " + viewM;
+            renderFoco();
+        }
+
+        function runSimulation() {
+            P = {
+                fee: parseFloat(document.getElementById('p-fee').value)/100,
+                npl: parseFloat(document.getElementById('p-npl').value)/100,
+                poolrep: parseFloat(document.getElementById('p-poolreturn').value)/100,
+                mdr: parseFloat(document.getElementById('p-mdr').value)/100,
+                maint: parseFloat(document.getElementById('p-maint').value),
+                issue: parseFloat(document.getElementById('p-issue').value),
+                users: parseFloat(document.getElementById('p-users').value),
+                growth: parseFloat(document.getElementById('p-growth').value)/100,
+                ticket: parseFloat(document.getElementById('p-ticket').value),
+                chargeback: parseFloat(document.getElementById('p-chargeback').value)/100,
+                rec_rate: parseFloat(document.getElementById('p-recovery-rate').value)/100,
+                rec_bonus: parseFloat(document.getElementById('p-recovery-bonus').value)/100,
+                mth: parseInt(document.getElementById('sel-period').value),
+                hr_ass: parseFloat(document.getElementById('hr-ass-pct').value)/100,
+                hr_exe: parseFloat(document.getElementById('hr-exc-pct').value)/100,
+                hr_ger: parseFloat(document.getElementById('hr-ger-pct').value)/100,
+                hr_dir: parseFloat(document.getElementById('hr-dir-pct').value)/100,
+            };
+
+            if (viewM > P.mth) viewM = P.mth;
+
+            const data = [];
+            let cUsers = P.users;
+            let actFinList = {}; 
+            
+            let T = { giro:0, sp2p_bruto: 0, mdrBruto: 0, shr:0, opex:0, ebitda:0, total_chargebacks:0, total_recuperado: 0, total_premio:0 }; 
+            let previous_dNPL = 0;
+            let fundoRestrito = 0; // The V5 reserve
+
+            for (let m = 1; m <= P.mth; m++) {
+                const prevU = m === 1 ? P.users : data[m - 2].usuarios_totais;
+                const newU = m === 1 ? P.users : (cUsers - prevU);
+                const cap = cUsers * P.ticket;
+                
+                // P2P Spread Clássico
+                const rJur = cap * P.fee;
+                const dNpl = cap * P.npl;
+                const dRep = cap * P.poolrep;
+                const rMdr = cap * P.mdr;
+
+                // Fluxo Emissão Cartões (V5 Isolated)
+                let rCar = 0;
+                actFinList[m] = newU;
+                for(let k = Math.max(1, m - 11); k <= m; k++) {
+                    if(actFinList[k]) rCar += (actFinList[k] * (P.issue / 12));
+                }
+                const cEmis = newU * P.issue; 
+                const fluxoCar = rCar - cEmis; 
+
+                // Reserva Cartão Logic
+                let deposito_saque = 0;
+                let operacao_deficit_ebitda = 0; 
+                if (fluxoCar > 0) {
+                    deposito_saque = fluxoCar;
+                    fundoRestrito += fluxoCar;
+                } else if (fluxoCar < 0) {
+                    const deficit = Math.abs(fluxoCar);
+                    if (fundoRestrito >= deficit) { fundoRestrito -= deficit; deposito_saque = -deficit; } 
+                    else { const st = fundoRestrito; fundoRestrito=0; deposito_saque=-st; operacao_deficit_ebitda=deficit-st; }
+                }
+
+                // Motor RH 
+                const qA = Math.ceil(cUsers / 500); 
+                const qE = Math.ceil(qA / 5); 
+                const qG = Math.ceil(qE / 5); 
+                const qD = Math.ceil(qG / 4); 
+
+                const totalHRBruto = (rMdr * P.hr_ass) + (rMdr * P.hr_exe) + (rMdr * P.hr_ger) + (rMdr * P.hr_dir);
+
+                // --- V6: NPL RECUPERADO MAGIC ---
+                const penaltyReq = previous_dNPL * P.chargeback; // A Punição Original
+                
+                // Mas os agentes foram e recuperaram ativamente o calote
+                const valorFisicoRecuperado = previous_dNPL * P.rec_rate;
+                const bonusComissaoTime = valorFisicoRecuperado * P.rec_bonus;
+
+                let effectivePenalty = 0;
+                if (penaltyReq > 0) {
+                    if (penaltyReq > totalHRBruto) effectivePenalty = totalHRBruto;
+                    else effectivePenalty = penaltyReq; 
+                }
+
+                // Pagamento final ao executivo: Ganho normal - Punição por não previnir + Prêmio pela grana q trouxe de volta
+                const hr_liquido_pago_time = (totalHRBruto - effectivePenalty) + bonusComissaoTime;
+                
+                // Fundo P2P é salvo: Entra o Dinheiro Físico Recuperado e mais o próprio chargeback retido que socorreu o caixa!
+                const p2p_liquido = (rJur - dNpl - dRep) + valorFisicoRecuperado + effectivePenalty;
+
+                const opex = cUsers * P.maint;
+                const ebitda = p2p_liquido + (rMdr - hr_liquido_pago_time) - operacao_deficit_ebitda - opex;
+
+                data.push({
+                    mes: m, usuarios_totais: cUsers, novos_usuarios: newU, cap: cap,
+                    r_jur: rJur, d_npl: dNpl, d_rep: dRep, p2p_liquido: p2p_liquido,
+                    r_mdr: rMdr, mdr_liquido: rMdr - hr_liquido_pago_time,
+                    
+                    vol_recuperado: valorFisicoRecuperado, 
+                    premio_pago: bonusComissaoTime,
+                    hr_bruto: totalHRBruto, hr_penalty: effectivePenalty, hr_liquido: hr_liquido_pago_time,
+                    
+                    r_car: rCar, c_emis: cEmis, fluxo_car: fluxoCar,
+                    deposito_saque: deposito_saque,
+                    operacao_deficit_ebitda: operacao_deficit_ebitda,
+                    fundo_restrito: fundoRestrito,
+                    
+                    c_baas: opex, ebitda: ebitda,
+                    qA: qA, qE: qE, qG: qG, qD: qD
+                });
+
+                T.giro += cap; T.sp2p_bruto += (rJur - dNpl - dRep); T.total_chargebacks += effectivePenalty;
+                T.mdrBruto += rMdr; T.shr += hr_liquido_pago_time; T.opex += opex; 
+                T.total_recuperado += valorFisicoRecuperado; T.total_premio += bonusComissaoTime;
+                T.ebitda += ebitda;
+                
+                previous_dNPL = dNpl; cUsers *= (1 + P.growth);
+            }
+            G_DATA = data;
+            renderKPIs(T, fundoRestrito);
+            if(cTab === 'geral') renderTable(data, P.mth);
+            else renderFoco();
+        }
+
+        function renderKPIs(T, fundoR) {
+            document.getElementById('kpi-container').innerHTML = `
+                <div class="kpi-card p-4 bg-slate-900 border-l-4 border-slate-600 text-white"><span class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Giro Ponto</span><span class="text-xl font-extrabold mt-1">${formatBRL(T.giro)}</span></div>
+                <div class="kpi-card p-4 bg-emerald-900 border-l-4 border-emerald-500 text-white"><span class="text-green-300 text-[10px] font-bold tracking-widest uppercase">Caixa P2P + Recuperado Real (${(P.rec_rate*100).toFixed(0)}%)</span><span class="text-xl font-extrabold mt-1">${formatBRL(T.sp2p_bruto + T.total_chargebacks + T.total_recuperado)}</span></div>
+                <div class="kpi-card p-4 bg-[#1E3A8A] border-l-4 border-blue-500 text-white"><span class="text-blue-300 text-[10px] font-bold tracking-widest uppercase">Caixa Cartões Exclusivo</span><span class="text-xl font-extrabold text-[#93C5FD] mt-1">${formatBRL(fundoR)}</span></div>
+                <div class="kpi-card p-4 bg-amber-900 border-l-4 border-amber-500 text-white relative"><span class="text-amber-200 text-[10px] font-bold tracking-widest uppercase">Custo Pagamento Matriz (Líq)</span><span class="text-xl font-extrabold mt-1">-${formatBRL(T.shr)}</span></div>
+                <div class="kpi-card p-4 bg-red-900 border-l-4 border-red-500 text-white"><span class="text-red-300 text-[10px] font-bold tracking-widest uppercase">Sisterno BaaS Tech</span><span class="text-xl font-extrabold mt-1">-${formatBRL(T.opex)}</span></div>
+                <div class="kpi-card p-4 bg-[#064E3B] border-l-4 border-emerald-400 text-white"><span class="text-emerald-300 text-[10px] font-bold tracking-widest uppercase">Caixa Matrix Holding (Ebitda)</span><span class="text-xl font-extrabold mt-1">${formatBRL(T.ebitda)}</span></div>
+            `;
+        }
+
+        function bRow(title, prop, pData, type="normal") {
+            let trClass = "link-row bg-white border-b border-gray-100"; 
+            let vClass = "text-gray-700"; let tdClass="pl-8 text-gray-800";
+            if (type === "section") { trClass = "dre-section border-b-2 border-slate-300 bg-slate-100"; vClass = "text-slate-900"; tdClass="pl-3 text-[11px]"; }
+            else if (type === "result") { trClass = "dre-result bg-slate-200"; vClass = "text-blue-900 font-bold"; tdClass="pl-6 text-[12px]"; }
+            else if (type === "fundo") { trClass = "dre-result bg-[#EFF6FF] border-y-2 border-blue-400"; vClass = "text-blue-800 font-black"; tdClass="pl-6 text-blue-900 font-bold uppercase"; }
+            else if (type === "deduction") { vClass = "text-red-600"; tdClass="pl-8 text-gray-700 italic border-l-2 border-red-300"; }
+            else if (type === "info") { vClass = "text-gray-400 text-xs"; tdClass="pl-8 text-slate-500 italic text-[11px] font-semibold"; } 
+            
+            let html = `<tr class="${trClass}"><td class="p-2.5 text-xs z-10 sticky left-0 border-r border-gray-200 bg-inherit ${tdClass}">${title}</td>`;
+            pData.forEach(m => {
+                let v = prop ? m[prop] : "";
+                let txt = (type === "info") ? formatNum(v) : ((typeof v === 'number') ? formatBRL(v) : v);
+                let sign = (type === "deduction" && v > 0) ? "- " : "";
+                if(type === "recovery" && v>0) { txt = `+ ${txt}`; vClass="text-emerald-700 font-bold bg-emerald-50"; }
+                html += `<td class="p-2.5 text-right font-medium ${vClass}">${sign}${txt}</td>`;
+            }); return html + `</tr>`;
+        }
+
+        function renderTable(data, months) {
+            let thead = `<tr><th class="p-3 bg-slate-800 text-slate-200 sticky left-0 z-20 text-[11px] uppercase">Conta Gerencial Acumulada</th>`;
+            for(let i=1; i<=months; i++) { thead += `<th class="p-2 bg-slate-800 text-[11px] text-slate-200 uppercase text-right min-w-[130px]">Mês ${i}</th>`; }
+            thead += `</tr>`; document.getElementById('dre-thead').innerHTML = thead;
+            
+            let tbody = "";
+            tbody += bRow("📉 MÉTRICAS DE BASE (Headcount V6)", "", data, "section");
+            tbody += bRow("(+) Total de Usuários Base Faturando", "usuarios_totais", data, "info");
+            tbody += bRow("💡 Qtd. Assistentes em Atuação", "qA", data, "info");
+            tbody += bRow("💡 Qtd. Executivos em Atuação", "qE", data, "info");
+
+            tbody += bRow(`Vazio`, "", data, "section");
+            tbody += bRow("I. SPREAD FINANCEIRO CRUZADO COM RECUPERAÇÃO ATIVA", "", data, "section");
+            tbody += bRow("(+) Faturamento Base (Juros/Luva)", "r_jur", data, "normal");
+            tbody += bRow("(-) Repasse Contratual Aplicantes", "d_rep", data, "deduction");
+            tbody += bRow("(-) Sangramento NPL Bruto (Inadimplência Real)", "d_npl", data, "deduction");
+            tbody += bRow("(+) AÇÃO FÍSICA: Dinheiro do Fundo Recuperado pela Equipe!", "vol_recuperado", data, "recovery");
+            tbody += bRow("(+) Call-Back: Punição descontada da Folha (Injetada no Fundo)", "hr_penalty", data, "normal");
+            tbody += bRow("= Margem Final da Atividade de Crédito Blindada", "p2p_liquido", data, "result");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("II. COMISSÃO DE REDE (Chargeback & Bônus)", "", data, "section");
+            tbody += bRow("(+) O Pote de Ouro Tecnológico (MDR)", "r_mdr", data, "normal");
+            tbody += bRow("(-) Remuneração Original Teórica", "hr_bruto", data, "deduction");
+            tbody += bRow("(+) PENALIDADE - Chargeback Retido (Faltas na Cobrança)", "hr_penalty", data, "normal");
+            tbody += bRow("(-) PRÊMIO PERFORMANCE: Bônus pela Inadimplência Recuperada", "premio_pago", data, "deduction");
+            tbody += bRow("= Lucro Líquido Real Depositado na conta do Corporate/RH", "hr_liquido", data, "result");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("III. 💳 BALANÇO RESTRITO DE CARTÕES (A CAIXINHA)", "", data, "section");
+            tbody += bRow("(+) Mensalidades Entrantes Retidas Diariamente", "r_car", data, "normal");
+            tbody += bRow("(-) Emissão Nova de Físicos", "c_emis", data, "deduction");
+            tbody += bRow("=> Respiro ou Falta Mensal de Cartões", "fluxo_car", data, "normal");
+            tbody += bRow("=> Depósito/Aporte na Caixinha Restrita", "deposito_saque", data, "normal");
+            tbody += bRow("📉 SALDO ACUMULADO DO FUNDO DE PLÁSTICO", "fundo_restrito", data, "fundo");
+            tbody += bRow("=> Queima Residual (Déficit Transferido para Ebitda)", "operacao_deficit_ebitda", data, "deduction");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            tbody += bRow("IV. CUSTO ESTRUTURAL MAQUINA", "", data, "section");
+            tbody += bRow("(-) Licenças Engine (BaaS)", "c_baas", data, "deduction");
+
+            tbody += `<tr class="h-2 bg-slate-50"><td colspan="${months+1}"></td></tr>`;
+            let eht = `<tr class="bg-[#D1FAE5] border-t border-emerald-600 h-[50px]">
+                <td class="p-3 text-emerald-950 font-black text-[13px] uppercase tracking-wide border-r border-[#6EE7B7] bg-[#D1FAE5] z-10 sticky left-0 hover:bg-[#A7F3D0] transition">V. EBITDA SOCIEDADE (Caixa Matrix Absoluto V6)</td>`;
+            data.forEach(m => { eht += `<td class="p-3 text-right font-black ${m.ebitda < 0 ? 'text-red-700' : 'text-emerald-800 text-[17px]'} bg-[#ECFDF5] border-b border-white">${formatBRL(m.ebitda)}</td>`; });
+            tbody += eht + `</tr>`;
+
+            document.getElementById('dre-tbody').innerHTML = tbody;
+        }
+
+        // NOVO RENDER SIMPLES E CLEAN PARA VISÃO ISOLADA
+        function renderFoco() {
+            let m = G_DATA[viewM - 1]; // Pega exatmente o mês da navegação
+            if(!m) return;
+
+            document.getElementById('foco-content').innerHTML = `
+                <div class="border-b-4 border-slate-800 pb-4 mb-6">
+                    <h2 class="text-3xl font-black text-slate-800">Cenário Financeiro Focado <span class="text-blue-600 ml-2">>> MÊS ${m.mes}</span></h2>
+                    <p class="text-slate-500 mt-1 font-medium">Balanço independente onde você foca 100% num único período de tempo operado pela plataforma completa.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <!-- Esquerda: Base e P2P -->
+                    <div class="space-y-4">
+                        <div class="bg-slate-100 rounded-lg p-5 border border-slate-200">
+                            <h3 class="font-bold text-slate-700 uppercase tracking-widest text-xs mb-3 border-b border-slate-300 pb-2">Tamanho Estrutura Neste Mês</h3>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold">Volume Transacionado (Giro Mês)</span><span class="font-black text-lg text-slate-800">${formatBRL(m.cap)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold">Base Faturando Ativa</span><span class="font-bold">${formatNum(m.usuarios_totais)} Usuários</span></div>
+                            <div class="flex justify-between items-center"><span class="text-sm text-slate-600">Novos Usuários Incorporados (Vindos Neste Mês)</span><span class="font-bold text-slate-600">${formatNum(m.novos_usuarios)}</span></div>
+                        </div>
+
+                        <div class="bg-emerald-50 rounded-lg p-5 border border-emerald-200 shadow-sm relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-2 h-full bg-emerald-500"></div>
+                            <h3 class="font-bold text-emerald-800 uppercase tracking-widest text-xs mb-3 border-b border-emerald-300 pb-2">Coração do Crédito P2P</h3>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm text-emerald-900">Juros/Luvas de Faturamento do Fundo</span><span class="font-bold text-emerald-800">${formatBRL(m.r_jur)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm text-emerald-900">Repasse Obrigado aos Aplicantes (-${(P.poolrep*100).toFixed(1)}%)</span><span class="font-bold text-red-600">-${formatBRL(m.d_rep)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm text-emerald-900">Sangramento Real Calote NPL (-${(P.npl*100).toFixed(1)}%)</span><span class="font-bold text-red-600">-${formatBRL(m.d_npl)}</span></div>
+                            <div class="flex justify-between items-center mb-3 mt-3 bg-emerald-100 p-2 rounded"><span class="text-xs text-emerald-900 font-bold uppercase">Volume Recuperado Física & Punição HR</span><span class="font-black text-emerald-700">${formatBRL(m.vol_recuperado + m.hr_penalty)}</span></div>
+                            <div class="flex justify-between items-center mt-4 border-t border-emerald-300 pt-3"><span class="font-bold text-emerald-900">Resultado Acumulado no Pool do Aplicante:</span><span class="font-black text-xl text-emerald-900">${formatBRL(m.p2p_liquido)}</span></div>
+                        </div>
+
+                        <div class="bg-orange-50 rounded-lg p-5 border border-orange-200 shadow-sm">
+                            <h3 class="font-bold text-orange-800 uppercase tracking-widest text-xs mb-3 border-b border-orange-300 pb-2">Despesas de Corporação Matriz</h3>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm">Custos Emissor BaaS (Dock/Software)</span><span class="font-bold text-red-700">-${formatBRL(m.c_baas)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm">Queima de Caixa de Cartões Restantes</span><span class="font-bold text-red-700">-${formatBRL(m.operacao_deficit_ebitda)}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Direita: Cartoes e MDR -->
+                    <div class="space-y-4">
+                        <div class="bg-amber-50 rounded-lg p-5 border border-amber-200 shadow-sm">
+                            <h3 class="font-bold text-amber-800 uppercase tracking-widest text-xs mb-3 border-b border-amber-300 pb-2">Modelo Comissionamento Remuneração & Churn</h3>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm text-amber-900">MDR Total Retido (O Ouro)</span><span class="font-bold text-amber-800">${formatBRL(m.r_mdr)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm text-amber-900">Folha de Parceiros Padrão Contratual</span><span class="font-bold text-amber-700">-${formatBRL(m.hr_bruto)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-[11px] text-amber-900">Descontos Feito por Falha em NPL Anteriores</span><span class="font-bold text-red-600">-${formatBRL(m.hr_penalty)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-[11px] text-amber-900">Bônus Performance (Comissão Recuperação do NPL)</span><span class="font-bold text-emerald-600">+${formatBRL(m.premio_pago)}</span></div>
+                            <div class="flex justify-between items-center mt-3 pt-3 border-t border-amber-300"><span class="font-bold text-amber-900 text-xs">PAGAMENTO LÍQUIDO DEPOSITADO VIA PIX NA EQUIPE FÍSICA:</span><span class="font-black text-amber-900">${formatBRL(m.hr_liquido)}</span></div>
+                            <div class="flex justify-between items-center mt-3 pt-3"><span class="font-bold text-slate-800 text-xs">A SOBRA DO MDR (Lucro Transacional puro da Holding):</span><span class="font-black text-emerald-800">${formatBRL(m.mdr_liquido)}</span></div>
+                            
+                            <!-- Headcount no mes -->
+                            <div class="mt-4 bg-white p-3 rounded flex justify-between tracking-wide shadow-sm text-xs border border-amber-100">
+                                <div class="text-center"><div class="font-bold text-amber-800 text-lg">${formatNum(m.qA)}</div>Assistentes</div>
+                                <div class="text-center"><div class="font-bold text-amber-800 text-lg">${formatNum(m.qE)}</div>Execs</div>
+                                <div class="text-center"><div class="font-bold text-amber-800 text-lg">${formatNum(m.qG)}</div>Gerentes</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#EFF6FF] rounded-lg p-5 border border-blue-200 shadow-sm">
+                            <h3 class="font-bold text-blue-900 uppercase tracking-widest text-xs mb-3 border-b border-blue-300 pb-2">A Caixinha Fundo dos Cartões</h3>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm">Arrecadação Mensal Recebida</span><span class="font-bold text-blue-800">${formatBRL(m.r_car)}</span></div>
+                            <div class="flex justify-between items-center mb-2"><span class="text-sm">Gasto Físico Novos Deste Mês</span><span class="font-bold text-red-600">-${formatBRL(m.c_emis)}</span></div>
+                            <div class="flex justify-between items-center mt-4 border-t border-blue-300 pt-3"><span class="font-bold uppercase text-[11px] tracking-widest text-blue-900">Reserva Restrita Isolada Até Agora:</span><span class="font-black text-xl text-blue-900">${formatBRL(m.fundo_restrito)}</span></div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-lg p-5 text-white shadow-xl mt-6 relative overflow-hidden">
+                            <div class="absolute -right-10 -bottom-10 opacity-10 text-[100px]">💸</div>
+                            <h3 class="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-1">EBITDA MÊS ${m.mes} / SOVEREIGN</h3>
+                            <div class="flex justify-between items-end"><span class="text-xs font-semibold text-slate-400">Todo Custo Cortado e Sub-Economias Executadas</span><span class="font-black text-3xl ${m.ebitda < 0 ? 'text-red-400' : 'text-emerald-400'}">${formatBRL(m.ebitda)}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('p-chargeback').addEventListener('change', runSimulation);
+            document.getElementById('p-recovery-rate').addEventListener('change', runSimulation);
+            document.getElementById('p-recovery-bonus').addEventListener('change', runSimulation);
+            runSimulation();
+        });
+    </script>
+</body>
+</html>

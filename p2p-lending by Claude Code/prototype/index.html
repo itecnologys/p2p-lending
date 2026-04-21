@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS — P2P Credit Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1640D6;--primary-dark:#1235B4;--primary-50:#EFF3FF;--primary-light:#DBEAFE;
+  --gold:#D97706;--gold-light:#FFFBEB;--green:#059669;--green-light:#ECFDF5;
+  --red:#DC2626;--red-light:#FEF2F2;--purple:#7C3AED;--purple-light:#EDE9FE;
+  --bg:#F1F5F9;--white:#fff;--border:#E2E8F0;--t1:#0F172A;--t2:#64748B;--t3:#94A3B8;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
+.hero{text-align:center;margin-bottom:44px}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px}
+.logo-icon{width:48px;height:48px;background:var(--primary);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-1px}
+.logo-name{font-size:28px;font-weight:800;color:var(--t1)}.logo-name em{color:var(--primary);font-style:normal}
+.hero-sub{font-size:15px;color:var(--t2);max-width:580px;margin:0 auto;line-height:1.7}
+.pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;background:var(--white);border:1px solid var(--border);color:var(--t2)}
+.pill.hl{background:var(--primary-50);border-color:#BFDBFE;color:var(--primary-dark)}
+.pill.gold{background:var(--gold-light);border-color:#FDE68A;color:var(--gold)}
+
+.section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin:0 0 10px 2px}
+.wrap{max-width:1000px;width:100%;margin-bottom:28px}
+
+.cards{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g1{grid-template-columns:1fr}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;cursor:pointer;transition:.18s;text-decoration:none;color:inherit;display:block;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card:hover{border-color:#CBD5E1;box-shadow:0 8px 24px rgba(0,0,0,.09);transform:translateY(-3px)}
+.card-num{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:12px}
+.card-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.card-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ci-p{background:var(--primary-50);color:var(--primary-dark)}
+.ci-g{background:var(--green-light);color:var(--green)}
+.ci-r{background:var(--red-light);color:var(--red)}
+.ci-o{background:var(--gold-light);color:var(--gold)}
+.ci-v{background:var(--purple-light);color:var(--purple)}
+.ci-s{background:#F8FAFC;color:#475569;border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:5px}
+.card-desc{font-size:12.5px;color:var(--t2);line-height:1.6}
+.card-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary);font-weight:600;margin-top:14px}
+.card-link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+.role-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;margin-right:4px;margin-bottom:8px}
+.rt-a{background:var(--primary-50);color:var(--primary-dark);border:1px solid #BFDBFE}
+.rt-u{background:var(--green-light);color:var(--green);border:1px solid #A7F3D0}
+.rt-adm{background:var(--gold-light);color:var(--gold);border:1px solid #FDE68A}
+.rt-pub{background:#F8FAFC;color:#475569;border:1px solid var(--border)}
+
+.hero-card{grid-column:span 2;display:flex;align-items:center;gap:20px;padding:20px 24px;background:linear-gradient(135deg,var(--primary-50),#EFF6FF)}
+.hero-card .card-icon{margin-bottom:0;flex-shrink:0}
+.hero-card-text{flex:1}
+.hero-card-text .card-title{font-size:14px}
+.open-btn{padding:10px 20px;background:var(--primary);border:none;border-radius:9px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:.15s}
+.open-btn:hover{background:var(--primary-dark)}
+
+.footer{margin-top:32px;font-size:11.5px;color:var(--t3);text-align:center;line-height:2}
+.footer b{color:var(--t2)}
+hr{border:none;border-top:1px solid var(--border);margin:20px 0;max-width:1000px;width:100%}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="logo-row">
+    <div class="logo-icon">NX</div>
+    <div class="logo-name">NEX<em>US</em></div>
+  </div>
+  <div class="hero-sub">Plataforma P2P de Crédito Inteligente · SCD/SEP · CMN 5050/2022 · MACRO HASH SHA-256 · IA Agentic · Cartão Visa Pré-Pago</div>
+  <div class="pills">
+    <div class="pill hl">Prototype v1 · Abril 2026</div>
+    <div class="pill gold">FastAPI · Celery · Redis</div>
+    <div class="pill">Inter Font · Chart.js</div>
+    <div class="pill">PostgreSQL 16</div>
+    <div class="pill">Dock/BS2 · PIX D+1</div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="wrap">
+  <div class="section-title">Onboarding &amp; Autenticação</div>
+  <div class="cards g2">
+    <a class="card hero-card" href="tela-01-login.html" style="grid-column:span 2">
+      <div class="card-icon ci-p"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div>
+      <div class="hero-card-text">
+        <div class="card-num">Tela 01 · Auth</div>
+        <div class="card-title">Login / Cadastro — Aplicante e Usuário</div>
+        <div class="card-desc">Split screen · Seleção de role (Investidor / Tomador) · JWT · KYC flow · Badges regulatórios Bacen</div>
+      </div>
+      <button class="open-btn">Abrir tela →</button>
+    </a>
+  </div>
+</div>
+
+<!-- APLICANTE -->
+<div class="wrap">
+  <div class="section-title">Módulo do Aplicante — Investidor</div>
+  <div class="cards g3">
+    <a class="card" href="tela-02-dashboard-aplicante.html">
+      <div class="card-num">Tela 02 · Aplicante</div>
+      <div class="role-tag rt-a">Aplicante</div>
+      <div class="card-icon ci-p"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="card-title">Dashboard do Investidor</div>
+      <div class="card-desc">KPIs de portfólio · Gráfico de retorno (Chart.js) · Distribuição por vertical · Tabela de contratos com MACRO HASH</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-03-composer-portfolio.html">
+      <div class="card-num">Tela 03 · Portfólios</div>
+      <div class="role-tag rt-a">Aplicante</div>
+      <div class="card-icon ci-g"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="card-title">Composer de Portfólio</div>
+      <div class="card-desc">Sliders de risco/vertical · Donut interativo · Projeção pessimista/base/otimista · Aporte via PIX QR Code</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-04-macro-hash.html">
+      <div class="card-num">Tela 04 · Ledger</div>
+      <div class="role-tag rt-a">Aplicante</div>
+      <div class="role-tag rt-pub">Público</div>
+      <div class="card-icon ci-v"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/><line x1="5" y1="9" x2="5" y2="12"/><line x1="12" y1="9" x2="12" y2="12"/><line x1="19" y1="9" x2="19" y2="18"/></svg></div>
+      <div class="card-title">MACRO HASH — Ledger Explorer</div>
+      <div class="card-desc">Cadeia SHA-256 L1→L5 · Estados de bloco · Verificação pública de integridade · Timeline auditável append-only</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+  </div>
+</div>
+
+<!-- USUÁRIO -->
+<div class="wrap">
+  <div class="section-title">Módulo do Usuário — Tomador de Crédito</div>
+  <div class="cards g3">
+    <a class="card" href="tela-05-dashboard-usuario.html">
+      <div class="card-num">Tela 05 · Usuário</div>
+      <div class="role-tag rt-u">Usuário</div>
+      <div class="card-icon ci-g"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+      <div class="card-title">Dashboard do Tomador</div>
+      <div class="card-desc">Cartão Visa virtual animado · Saldo disponível · Próxima parcela · NEXUS Score gauge · Crédito ativo</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-06-solicitar-credito.html">
+      <div class="card-num">Tela 06 · Crédito</div>
+      <div class="role-tag rt-u">Usuário</div>
+      <div class="card-icon ci-p"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="2"/></svg></div>
+      <div class="card-title">Solicitar Crédito — Fila FIFO</div>
+      <div class="card-desc">Blocos de R$40 (1–10) · Seleção de vertical · Parcelas Sistema Price · Posição na fila Celery/Redis</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-07-nexus-score.html">
+      <div class="card-num">Tela 07 · Score</div>
+      <div class="role-tag rt-u">Usuário</div>
+      <div class="card-icon ci-o"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="card-title">NEXUS Score Proprietário</div>
+      <div class="card-desc">Gauge 0–1000 · 5 blocos (A/B/C/D/E) com barras de progresso · Histórico evolução · Dicas de melhoria</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-08-extrato-cartao.html">
+      <div class="card-num">Tela 08 · Extrato</div>
+      <div class="role-tag rt-u">Usuário</div>
+      <div class="card-icon ci-s"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <div class="card-title">Extrato do Cartão por Vertical</div>
+      <div class="card-desc">Transações por vertical · MACRO HASH L5 por bloco de crédito · Filtros data/categoria · Parcelas abertas</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+
+    <a class="card" href="tela-09-parcelas.html">
+      <div class="card-num">Tela 09 · Parcelas</div>
+      <div class="role-tag rt-u">Usuário</div>
+      <div class="card-icon ci-r"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div class="card-title">Calendário de Parcelas</div>
+      <div class="card-desc">Cronograma Sistema Price · Parcelas pagas/abertas/vencidas · Pagar via PIX · Renegociação de atraso</div>
+      <div class="card-link">Abrir tela <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="wrap">
+  <div class="section-title">Administração — 360° BOARD</div>
+  <div class="cards g2">
+    <a class="card hero-card" href="tela-10-360-board.html" style="grid-column:span 2">
+      <div class="card-icon ci-o"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      <div class="hero-card-text">
+        <div class="card-num">Tela 10 · Admin · 360° BOARD</div>
+        <div class="card-title">Painel Executivo Completo — Visão 360° da Plataforma</div>
+        <div class="card-desc">Carteira ativa · Inadimplência por vertical · Executivos de campo · Compliance Bacen (SCR/COAF) · KPIs financeiros · Distribuição portfólios</div>
+      </div>
+      <button class="open-btn">Abrir 360° Board →</button>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  <b>Design system:</b> Inter · Lucide Icons SVG · Chart.js · Paleta NEXUS / QuickBooks style · WCAG AA<br>
+  <b>Stack:</b> FastAPI 0.115 · PostgreSQL 16 · Redis 7 · Celery · React 18 · TypeScript<br>
+  <b>Regulação:</b> CMN 5050/2022 · SCD/SEP · Bacen · Dock/BS2 · PIX D+1 · MACRO HASH SHA-256<br>
+  C:\LAPTOP\p2p-lending\prototype\ · versão 1.0 · abril 2026
+</div>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>02_Estrutura_Empresarial_e_RH.md</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 12pt;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>ESTRUTURA DE RH E POLÍTICA DE REMUNERAÇÃO (P2P LENDING STABLECOIN)</h1>
+<p>Este documento estabelece o modelo de compensação comercial inspirado em práticas bancárias premium (Private Banking, Gerentes de Conta PJ) fundidas à dinâmica acelerada de Fintechs. </p>
+<p>A remuneração do braço comercial (Executivos e Assistentes) baseia-se diretamente na sua eficiência de credenciamento e manutenção da saúde do crédito. A receita primária vem da taxa paga pelos estabelecimentos parceiros (Merchants) — estimativa base de 3% (MDR) por transação — além da taxa de adesão/manutenção da plataforma.</p>
+<h2>Tabela de Compensação e Metas Financeiras</h2>
+<table>
+<thead>
+<tr>
+<th>Cargo / Posição</th>
+<th>Responsabilidade Principal</th>
+<th>Remuneração Base (CLT/PJ)</th>
+<th>Comissão Variável (MDR + Performance)</th>
+<th>Bônus Semestral de Inadimplência</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Assistente Executivo Júnior</strong></td>
+<td>Relacionamento direto (1 Assist. : 500 Usuários) para suporte e prevenção de inadimplência</td>
+<td>R$ 3.500,00 - R$ 4.500,00</td>
+<td>+ 0,10% sobre o volume de repagamento tempestivo da sua base (faturas pagas no prazo)</td>
+<td>Até 2 salários base</td>
+</tr>
+<tr>
+<td><strong>Executivo Associado</strong></td>
+<td>Operações locais, expansão de base de Pessoas Físicas e pequenos merchants (Bairros)</td>
+<td>R$ 6.000,00 - R$ 8.000,00</td>
+<td>+ 0,30% da receita MDR dos Merchants por ele captados + bônus por ticket médio ativado</td>
+<td>Até 3 salários base</td>
+</tr>
+<tr>
+<td><strong>Executivo de Área (Júnior/Pleno)</strong></td>
+<td>Credenciamento de grandes lojistas, supermercados e gestão ativa de carteira de Usuários</td>
+<td>R$ 9.000,00 - R$ 12.000,00</td>
+<td>+ 0,40% do MDR das áreas sob sua carteira direta. Participação em marketing local</td>
+<td>Até 4 salários base</td>
+</tr>
+<tr>
+<td><strong>Executivo de Área (Sênior)</strong></td>
+<td>Cobertura de múltiplas zonas / municípios. Gestão da política de consumo da área.</td>
+<td>R$ 14.000,00 - R$ 18.000,00</td>
+<td>+ 0,55% sobre o MDR macro da área e split pool de resultado. (Metas agressivas em R$)</td>
+<td>Até 4 salários base + Equity</td>
+</tr>
+<tr>
+<td><strong>Gerente de Área</strong></td>
+<td>Lidera um hub de Executivos da região. Estratégia de rentabilidade e KYC Avançado</td>
+<td>R$ 22.000,00 - R$ 28.000,00</td>
+<td>+ Parte do "% da empresa" (após folha e infra), com base no EBITDA gerado pelo Hub Regional.</td>
+<td>Bônus Executivo Atrelado ao EBITDA</td>
+</tr>
+<tr>
+<td><strong>Diretor de Área (Regional)</strong></td>
+<td>Responsável por Macro Regiões ou Estados Inteiros.</td>
+<td>R$ 35.000,00 +</td>
+<td>+ Pool de Performance sobre a operação cross-state. Foco em Shareholder Value. Metas de Originação.</td>
+<td>Bônus Executivo / Ações</td>
+</tr>
+</tbody>
+</table>
+<h2>Rule Engine de Lucratividade da Empresa</h2>
+<ol>
+<li><strong>Receitas Brutas:</strong> </li>
+<li>3% MDR Merchant pago pelo Varejista.</li>
+<li>6% Ágio/Custos no rotativo do Usuário final, que remunera a cota do Investidor (3 a 5%), sobrando de 1% a 3% para a Platform Fee.</li>
+<li><strong>Distribuição do MDR (exemplo em transação de R$ 100 — Gera R$ 3,00 MDR):</strong></li>
+<li>R$ 0,80 (Custo Ope/Bandeira Card/Dock/Liquidação Stablecoin)</li>
+<li>R$ 0,60 (Pool Comercial: Executivo, Assistente e Manager Regional)</li>
+<li>R$ 1,60 (Receita Bruta Plataforma)</li>
+<li><strong>Lucro Líquido Platform:</strong> Desta base de R$ 1,60 (53% da receita), serão subtraídos salários base, marketing, impostos e custos cloud Odo/Agentic AI, gerando o lucro do Acionista/Board.</li>
+</ol>
+<h2>Ratio Obrigatório de Assistência Familiar / Controle de Estresse Financeiro</h2>
+<p>Mantém-se a rigorosa meta de 1 (UM) Assistente para cada 500 usuários. Isso blinda a operação. O assistente funciona como um conciliador e educador financeiro, usando os dashboards de IA (Visão 360) para identificar usuários que correm risco de default e oferecer renegociação de prazos, atuando também em conformidade a AML e KYC.</p>
+</body>
+</html>

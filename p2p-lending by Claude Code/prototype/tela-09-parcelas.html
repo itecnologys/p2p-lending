@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Parcelas — NEXUS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* CONTRACT SELECTOR */
+.contract-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.ctab{padding:10px 16px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:.12s;font-family:inherit;text-align:left;min-width:180px}
+.ctab.sel{border-color:var(--primary);background:var(--primary-50)}
+.ctab-id{font-size:12px;font-weight:700;color:var(--primary);margin-bottom:3px}
+.ctab.sel .ctab-id{color:var(--primary-dark)}
+.ctab-val{font-size:15px;font-weight:800;color:var(--t1)}
+.ctab-info{font-size:11px;color:var(--t3);margin-top:2px}
+.ctab-prog{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.ctab-fill{height:100%;background:var(--primary);border-radius:2px}
+.ctab.sel .ctab-fill{background:var(--primary)}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-head{text-align:center;font-size:10.5px;font-weight:600;color:var(--t3);padding:6px 0;text-transform:uppercase;letter-spacing:.3px}
+.cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.12s;border:1px solid transparent;position:relative}
+.cal-cell:hover{background:var(--bg)}
+.cal-cell.empty{pointer-events:none}
+.cal-cell .c-day{font-size:13px;font-weight:600;color:var(--t1)}
+.cal-cell.paid{background:var(--green-light);border-color:var(--green-50)}
+.cal-cell.paid .c-day{color:var(--green)}
+.cal-cell.due{background:var(--primary-50);border-color:#BFDBFE}
+.cal-cell.due .c-day{color:var(--primary-dark)}
+.cal-cell.overdue{background:var(--red-light);border-color:#FECACA}
+.cal-cell.overdue .c-day{color:var(--red)}
+.cal-cell .c-dot{width:5px;height:5px;border-radius:50%;margin-top:3px}
+.cal-cell.paid .c-dot{background:var(--green)}
+.cal-cell.due .c-dot{background:var(--primary)}
+.cal-cell.overdue .c-dot{background:var(--red)}
+
+/* INSTALLMENT TABLE */
+.inst-full-row{display:grid;grid-template-columns:40px 1fr 90px 90px 90px 90px 120px;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border-light);transition:.1s}
+.inst-full-row:hover{background:#FAFBFC}
+.inst-full-row.header{background:var(--bg);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);border-bottom:1px solid var(--border)}
+.inst-num-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.inst-num-badge.paid{background:var(--green-light);color:var(--green)}
+.inst-num-badge.open{background:var(--primary-50);color:var(--primary)}
+.inst-num-badge.due-badge{background:var(--gold-light);color:var(--gold)}
+
+/* PIX MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:28px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.pix-code{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;font-family:'Courier New',monospace;font-size:10.5px;color:var(--t2);word-break:break-all;margin-bottom:12px}
+.qr-box{width:140px;height:140px;background:var(--bg);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:11px;color:var(--t3);text-align:center;flex-direction:column;gap:6px}
+
+/* RENEGOTIATION CARD */
+.reneg-card{background:linear-gradient(135deg,var(--gold-light),#FFFBEB);border:1px solid #FDE68A;border-radius:12px;padding:18px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <div class="logo-icon" style="background:var(--green)">NX</div>
+    <div class="logo-text">NEX<em>US</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <a class="ni" href="tela-05-dashboard-usuario.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="ni" href="tela-08-extrato-cartao.html">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Meu Cartão
+      </a>
+      <a class="ni" href="tela-07-nexus-score.html">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        NEXUS Score
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Crédito</div>
+      <a class="ni" href="tela-06-solicitar-credito.html">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Solicitar Crédito
+      </a>
+      <a class="ni active" href="tela-09-parcelas.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Parcelas
+        <span class="ni-badge">1</span>
+      </a>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Histórico
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Conta</div>
+      <a class="ni" href="#">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </a>
+    </div>
+  </nav>
+  <div class="s-divider"></div>
+  <div class="s-bottom">
+    <div class="user-row">
+      <div class="uavatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+      <div>
+        <div class="u-name">Maria Ramos</div>
+        <div class="u-role"><span class="role-badge rb-u">Usuário</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <div class="pg-title">Calendário de Parcelas</div>
+    <div class="pg-sub">Sistema Price · 1 contrato ativo · Próxima parcela em 23 dias</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div style="background:var(--primary-50);border:1px solid #BFDBFE;border-radius:8px;padding:7px 13px;font-size:12.5px;color:var(--primary-dark);font-weight:600">
+    ⏰ Próxima parcela: R$ 67,80 · 05/mai/2026
+  </div>
+  <button class="ib">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="tb-avatar" style="background:linear-gradient(135deg,var(--green),#0F766E)">MR</div>
+</header>
+
+<main class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-row" style="margin-bottom:16px">
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Total do Contrato</div><div class="kc-icon icon-p"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+      <div class="kc-val">R$ 474,60</div>
+      <div class="kc-bot"><div class="trend nu">7 parcelas × R$67,80</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Total Pago</div><div class="kc-icon icon-g"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      <div class="kc-val">R$ 203,40</div>
+      <div class="kc-bot"><div class="trend up">3 parcelas pagas</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Saldo Devedor</div><div class="kc-icon icon-o"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+      <div class="kc-val">R$ 201,42</div>
+      <div class="kc-bot"><div class="trend nu">saldo corrigido Price</div></div>
+    </div>
+    <div class="kcard">
+      <div class="kc-top"><div class="kc-label">Progresso</div><div class="kc-icon icon-v"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div></div>
+      <div class="kc-val">43%</div>
+      <div class="kc-bot">
+        <div class="pbar-wrap" style="flex:1">
+          <div class="pbar-track"><div class="pbar-fill" style="width:43%;background:var(--purple)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start">
+
+    <!-- LEFT: Contrato selector + Tabela -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- CONTRACT TABS -->
+      <div class="contract-tabs">
+        <button class="ctab sel">
+          <div class="ctab-id">CRT-2026-1204</div>
+          <div class="ctab-val">R$ 280,00</div>
+          <div class="ctab-info">7 blocos · Saúde · jan/2026</div>
+          <div class="ctab-prog"><div class="ctab-fill" style="width:43%"></div></div>
+        </button>
+        <button class="ctab">
+          <div class="ctab-id" style="color:var(--t3)">+ Novo contrato</div>
+          <div class="ctab-val" style="font-size:13px;color:var(--t2)">Solicitar crédito</div>
+          <div class="ctab-info">Score ≥ 400 · até 10 blocos</div>
+          <div class="ctab-prog"><div class="ctab-fill" style="width:0"></div></div>
+        </button>
+      </div>
+
+      <!-- TABELA PRICE COMPLETA -->
+      <div class="card">
+        <div class="ch">
+          <div>
+            <div class="ct">Tabela de Amortização — Sistema Price</div>
+            <div class="cs">Contrato #CRT-2026-1204 · R$280 · 7× · Taxa 5,9% a.m.</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-p" onclick="openPixModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Pagar via PIX
+            </button>
+          </div>
+        </div>
+        <div class="cb" style="padding:0">
+          <div class="inst-full-row header">
+            <div>#</div><div>Vencimento</div><div>Parcela</div><div>Amortiz.</div><div>Juros</div><div>Saldo</div><div>Status</div>
+          </div>
+          <!-- Parcela 1 PAGA -->
+          <div class="inst-full-row">
+            <div><div class="inst-num-badge paid">1</div></div>
+            <div><div style="font-size:13px;font-weight:600">05/fev/2026</div><div style="font-size:11px;color:var(--t3)">Pago em 05/fev</div></div>
+            <div style="font-size:13px;font-weight:600">R$67,80</div>
+            <div style="font-size:12.5px">R$51,32</div>
+            <div style="font-size:12.5px;color:var(--red)">R$16,52</div>
+            <div style="font-size:12.5px">R$228,68</div>
+            <span class="badge b-g">Paga</span>
+          </div>
+          <!-- Parcela 2 PAGA -->
+          <div class="inst-full-row">
+            <div><div class="inst-num-badge paid">2</div></div>
+            <div><div style="font-size:13px;font-weight:600">05/mar/2026</div><div style="font-size:11px;color:var(--t3)">Pago em 05/mar</div></div>
+            <div style="font-size:13px;font-weight:600">R$67,80</div>
+            <div style="font-size:12.5px">R$54,34</div>
+            <div style="font-size:12.5px;color:var(--red)">R$13,49</div>
+            <div style="font-size:12.5px">R$174,34</div>
+            <span class="badge b-g">Paga</span>
+          </div>
+          <!-- Parcela 3 PAGA -->
+          <div class="inst-full-row">
+            <div><div class="inst-num-badge paid">3</div></div>
+            <div><div style="font-size:13px;font-weight:600">05/abr/2026</div><div style="font-size:11px;color:var(--t3)">Pago em 05/abr</div></div>
+            <div style="font-size:13px;font-weight:600">R$67,80</div>
+            <div style="font-size:12.5px">R$57,55</div>
+            <div style="font-size:12.5px;color:var(--red)">R$10,29</div>
+            <div style="font-size:12.5px">R$116,79</div>
+            <span class="badge b-g">Paga</span>
+          </div>
+          <!-- Parcela 4 EM ABERTO -->
+          <div class="inst-full-row" style="background:var(--primary-50)">
+            <div><div class="inst-num-badge open">4</div></div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--primary)">05/mai/2026</div><div style="font-size:11px;color:var(--primary)">⏰ 23 dias · PRÓXIMA</div></div>
+            <div style="font-size:13px;font-weight:700;color:var(--primary)">R$67,80</div>
+            <div style="font-size:12.5px">R$60,90</div>
+            <div style="font-size:12.5px;color:var(--red)">R$6,89</div>
+            <div style="font-size:12.5px">R$55,89</div>
+            <button class="btn btn-p" style="font-size:11px;padding:5px 10px" onclick="openPixModal()">Pagar PIX</button>
+          </div>
+          <!-- Parcela 5 PENDENTE -->
+          <div class="inst-full-row" style="opacity:.6">
+            <div><div class="inst-num-badge open">5</div></div>
+            <div><div style="font-size:13px">05/jun/2026</div></div>
+            <div style="font-size:13px">R$67,80</div>
+            <div style="font-size:12.5px">R$64,49</div>
+            <div style="font-size:12.5px;color:var(--red)">R$3,29</div>
+            <div style="font-size:12.5px">−</div>
+            <span class="badge b-s">Pendente</span>
+          </div>
+          <!-- Parcela 6 PENDENTE -->
+          <div class="inst-full-row" style="opacity:.4">
+            <div><div class="inst-num-badge open">6</div></div>
+            <div><div style="font-size:13px">05/jul/2026</div></div>
+            <div style="font-size:13px">R$67,80</div>
+            <div style="font-size:12.5px">—</div>
+            <div style="font-size:12.5px">—</div>
+            <div style="font-size:12.5px">−</div>
+            <span class="badge b-s">Pendente</span>
+          </div>
+          <!-- Parcela 7 PENDENTE -->
+          <div class="inst-full-row" style="opacity:.4;border-bottom:none">
+            <div><div class="inst-num-badge open">7</div></div>
+            <div><div style="font-size:13px">05/ago/2026</div></div>
+            <div style="font-size:13px">R$67,80</div>
+            <div style="font-size:12.5px">—</div>
+            <div style="font-size:12.5px">—</div>
+            <div style="font-size:12.5px">−</div>
+            <span class="badge b-s">Pendente</span>
+          </div>
+        </div>
+        <!-- Totais -->
+        <div style="padding:14px 20px;background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 12px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <div style="text-align:center"><div style="font-size:11px;color:var(--t3)">Principal</div><div style="font-size:16px;font-weight:800;color:var(--t1)">R$280,00</div></div>
+          <div style="text-align:center"><div style="font-size:11px;color:var(--t3)">Juros totais</div><div style="font-size:16px;font-weight:800;color:var(--red)">R$194,60</div></div>
+          <div style="text-align:center"><div style="font-size:11px;color:var(--t3)">Total contrato</div><div style="font-size:16px;font-weight:800;color:var(--t1)">R$474,60</div></div>
+          <div style="text-align:center"><div style="font-size:11px;color:var(--t3)">CET</div><div style="font-size:16px;font-weight:800;color:var(--gold)">69,5% a.a.</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Calendário + Renegociação -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- CALENDÁRIO MAIO -->
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">Maio 2026</div></div>
+          <div style="display:flex;gap:4px">
+            <button class="ib"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button class="ib"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        </div>
+        <div class="cb">
+          <div class="cal-grid">
+            <div class="cal-head">Dom</div><div class="cal-head">Seg</div><div class="cal-head">Ter</div><div class="cal-head">Qua</div><div class="cal-head">Qui</div><div class="cal-head">Sex</div><div class="cal-head">Sáb</div>
+            <!-- May 2026: starts Friday -->
+            <div class="cal-cell empty"></div><div class="cal-cell empty"></div><div class="cal-cell empty"></div><div class="cal-cell empty"></div><div class="cal-cell empty"></div>
+            <div class="cal-cell"><div class="c-day">1</div></div>
+            <div class="cal-cell"><div class="c-day">2</div></div>
+            <div class="cal-cell"><div class="c-day">3</div></div>
+            <div class="cal-cell"><div class="c-day">4</div></div>
+            <div class="cal-cell due"><div class="c-day">5</div><div class="c-dot"></div></div>
+            <div class="cal-cell"><div class="c-day">6</div></div>
+            <div class="cal-cell"><div class="c-day">7</div></div>
+            <div class="cal-cell"><div class="c-day">8</div></div>
+            <div class="cal-cell"><div class="c-day">9</div></div>
+            <div class="cal-cell"><div class="c-day">10</div></div>
+            <div class="cal-cell"><div class="c-day">11</div></div>
+            <div class="cal-cell"><div class="c-day">12</div></div>
+            <div class="cal-cell"><div class="c-day">13</div></div>
+            <div class="cal-cell"><div class="c-day">14</div></div>
+            <div class="cal-cell"><div class="c-day">15</div></div>
+            <div class="cal-cell"><div class="c-day">16</div></div>
+            <div class="cal-cell"><div class="c-day">17</div></div>
+            <div class="cal-cell"><div class="c-day">18</div></div>
+            <div class="cal-cell"><div class="c-day">19</div></div>
+            <div class="cal-cell"><div class="c-day">20</div></div>
+            <div class="cal-cell"><div class="c-day">21</div></div>
+            <div class="cal-cell"><div class="c-day">22</div></div>
+            <div class="cal-cell"><div class="c-day">23</div></div>
+            <div class="cal-cell"><div class="c-day">24</div></div>
+            <div class="cal-cell"><div class="c-day">25</div></div>
+            <div class="cal-cell"><div class="c-day">26</div></div>
+            <div class="cal-cell"><div class="c-day">27</div></div>
+            <div class="cal-cell"><div class="c-day">28</div></div>
+            <div class="cal-cell"><div class="c-day">29</div></div>
+            <div class="cal-cell"><div class="c-day">30</div></div>
+            <div class="cal-cell"><div class="c-day">31</div></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light);flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><span style="width:12px;height:12px;border-radius:3px;background:var(--green-light);border:1px solid var(--green-50);display:inline-block"></span>Paga</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary-50);border:1px solid #BFDBFE;display:inline-block"></span>Próxima</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)"><span style="width:12px;height:12px;border-radius:3px;background:var(--red-light);border:1px solid #FECACA;display:inline-block"></span>Atrasada</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RENEGOCIAÇÃO -->
+      <div class="reneg-card">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:var(--gold-light);border:1px solid #FDE68A;display:flex;align-items:center;justify-content:center;font-size:18px">🔄</div>
+          <div>
+            <div style="font-size:13.5px;font-weight:700;color:var(--t1)">Renegociação disponível</div>
+            <div style="font-size:12px;color:var(--t2)">Parcelamento em até 10× sem perder o score</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+          Você pode reagendar as parcelas restantes (4–7) com prazo estendido. Isso não afeta negativamente seu NEXUS Score se solicitado antes do vencimento.
+        </div>
+        <button class="btn btn-s" style="width:100%;justify-content:center;font-size:13px;background:var(--white)">
+          Simular renegociação →
+        </button>
+      </div>
+
+      <!-- MACRO HASH L4 -->
+      <div class="card">
+        <div class="ch"><div class="ct">MACRO HASH — Contrato</div></div>
+        <div class="cb" style="padding:12px 16px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">Hash L4 (Contrato)</div>
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--purple);background:var(--purple-light);padding:8px 10px;border-radius:6px;word-break:break-all;line-height:1.6">a3f8c1e2d4b6795f1e3a8c2d4b7f9e01c3a5b8d2f4e6a1c3b5d7f9e2a4c6b8</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">Hash L3 (Portfólio)</div>
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--t2);background:var(--bg);padding:8px 10px;border-radius:6px;word-break:break-all;line-height:1.6">9c2a7f1e3d5b4e8a2c6d1f3e7b5a4c8d2e6f1a3b7c5d9e2f4a6b8c1d3e5f7a9</div>
+          <a href="tela-04-macro-hash.html" class="btn btn-s" style="width:100%;justify-content:center;margin-top:10px;font-size:12.5px">Ver no Ledger Explorer →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- PIX MODAL -->
+<div class="modal-bg" id="pixModal">
+  <div class="modal">
+    <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px">Pagar via PIX</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:20px">Parcela 4 de 7 · Contrato CRT-2026-1204</div>
+    <div class="qr-box">
+      <div style="font-size:36px">📲</div>
+      <div style="font-size:11px;color:var(--t3);line-height:1.4">QR Code PIX<br>R$ 67,80</div>
+    </div>
+    <div style="font-size:11.5px;color:var(--t2);margin-bottom:6px;font-weight:600">Código PIX Copia e Cola</div>
+    <div class="pix-code">00020126580014br.gov.bcb.pix0136a3f8c1e2-d4b6-795f-1e3a-8c2d4b7f9e015204000053039865802BR5913NEXUS Platform6009Sao Paulo62290525CRT20261204PARCELA04630</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--bg);border-radius:9px;padding:10px;text-align:center">
+        <div style="font-size:10.5px;color:var(--t3)">Valor</div>
+        <div style="font-size:18px;font-weight:800;color:var(--t1)">R$ 67,80</div>
+      </div>
+      <div style="background:var(--bg);border-radius:9px;padding:10px;text-align:center">
+        <div style="font-size:10.5px;color:var(--t3)">Vencimento</div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1)">05/mai/2026</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-s" style="flex:1;justify-content:center" onclick="closePixModal()">Fechar</button>
+      <button class="btn btn-p" style="flex:1;justify-content:center" onclick="simulatePix()">Confirmar Pagamento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openPixModal(){ document.getElementById('pixModal').className = 'modal-bg open'; }
+function closePixModal(){ document.getElementById('pixModal').className = 'modal-bg'; }
+function simulatePix(){
+  closePixModal();
+  alert('✅ Pagamento PIX confirmado!\nParcela 4 registrada no MACRO HASH L5.');
+}
+</script>
+</body>
+</html>

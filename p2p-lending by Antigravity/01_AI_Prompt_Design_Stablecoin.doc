@@ -1,0 +1,70 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>01_AI_Prompt_Design_Stablecoin.md</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 12pt;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>PROMPT MESTRE PARA IA GERADORA DE UI — P2P LENDING (STABLECOINS)</h1>
+<p><strong>Contexto da Aplicação:</strong>
+Plataforma de crédito P2P baseada em <strong>Stablecoins</strong> (descentralizada e alheia ao risco Bacen).
+- <strong>Aplicante (Investidor):</strong> Fundo pulverizado (1 aplicação rateada para 250 Usuários). Rentabilidade de 3% a 5% ao mês. Recebe pagamentos vindos da taxa fixa de 6% aplicada sobre a fatura do cartão do Usuário. Contratos de no mínimo 18 meses com reinvestimento automático. Perfis compostos por "cestas de verticais" baseadas em consumo (saúde, seguros, mercados, etc.). 
+- <strong>Usuário (Tomador):</strong> Recebe microcréditos em um cartão de crédito pré-pago (até R$ 2.500 no total), formado por múltiplos blocos de diferentes Aplicantes. Taxa do cartão rotativo (pago no fechamento) é de 6% fixo. Deve consumir 100% do limite no mês nas verticais de sua classificação. </p>
+<p><strong>Instruções para a IA Geradora de Telas (Ex: v0.dev, Cursor, Lovable):</strong>
+Crie componentes React/Tailwind em Dark Mode elegante (inspirado em Crypto/Web3, verde neon, roxo escuro e preto) para os cenários abaixo.</p>
+<hr />
+<h2>TELA A-01: Dashboard do Aplicante (Investidor)</h2>
+<p><strong>Objetivo:</strong> Mostrar clareza de onde está o dinheiro, como está performando e permitir escolha de portfólio.
+- <strong>Hero Metrics:</strong> Valor Total em Stablecoin (USDC/USDT), Retorno Mensal Previsto, Risco Atual da Carteira, Tempo Restante no Contrato Base (Mín. 18 meses).
+- <strong>Composer de Verticais:</strong> Interface de slider ou drag-and-drop para compor as cestas de consumo (Saúde, Transporte, Alimentação, Seguros). Nenhuma vertical pode ter 100% (min de 3 verticais obrigatórias). Mostrar como a mudança afeta os 3,5% a 5% de retorno.
+- <strong>Previsão de 60 Dias:</strong> Gráfico de forecast com projeção de recebimento após carência de 60 dias da entrada na base.
+- <strong>Macro Hash Ledger:</strong> Visualização "Deep Dive" Cripto. Um Macro Hash que se expande para centenas de Micro Hashes. Cada bloco mostra o status do recurso (Em Uso, Parado, Adimplente, Inadimplente). NUNCA exibir dados pessoais do tomador.
+- <strong>Contato:</strong> Informações de contato e chat do "Gerente Executivo de Contas" que administra sua carteira.</p>
+<h2>TELA U-01: App do Cartão do Usuário</h2>
+<p><strong>Objetivo:</strong> Interface Mobile simples, empática e com visibilidade de controle.
+- <strong>Visão Principal:</strong> Limite do Cartão (composto de microcréditos), Saldo da Fatura, Contador de dias até o Vencimento.
+- <strong>Taxa Clarificada:</strong> "Use R$1.000, pague R$1.060 (Taxa de 6% fixa)". 
+- <strong>Histórico (até 5 anos):</strong> Linha do tempo navegável com os gastos categorizados.
+- <strong>Educação e Negociação:</strong> Chat integrado direto com o "Assistente Executivo" para educação financeira ou renegociação em caso de perigo de default. Opções para solicitar aumento de score/crédito baseado no histórico.</p>
+<h2>TELA B-01: Dashboard VISÃO 360º (Executivo de Contas)</h2>
+<p><strong>Objetivo:</strong> Ferramenta CRM para o Executivo de Contas validar e gerenciar a expansão na sua região.
+- <strong>Trava de Hash Ativa:</strong> Banner indicando que o painel só exibe dados do hash regional (ex: São Paulo - Sul).
+- <strong>Métricas:</strong> Volume em Merchants ativos, Rentabilidade da Carteira, Alertas de Inadimplência, Comissão de 3% (MDR) auferida na região com base de Lojas cadastradas.
+- <strong>Mapa de Merchants e Novos Usuários:</strong> Base de credenciamento via mapa (pontos quentes e frios).</p>
+<h2>TELA B-02: Dashboard BOARD 360º (Administração Geral)</h2>
+<p><strong>Objetivo:</strong> Tela mestra com IA em tempo real.
+- <strong>Status Geral:</strong> Fluxo das Stablecoins, Custódia global, Nível de Adimplência Médio vs Global por Executivo de Área.
+- <strong>Inteligência:</strong> IA respondendo perguntas financeiras via Chat em linguagem natural. Exibição cruzada de Executivos, Diretores e Gerentes identificando quem tem as praças mais lucrativas.</p>
+<hr />
+<p><strong>Instruções CSS/UI:</strong>
+Use fonte "Inter" ou "JetBrains Mono" (para hashes). Utilize Cards translúcidos (Glassmorphism leve), cores de alerta (Verde para retorno limpo, Vermelho para blocos não pagos). Priorizar a usabilidade do Investidor, inspirando extrema segurança e estabilidade, com toda blockchain operando nos bastidores (abstracted crypto layer).</p>
+</body>
+</html>
